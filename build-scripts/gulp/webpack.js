@@ -45,6 +45,28 @@ gulp.task("webpack-watch-app", () => {
 });
 
 gulp.task(
+  "webpack-dev-app",
+  () =>
+    new Promise((resolve) =>
+      webpack(
+        [
+          createAppConfig({
+            isProdBuild: false,
+            latestBuild: true,
+            isStatsBuild: false,
+          }),
+          createAppConfig({
+            isProdBuild: false,
+            latestBuild: false,
+            isStatsBuild: false,
+          }),
+        ],
+        handler(resolve)
+      )
+    )
+);
+
+gulp.task(
   "webpack-prod-app",
   () =>
     new Promise((resolve) =>

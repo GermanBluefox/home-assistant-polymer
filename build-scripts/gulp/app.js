@@ -49,3 +49,22 @@ gulp.task(
     )
   )
 );
+
+gulp.task(
+  "develop-iob",
+  gulp.series(
+    async function setEnv() {
+      process.env.NODE_ENV = "development";
+    },
+    "clean",
+    gulp.parallel(
+      "gen-service-worker-dev",
+      "gen-icons",
+      "gen-pages-dev",
+      "gen-index-app-dev",
+      gulp.series("create-test-translation", "build-translations")
+    ),
+    "copy-static",
+    "webpack-dev-app"
+  )
+);
