@@ -3,6 +3,7 @@ import { Connection } from "home-assistant-js-websocket";
 
 export interface LovelaceConfig {
   title?: string;
+  hideToolbar?: boolean; // IoB
   views: LovelaceViewConfig[];
   background?: string;
   resources?: Array<{ type: "css" | "js" | "module" | "html"; url: string }>;

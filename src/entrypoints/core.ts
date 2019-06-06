@@ -34,6 +34,7 @@ const authProm = isExternal
         hassUrl,
         saveTokens,
         loadTokens: () => Promise.resolve(loadTokens()),
+        authCode: window.hassNoAuth // for IoB
       });
 
 const connProm = async (auth) => {

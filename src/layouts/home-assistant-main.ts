@@ -8,7 +8,7 @@ import {
   property,
 } from "lit-element";
 import "@polymer/app-layout/app-drawer-layout/app-drawer-layout";
-import "@polymer/app-layout/app-drawer/app-drawer";
+// import "@polymer/app-layout/app-drawer/app-drawer"; // IoB
 // Not a duplicate, it's for typing
 // tslint:disable-next-line
 import { AppDrawerElement } from "@polymer/app-layout/app-drawer/app-drawer";
@@ -53,7 +53,8 @@ class HomeAssistantMain extends LitElement {
         .forceNarrow=${this._narrow || !hass.dockedSidebar}
         responsive-width="0"
       >
-        <app-drawer
+		<!-- Disabled for IoB -->
+        <!--app-drawer
           id="drawer"
           align="start"
           slot="drawer"
@@ -62,7 +63,7 @@ class HomeAssistantMain extends LitElement {
           .persistent=${hass.dockedSidebar}
         >
           <ha-sidebar .hass=${hass}></ha-sidebar>
-        </app-drawer>
+        </app-drawer-->
 
         <partial-panel-resolver
           .narrow=${this._narrow}
@@ -74,7 +75,7 @@ class HomeAssistantMain extends LitElement {
   }
 
   protected firstUpdated() {
-    import(/* webpackChunkName: "ha-sidebar" */ "../components/ha-sidebar");
+    // import(/* webpackChunkName: "ha-sidebar" */ "../components/ha-sidebar"); // IoB
 
     this.addEventListener("hass-toggle-menu", () => {
       const shouldOpen = !this.drawer.opened;

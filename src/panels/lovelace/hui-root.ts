@@ -162,9 +162,10 @@ class HUIRoot extends LitElement {
                   </paper-menu-button>
                 </app-toolbar>
               `
-            : html`
+            : /* IoB */ this._hideToolbar ? "" : html`
                 <app-toolbar>
-                  <ha-menu-button></ha-menu-button>
+                  <!-- Disabled for IoB -->
+                  <!--ha-menu-button></ha-menu-button-->
                   <div main-title>${this.config.title || "Home Assistant"}</div>
                   <hui-notifications-button
                     .hass="${this.hass}"
@@ -451,6 +452,12 @@ class HUIRoot extends LitElement {
       this._persistentNotifications! || []
     );
   }
+  private get _hideToolbar(): boolean {
+    return (
+      this.config.hideToolbar === true &&
+      window.location.search.indexOf("toolbar") === -1
+    );
+  }
 
   private get config(): LovelaceConfig {
     return this.lovelace!.config;
@@ -501,7 +508,9 @@ class HUIRoot extends LitElement {
   }
 
   private _handleHelp(): void {
-    window.open("https://www.home-assistant.io/lovelace/", "_blank");
+    // window.open("https://www.home-assistant.io/lovelace/", "_blank");
+    // IoB
+    window.open("https://www.iobroker.net/#en/adapters/adapterref/iobroker.lovelace/README.md", "_blank");
   }
 
   private _editModeEnable(): void {
