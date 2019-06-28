@@ -9,9 +9,11 @@ import { HassBaseEl } from "./hass-base-mixin";
 import { computeLocalize } from "../common/translations/localize";
 import { computeRTL } from "../common/util/compute_rtl";
 import { HomeAssistant } from "../types";
-import { saveFrontendUserData } from "../data/frontend";
 import { storeState } from "../util/ha-pref-storage";
-import { getHassTranslations } from "../data/translation";
+import {
+  getHassTranslations,
+  saveTranslationPreferences,
+} from "../data/translation";
 
 /*
  * superClass needs to contain `this.hass` and `this._updateHass`.
@@ -19,6 +21,9 @@ import { getHassTranslations } from "../data/translation";
 
 export default (superClass: Constructor<LitElement & HassBaseEl>) =>
   class extends superClass {
+    // tslint:disable-next-line: variable-name
+    private __coreProgress?: string;
+
     protected firstUpdated(changedProps) {
       super.firstUpdated(changedProps);
       this.addEventListener("hass-language-select", (e) =>
@@ -62,7 +67,7 @@ export default (superClass: Constructor<LitElement & HassBaseEl>) =>
       this._updateHass({ language, selectedLanguage: language });
       storeState(this.hass);
       if (saveToBackend) {
-        saveFrontendUserData(this.hass, "language", { language });
+        saveTranslationPreferences(this.hass, { language });
       }
 
       this._applyTranslations(this.hass);
@@ -97,8 +102,18 @@ export default (superClass: Constructor<LitElement & HassBaseEl>) =>
     }
 
     private async _loadCoreTranslations(language: string) {
-      const result = await getTranslation(null, language);
-      this._updateResources(result.language, result.data);
+      // Check if already in progress
+      // Necessary as we call this in firstUpdated and hassConnected
+      if (this.__coreProgress === language) {
+        return;
+      }
+      this.__coreProgress = language;
+      try {
+        const result = await getTranslation(null, language);
+        this._updateResources(result.language, result.data);
+      } finally {
+        this.__coreProgress = undefined;
+      }
     }
 
     private _updateResources(language: string, data: any) {

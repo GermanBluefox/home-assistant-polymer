@@ -14,6 +14,7 @@ class HaStartVoiceButton extends EventsMixin(PolymerElement) {
   static get template() {
     return html`
       <paper-icon-button
+        aria-label="Start conversation"
         icon="hass:microphone"
         hidden$="[[!canListen]]"
         on-click="handleListenClick"
@@ -46,7 +47,9 @@ class HaStartVoiceButton extends EventsMixin(PolymerElement) {
   handleListenClick() {
     fireEvent(this, "show-dialog", {
       dialogImport: () =>
-        import(/* webpackChunkName: "voice-command-dialog" */ "../dialogs/ha-voice-command-dialog"),
+        import(
+          /* webpackChunkName: "voice-command-dialog" */ "../dialogs/ha-voice-command-dialog"
+        ),
       dialogTag: "ha-voice-command-dialog",
     });
   }

@@ -32,7 +32,9 @@ import { MapCardConfig } from "./types";
 @customElement("hui-map-card")
 class HuiMapCard extends LitElement implements LovelaceCard {
   public static async getConfigElement() {
-    await import(/* webpackChunkName: "hui-map-card-editor" */ "../editor/config-elements/hui-map-card-editor");
+    await import(
+      /* webpackChunkName: "hui-map-card-editor" */ "../editor/config-elements/hui-map-card-editor"
+    );
     return document.createElement("hui-map-card-editor");
   }
 
@@ -180,7 +182,10 @@ class HuiMapCard extends LitElement implements LovelaceCard {
   }
 
   private async loadMap(): Promise<void> {
-    [this._leafletMap, this.Leaflet] = await setupLeafletMap(this._mapEl);
+    [this._leafletMap, this.Leaflet] = await setupLeafletMap(
+      this._mapEl,
+      this._config !== undefined ? this._config.dark_mode === true : false
+    );
     this._drawEntities();
     this._leafletMap.invalidateSize();
     this._fitMap();

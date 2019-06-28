@@ -615,11 +615,12 @@
                         "delete_confirm": "Czy na pewno chcesz usunąć tę integrację?",
                         "restart_confirm": "Zrestartuj Home Assistant'a, aby zakończyć usuwanie tej integracji",
                         "manuf": "przez: {manufacturer}",
-                        "hub": "Połączony przez",
+                        "via": "Połączony przez",
                         "firmware": "Oprogramowanie: {version}",
                         "device_unavailable": "urządzenie niedostępne",
                         "entity_unavailable": "encja niedostępna",
-                        "no_area": "brak"
+                        "no_area": "brak",
+                        "hub": "Połączony przez"
                     },
                     "config_flow": {
                         "external_step": {
@@ -848,7 +849,7 @@
                                     "data": {
                                         "code": "Kod uwierzytelniania dwuskładnikowego"
                                     },
-                                    "description": "Otwórz **{mfa_module_name}** na swoim urządzeniu by zobaczyć kod dwuskładnikowego uwierzytelniania i zweryfikować swoją toższamość:"
+                                    "description": "Otwórz **{mfa_module_name}** na swoim urządzeniu by zobaczyć kod dwuskładnikowego uwierzytelniania i zweryfikować swoją tożsamość:"
                                 }
                             },
                             "error": {
@@ -970,6 +971,49 @@
                     "refresh": "Odśwież"
                 },
                 "reload_lovelace": "Przeładuj Lovelace"
+            },
+            "page-demo": {
+                "cards": {
+                    "demo": {
+                        "demo_by": "według {name}",
+                        "next_demo": "Następna demonstracja",
+                        "introduction": "Witaj w domu! Dotarłeś do demonstracji Home Assistant, gdzie prezentujemy najlepsze interfejsy użytkownika stworzone przez naszą społeczność.",
+                        "learn_more": "Dowiedz się więcej o Home Assistant"
+                    }
+                },
+                "config": {
+                    "arsaboo": {
+                        "names": {
+                            "upstairs": "Piętro",
+                            "family_room": "Pokój rodzinny",
+                            "kitchen": "Kuchnia",
+                            "patio": "Patio",
+                            "hallway": "Korytarz",
+                            "master_bedroom": "Główna sypialnia",
+                            "left": "Lewo",
+                            "right": "Prawo",
+                            "mirror": "Lustro"
+                        },
+                        "labels": {
+                            "lights": "Światła",
+                            "information": "Informacje",
+                            "morning_commute": "Poranne dojazdy",
+                            "commute_home": "Dojazd do domu",
+                            "entertainment": "Rozrywka",
+                            "activity": "Aktywność",
+                            "hdmi_input": "Wejście HDMI",
+                            "hdmi_switcher": "Przełącznik HDMI",
+                            "volume": "Głośność",
+                            "total_tv_time": "Całkowity czas przed telewizorem",
+                            "turn_tv_off": "Wyłącz telewizor",
+                            "air": "Powietrze"
+                        },
+                        "unit": {
+                            "watching": "oglądanie",
+                            "minutes_abbr": "min"
+                        }
+                    }
+                }
             }
         },
         "sidebar": {

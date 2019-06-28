@@ -281,7 +281,7 @@
             "unknown": "Neznano",
             "unavailable": "N\/A",
             "error": "Napaka",
-            "entity_not_found": "Subjekt ni bil najden"
+            "entity_not_found": "Entiteta ni bila najdena"
         },
         "alarm_control_panel": {
             "armed": "Aktiven",
@@ -338,7 +338,7 @@
                             "validation": {
                                 "heading": "Preverjanje konfiguracije",
                                 "introduction": "Potrdite svojo konfiguracijo, če ste nedavno spremenili svojo konfiguracijo in se prepričajte, da je vse veljavno",
-                                "check_config": "Preverite nastavitve",
+                                "check_config": "Preverite konfiguracijo",
                                 "valid": "Konfiguracija veljavna!",
                                 "invalid": "Konfiguracija ni veljavna"
                             },
@@ -379,7 +379,7 @@
                     "description": "Prilagodite svoje entitete",
                     "picker": {
                         "header": "Prilagajanje",
-                        "introduction": "Prilagajanja atributov na subjektu. Dodane\/spremenjene prilagoditve začnejo veljati takoj. Odstranjene pa po posodobitvi subjekta."
+                        "introduction": "Prilagajanja atributov na entiteti. Dodane\/spremenjene prilagoditve začnejo veljati takoj. Odstranjene pa po posodobitvi entitete."
                     }
                 },
                 "automation": {
@@ -454,7 +454,7 @@
                                 },
                                 "zone": {
                                     "label": "Območje",
-                                    "entity": "Subjekt z lokacijo",
+                                    "entity": "Entitete z lokacijo",
                                     "zone": "Območje",
                                     "event": "Dogodek:",
                                     "enter": "Vnesite",
@@ -521,7 +521,7 @@
                                 },
                                 "zone": {
                                     "label": "Območje",
-                                    "entity": "Subjekt z lokacijo",
+                                    "entity": "Entitete z lokacijo",
                                     "zone": "Območje"
                                 }
                             },
@@ -611,15 +611,16 @@
                     "none": "Nič še ni konfigurirano",
                     "config_entry": {
                         "no_devices": "Ta integracija je brez naprav.",
-                        "no_device": "Subjekti brez naprav",
+                        "no_device": "Entitete brez naprav",
                         "delete_confirm": "Ali ste prepričani, da želite izbrisati to integracijo?",
                         "restart_confirm": "Znova zaženite Home Assistant-a, da dokončate odstranitev te integracije",
                         "manuf": "po {manufacturer}",
-                        "hub": "Povezan prek",
+                        "via": "Povezan prek",
                         "firmware": "Firmware: {version}",
                         "device_unavailable": "naprava ni na voljo",
-                        "entity_unavailable": "subjekt ni na voljo",
-                        "no_area": "Brez območja"
+                        "entity_unavailable": "entiteta ni na voljo",
+                        "no_area": "Brez območja",
+                        "hub": "Povezan prek"
                     },
                     "config_flow": {
                         "external_step": {
@@ -668,10 +669,10 @@
                     }
                 },
                 "entity_registry": {
-                    "caption": "Register subjekta",
-                    "description": "Pregled vseh znanih subjektov.",
+                    "caption": "Seznam entitet",
+                    "description": "Pregled vseh znanih entitet.",
                     "picker": {
-                        "header": "Register subjekta",
+                        "header": "Seznam entitet",
                         "unavailable": "(ni na voljo)",
                         "introduction": "Home Assistant vodi register vseh entitet, ki jih je kdajkoli videl in jih je mogoče enolično identificirati. Vsak od teh entitet ima dodeljen ID entitete, ki bo rezerviran samo za to entiteto.",
                         "introduction2": "Z registrom entitet preglasite ime, spremenite ID entitete ali odstranite vnos iz Home Assistent-a. Opomba, odstranitev vnosa registra entitet ne bo odstranila entitete. Če želite to narediti, sledite spodnji povezavi in jo odstranite s strani za integracijo.",
@@ -949,7 +950,7 @@
                         "raw_editor": "Urejevalnik konfiguracije"
                     },
                     "raw_editor": {
-                        "header": "Uredi Nastavitve",
+                        "header": "Uredi nastavitve",
                         "save": "Shrani",
                         "unsaved_changes": "Neshranjene spremembe",
                         "saved": "Shranjeno"
@@ -957,13 +958,61 @@
                 },
                 "menu": {
                     "configure_ui": "Konfiguriraj UI",
-                    "unused_entities": "Neuporabljeni subjekti",
+                    "unused_entities": "Neuporabljene entitete",
                     "help": "Pomoč",
                     "refresh": "Osveži"
                 },
                 "warning": {
-                    "entity_not_found": "Subjekt ni na voljo: {entity}",
-                    "entity_non_numeric": "Subjekt je neštevilski: {entity}"
+                    "entity_not_found": "Entiteta ni na voljo: {entity}",
+                    "entity_non_numeric": "Entiteta je neštevilska: {entity}"
+                },
+                "changed_toast": {
+                    "message": "Konfiguracija Lovelace je bila spremenjena, jo želiš osvežiti?",
+                    "refresh": "Osveži"
+                },
+                "reload_lovelace": "Ponovno naloži Lovelace"
+            },
+            "page-demo": {
+                "cards": {
+                    "demo": {
+                        "demo_by": "avtor: {name}",
+                        "next_demo": "Naslednja predstavitev",
+                        "introduction": "Dobrodošli doma! Dosegli ste predstavitev Home Assistant-a, kjer smo predstavili najboljše uporabniške vmesnike, ki jih je ustvarila naša skupnost.",
+                        "learn_more": "Več o Home Assistant-u"
+                    }
+                },
+                "config": {
+                    "arsaboo": {
+                        "names": {
+                            "upstairs": "Zgoraj",
+                            "family_room": "Dnevna soba",
+                            "kitchen": "Kuhinja",
+                            "patio": "Terasa",
+                            "hallway": "Hodnik",
+                            "master_bedroom": "Glavna spalnica",
+                            "left": "Levo",
+                            "right": "Desno",
+                            "mirror": "Ogledalo"
+                        },
+                        "labels": {
+                            "lights": "Luči",
+                            "information": "Informacije",
+                            "morning_commute": "Jutranja vožnja",
+                            "commute_home": "Vožnja do doma",
+                            "entertainment": "Zabava",
+                            "activity": "Dejavnost",
+                            "hdmi_input": "HDMI vhod",
+                            "hdmi_switcher": "HDMI stikalo",
+                            "volume": "Glasnost",
+                            "total_tv_time": "Skupni TV čas",
+                            "turn_tv_off": "Izklop televizije",
+                            "air": "Zrak"
+                        },
+                        "unit": {
+                            "watching": "gledam",
+                            "minutes_abbr": "min"
+                        }
+                    }
                 }
             }
         },
@@ -1100,7 +1149,7 @@
         "components": {
             "entity": {
                 "entity-picker": {
-                    "entity": "Subjekt"
+                    "entity": "Entiteta"
                 }
             },
             "service-picker": {
@@ -1134,7 +1183,7 @@
             "more_info_settings": {
                 "save": "Shrani",
                 "name": "Preglasitev imena",
-                "entity_id": "ID subjekta"
+                "entity_id": "ID entitete"
             },
             "more_info_control": {
                 "script": {

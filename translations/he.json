@@ -615,11 +615,12 @@
                         "delete_confirm": "האם אתה בטוח שברצונך למחוק אינטגרציה זו?",
                         "restart_confirm": "הפעל מחדש את Home Assistant כדי להשלים את הסרת האינטגרציה",
                         "manuf": "על ידי {manufacturer}",
-                        "hub": "מחובר באמצעות",
+                        "via": "מחובר באמצעות",
                         "firmware": "קושחה: {version}",
                         "device_unavailable": "התקן אינו זמין",
                         "entity_unavailable": "ישות לא זמינה",
-                        "no_area": "ללא אזור"
+                        "no_area": "ללא אזור",
+                        "hub": "מחובר באמצעות"
                     },
                     "config_flow": {
                         "external_step": {
@@ -970,6 +971,46 @@
                     "refresh": "רענן"
                 },
                 "reload_lovelace": "טען מחדש את Lovelace"
+            },
+            "page-demo": {
+                "cards": {
+                    "demo": {
+                        "demo_by": "על ידי {name}",
+                        "next_demo": "ההדגמה הבאה",
+                        "introduction": "ברוך הבא הביתה! הגעת להדגמת Home Assistant שבה אנו מציגים את ה- UI הטובים ביותר שנוצרו על ידי הקהילה שלנו.",
+                        "learn_more": "למידע נוסף על Home Assistant"
+                    }
+                },
+                "config": {
+                    "arsaboo": {
+                        "names": {
+                            "upstairs": "למעלה",
+                            "family_room": "חדר משפחה",
+                            "kitchen": "מטבח",
+                            "patio": "פטיו",
+                            "hallway": "מסדרון",
+                            "master_bedroom": "חדר שינה ראשי",
+                            "left": "שמאל",
+                            "right": "ימין",
+                            "mirror": "מראה"
+                        },
+                        "labels": {
+                            "lights": "אורות",
+                            "information": "מידע",
+                            "entertainment": "בידור",
+                            "activity": "פעילות",
+                            "hdmi_input": "כניסת HDMI",
+                            "hdmi_switcher": "מחליף HDMI",
+                            "volume": "ווליום",
+                            "total_tv_time": "סה\"כ זמן טלוויזיה",
+                            "turn_tv_off": "כבה את הטלוויזיה",
+                            "air": "אוויר"
+                        },
+                        "unit": {
+                            "minutes_abbr": "דקות"
+                        }
+                    }
+                }
             }
         },
         "sidebar": {
@@ -1138,7 +1179,7 @@
         "dialogs": {
             "more_info_settings": {
                 "save": "שמור",
-                "name": "שם",
+                "name": "שם חלופי",
                 "entity_id": "מזהה ישות"
             },
             "more_info_control": {

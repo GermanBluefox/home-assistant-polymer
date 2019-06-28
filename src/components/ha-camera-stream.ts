@@ -55,7 +55,9 @@ class HaCameraStream extends LitElement {
               .src=${__DEMO__
                 ? `/api/camera_proxy_stream/${this.stateObj.entity_id}`
                 : computeMJPEGStreamUrl(this.stateObj)}
-              .alt=${computeStateName(this.stateObj)}
+              .alt=${`Preview of the ${computeStateName(
+                this.stateObj
+              )} camera.`}
             />
           `
         : html`
@@ -120,8 +122,9 @@ class HaCameraStream extends LitElement {
 
   private async _startHls(): Promise<void> {
     // tslint:disable-next-line
-    const Hls = ((await import(/* webpackChunkName: "hls.js" */ "hls.js")) as any)
-      .default as HLSModule;
+    const Hls = ((await import(
+      /* webpackChunkName: "hls.js" */ "hls.js"
+    )) as any).default as HLSModule;
     let hlsSupported = Hls.isSupported();
     const videoEl = this._videoEl;
 

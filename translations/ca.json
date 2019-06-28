@@ -338,7 +338,7 @@
                             "validation": {
                                 "heading": "Validació de la configuració",
                                 "introduction": "Valida la configuració si recentment has fet algun canvi a la configuració i vols assegurar-te de que no té problemes.",
-                                "check_config": "Comprovar la configuració",
+                                "check_config": "Comprova la configuració",
                                 "valid": "La configuració és vàlida!",
                                 "invalid": "La configuració és invàlida"
                             },
@@ -353,8 +353,8 @@
                             "server_management": {
                                 "heading": "Gestió del servidor",
                                 "introduction": "Controla el servidor de Home Assistant... des de Home Assistant.",
-                                "restart": "Reiniciar",
-                                "stop": "Aturar"
+                                "restart": "Reinicia",
+                                "stop": "Atura"
                             },
                             "core_config": {
                                 "edit_requires_storage": "L'editor està desactivat ja que la configuració es troba a configuration.yaml.",
@@ -387,7 +387,7 @@
                     "description": "Crea i edita automatismes",
                     "picker": {
                         "header": "Editor d'automatismes",
-                        "introduction": "L'editor d'automatismes permet crear i editar automatismes. Llegeix [les instruccions](https:\/\/home-assistant.io\/docs\/automation\/editor\/) per assegurar-te que has configurat el Home Assistant correctament.",
+                        "introduction": "L'editor d'automatismes permet crear i editar automatismes. Vés a l'enllaç de sota per llegir les instruccions i assegurar-te que has configurat el Home Assistant correctament.",
                         "pick_automation": "Selecciona l'automatisme a editar",
                         "no_automations": "No s'ha pogut trobar cap automatisme editable",
                         "add_automation": "Afegir automatisme",
@@ -615,11 +615,12 @@
                         "delete_confirm": "Estas segur que vols eliminar aquesta integració?",
                         "restart_confirm": "Reinicia el Home Assistant per acabar d'eliminar aquesta integració",
                         "manuf": "de {manufacturer}",
-                        "hub": "Connectat a través de",
+                        "via": "Connectat a través de",
                         "firmware": "Firmware: {version}",
                         "device_unavailable": "dispositiu no disponible",
                         "entity_unavailable": "entitat no disponible",
-                        "no_area": "Sense àrea"
+                        "no_area": "Sense àrea",
+                        "hub": "Connectat a través de"
                     },
                     "config_flow": {
                         "external_step": {
@@ -966,10 +967,53 @@
                     "entity_non_numeric": "Entitat no numèrica: {entity}"
                 },
                 "changed_toast": {
-                    "message": "S'ha actualitzat la configuració de Lovelace, vols refrescar-ho?",
+                    "message": "S'ha actualitzat la configuració de Lovelace, vols actualitzar la pàgina?",
                     "refresh": "Actualitza"
                 },
                 "reload_lovelace": "Recarrega Lovelace"
+            },
+            "page-demo": {
+                "cards": {
+                    "demo": {
+                        "demo_by": "per {name}",
+                        "next_demo": "Següent mostra",
+                        "introduction": "Benvingut a casa! Has arribat a la demo de Home Assistant on es mostren algunes de les millors interfícies d’usuari creades per la comunitat.",
+                        "learn_more": "Més informació sobre Home Assistant"
+                    }
+                },
+                "config": {
+                    "arsaboo": {
+                        "names": {
+                            "upstairs": "Pis superior",
+                            "family_room": "Sala d'estar",
+                            "kitchen": "Cuina",
+                            "patio": "Pati",
+                            "hallway": "Passadís",
+                            "master_bedroom": "Dormitori principal",
+                            "left": "Esquerra",
+                            "right": "Dreta",
+                            "mirror": "Mirall"
+                        },
+                        "labels": {
+                            "lights": "Llums",
+                            "information": "Informació",
+                            "morning_commute": "Desplaçament al matí",
+                            "commute_home": "Tornada cap a casa",
+                            "entertainment": "Entreteniment",
+                            "activity": "Activitat",
+                            "hdmi_input": "Entrada HDMI",
+                            "hdmi_switcher": "Commutador HDMI",
+                            "volume": "Volum",
+                            "total_tv_time": "Temps de visualització",
+                            "turn_tv_off": "Apaga la televisió",
+                            "air": "Aire"
+                        },
+                        "unit": {
+                            "watching": "visualitzant",
+                            "minutes_abbr": "min"
+                        }
+                    }
+                }
             }
         },
         "sidebar": {

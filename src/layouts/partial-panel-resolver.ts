@@ -9,57 +9,66 @@ import {
 } from "./hass-router-page";
 import { removeInitSkeleton } from "../util/init-skeleton";
 
-const CACHE_COMPONENTS = ["lovelace", "states"];
+const CACHE_COMPONENTS = ["lovelace", "states", "developer-tools"];
 const COMPONENTS = {
-//  calendar: () => // IoB
-//    import(/* webpackChunkName: "panel-calendar" */ "../panels/calendar/ha-panel-calendar"),
-//  config: () =>
-//    import(/* webpackChunkName: "panel-config" */ "../panels/config/ha-panel-config"),
-//  custom: () =>
-//    import(/* webpackChunkName: "panel-custom" */ "../panels/custom/ha-panel-custom"),
-//  "dev-event": () =>
-//    import(/* webpackChunkName: "panel-dev-event" */ "../panels/dev-event/ha-panel-dev-event"),
-//  "dev-info": () =>
-//    import(/* webpackChunkName: "panel-dev-info" */ "../panels/dev-info/ha-panel-dev-info"),
-//  "dev-mqtt": () =>
-//    import(/* webpackChunkName: "panel-dev-mqtt" */ "../panels/dev-mqtt/ha-panel-dev-mqtt"),
-//  "dev-service": () =>
-//    import(/* webpackChunkName: "panel-dev-service" */ "../panels/dev-service/ha-panel-dev-service"),
-//  "dev-state": () =>
-//    import(/* webpackChunkName: "panel-dev-state" */ "../panels/dev-state/ha-panel-dev-state"),
-//  "dev-template": () =>
-//    import(/* webpackChunkName: "panel-dev-template" */ "../panels/dev-template/ha-panel-dev-template"),
+  //  calendar: () => // IoB
+  //    import(/* webpackChunkName: "panel-calendar" */ "../panels/calendar/ha-panel-calendar"),
+  //  config: () =>
+  //    import(/* webpackChunkName: "panel-config" */ "../panels/config/ha-panel-config"),
+  //  custom: () =>
+  //    import(/* webpackChunkName: "panel-custom" */ "../panels/custom/ha-panel-custom"),
+  "developer-tools": () =>
+    import(
+      /* webpackChunkName: "panel-developer-tools" */ "../panels/developer-tools/ha-panel-developer-tools"
+    ),
+  //  "dev-event": () =>
+  //    import(/* webpackChunkName: "panel-dev-event" */ "../panels/dev-event/ha-panel-dev-event"),
+  //  "dev-info": () =>
+  //    import(/* webpackChunkName: "panel-dev-info" */ "../panels/dev-info/ha-panel-dev-info"),
+  //  "dev-mqtt": () =>
+  //    import(/* webpackChunkName: "panel-dev-mqtt" */ "../panels/dev-mqtt/ha-panel-dev-mqtt"),
+  //  "dev-service": () =>
+  //    import(/* webpackChunkName: "panel-dev-service" */ "../panels/dev-service/ha-panel-dev-service"),
+  //  "dev-state": () =>
+  //    import(/* webpackChunkName: "panel-dev-state" */ "../panels/dev-state/ha-panel-dev-state"),
+  //  "dev-template": () =>
+  //    import(/* webpackChunkName: "panel-dev-template" */ "../panels/dev-template/ha-panel-dev-template"),
   lovelace: () =>
-    import(/* webpackChunkName: "panel-lovelace" */ "../panels/lovelace/ha-panel-lovelace"),
-//  states: () =>
-//    import(/* webpackChunkName: "panel-states" */ "../panels/states/ha-panel-states"),
-//  history: () =>
-//    import(/* webpackChunkName: "panel-history" */ "../panels/history/ha-panel-history"),
-//  iframe: () =>
-//    import(/* webpackChunkName: "panel-iframe" */ "../panels/iframe/ha-panel-iframe"),
-//  kiosk: () =>
-//    import(/* webpackChunkName: "panel-kiosk" */ "../panels/kiosk/ha-panel-kiosk"),
-//  logbook: () =>
-//    import(/* webpackChunkName: "panel-logbook" */ "../panels/logbook/ha-panel-logbook"),
-//  mailbox: () =>
-//    import(/* webpackChunkName: "panel-mailbox" */ "../panels/mailbox/ha-panel-mailbox"),
-//  map: () =>
-//    import(/* webpackChunkName: "panel-map" */ "../panels/map/ha-panel-map"),
-//  profile: () =>
-//    import(/* webpackChunkName: "panel-profile" */ "../panels/profile/ha-panel-profile"),
-//  "shopping-list": () =>
-//    import(/* webpackChunkName: "panel-shopping-list" */ "../panels/shopping-list/ha-panel-shopping-list"),
+    import(
+      /* webpackChunkName: "panel-lovelace" */ "../panels/lovelace/ha-panel-lovelace"
+    ),
+  //  states: () =>
+  //    import(/* webpackChunkName: "panel-states" */ "../panels/states/ha-panel-states"),
+  //  history: () =>
+  //    import(/* webpackChunkName: "panel-history" */ "../panels/history/ha-panel-history"),
+  //  iframe: () =>
+  //    import(/* webpackChunkName: "panel-iframe" */ "../panels/iframe/ha-panel-iframe"),
+  //  kiosk: () =>
+  //    import(/* webpackChunkName: "panel-kiosk" */ "../panels/kiosk/ha-panel-kiosk"),
+  //  logbook: () =>
+  //    import(/* webpackChunkName: "panel-logbook" */ "../panels/logbook/ha-panel-logbook"),
+  //  mailbox: () =>
+  //    import(/* webpackChunkName: "panel-mailbox" */ "../panels/mailbox/ha-panel-mailbox"),
+  //  map: () =>
+  //    import(/* webpackChunkName: "panel-map" */ "../panels/map/ha-panel-map"),
+  //  profile: () =>
+  //    import(/* webpackChunkName: "panel-profile" */ "../panels/profile/ha-panel-profile"),
+  //  "shopping-list": () =>
+  //    import(/* webpackChunkName: "panel-shopping-list" */ "../panels/shopping-list/ha-panel-shopping-list"),
 };
 
 const getRoutes = (panels: Panels): RouterOptions => {
-  const routes: { [route: string]: RouteOptions } = {};
+  const routes: RouterOptions["routes"] = {};
 
   Object.values(panels).forEach((panel) => {
-    routes[panel.url_path] = {
-      load: COMPONENTS[panel.component_name],
+    const data: RouteOptions = {
       tag: `ha-panel-${panel.component_name}`,
       cache: CACHE_COMPONENTS.includes(panel.component_name),
     };
+    if (panel.component_name in COMPONENTS) {
+      data.load = COMPONENTS[panel.component_name];
+    }
+    routes[panel.url_path] = data;
   });
 
   return {

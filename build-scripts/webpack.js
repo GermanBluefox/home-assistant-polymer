@@ -19,7 +19,7 @@ version = version[0];
 
 const genMode = (isProdBuild) => (isProdBuild ? "production" : "development");
 const genDevTool = (isProdBuild) =>
-  isProdBuild ? "cheap-source-map" : "source-map"; //inline-cheap-module-source-map";
+  isProdBuild ? "source-map" : "inline-cheap-module-source-map";
 const genFilename = (isProdBuild, dontHash = new Set()) => ({ chunk }) => {
   if (!isProdBuild || dontHash.has(chunk.name)) {
     return `${chunk.name}.js`;
@@ -81,6 +81,7 @@ const optimization = (latestBuild) => ({
       cache: true,
       parallel: true,
       extractComments: true,
+      sourceMap: true,
       terserOptions: {
         safari10: true,
         ecma: latestBuild ? undefined : 5,
@@ -153,14 +154,14 @@ const createAppConfig = ({ isProdBuild, latestBuild, isStatsBuild }) => {
             ...workBoxTranslationsTemplatedURLs,
             "/static/icons/favicon-192x192.png":
               "public/icons/favicon-192x192.png",
-            "/static/fonts/roboto/Roboto-Light.ttf":
-              "node_modules/@polymer/font-roboto-local/fonts/roboto/Roboto-Light.ttf",
-            "/static/fonts/roboto/Roboto-Medium.ttf":
-              "node_modules/@polymer/font-roboto-local/fonts/roboto/Roboto-Medium.ttf",
-            "/static/fonts/roboto/Roboto-Regular.ttf":
-              "node_modules/@polymer/font-roboto-local/fonts/roboto/Roboto-Regular.ttf",
-            "/static/fonts/roboto/Roboto-Bold.ttf":
-              "node_modules/@polymer/font-roboto-local/fonts/roboto/Roboto-Bold.ttf",
+            "/static/fonts/roboto/Roboto-Light.woff2":
+              "node_modules/roboto-fontface/fonts/roboto/Roboto-Light.woff2",
+            "/static/fonts/roboto/Roboto-Medium.woff2":
+              "node_modules/roboto-fontface/fonts/roboto/Roboto-Medium.woff2",
+            "/static/fonts/roboto/Roboto-Regular.woff2":
+              "node_modules/roboto-fontface/fonts/roboto/Roboto-Regular.woff2",
+            "/static/fonts/roboto/Roboto-Bold.woff2":
+              "node_modules/roboto-fontface/fonts/roboto/Roboto-Bold.woff2",
           },
         }),
     ].filter(Boolean),

@@ -18,6 +18,9 @@ import "./partial-panel-resolver";
 import { HomeAssistant, Route } from "../types";
 import { fireEvent } from "../common/dom/fire_event";
 import { PolymerChangedEvent } from "../polymer-types";
+// tslint:disable-next-line: no-duplicate-imports
+import { AppDrawerLayoutElement } from "@polymer/app-layout/app-drawer-layout/app-drawer-layout";
+import { showNotificationDrawer } from "../dialogs/notifications/show-notification-drawer";
 
 const NON_SWIPABLE_PANELS = ["kiosk", "map"];
 
@@ -25,13 +28,14 @@ declare global {
   // for fire event
   interface HASSDomEvents {
     "hass-toggle-menu": undefined;
+    "hass-show-notifications": undefined;
   }
 }
 
 class HomeAssistantMain extends LitElement {
-  @property() public hass?: HomeAssistant;
+  @property() public hass!: HomeAssistant;
   @property() public route?: Route;
-  @property() private _narrow?: boolean;
+  @property({ type: Boolean }) private narrow?: boolean;
 
   protected render(): TemplateResult | void {
     const hass = this.hass;
@@ -40,7 +44,8 @@ class HomeAssistantMain extends LitElement {
       return;
     }
 
-    const disableSwipe = NON_SWIPABLE_PANELS.indexOf(hass.panelUrl) !== -1;
+    const disableSwipe =
+      !this.narrow || NON_SWIPABLE_PANELS.indexOf(hass.panelUrl) !== -1;
 
     return html`
       <iron-media-query
@@ -50,23 +55,27 @@ class HomeAssistantMain extends LitElement {
 
       <app-drawer-layout
         fullbleed
-        .forceNarrow=${this._narrow || !hass.dockedSidebar}
+        .forceNarrow=${this.narrow}
         responsive-width="0"
       >
-		<!-- Disabled for IoB -->
+        <!-- Disabled for IoB -->
         <!--app-drawer
           id="drawer"
           align="start"
           slot="drawer"
           .disableSwipe=${disableSwipe}
           .swipeOpen=${!disableSwipe}
-          .persistent=${hass.dockedSidebar}
+          .persistent=${!this.narrow}
         >
-          <ha-sidebar .hass=${hass}></ha-sidebar>
+          <ha-sidebar
+            .hass=${hass}
+            .narrow=${this.narrow}
+            .alwaysExpand=${this.narrow || hass.dockedSidebar}
+          ></ha-sidebar>
         </app-drawer-->
 
         <partial-panel-resolver
-          .narrow=${this._narrow}
+          .narrow=${this.narrow}
           .hass=${hass}
           .route=${this.route}
         ></partial-panel-resolver>
@@ -78,27 +87,33 @@ class HomeAssistantMain extends LitElement {
     // import(/* webpackChunkName: "ha-sidebar" */ "../components/ha-sidebar"); // IoB
 
     this.addEventListener("hass-toggle-menu", () => {
-      const shouldOpen = !this.drawer.opened;
-
-      if (shouldOpen) {
-        if (this._narrow) {
-          this.drawer.open();
+      if (this.narrow) {
+        if (this.drawer.opened) {
+          this.drawer.close();
         } else {
-          fireEvent(this, "hass-dock-sidebar", { dock: true });
+          this.drawer.open();
         }
       } else {
-        this.drawer.close();
-        if (this.hass!.dockedSidebar) {
-          fireEvent(this, "hass-dock-sidebar", { dock: false });
-        }
+        fireEvent(this, "hass-dock-sidebar", {
+          dock: !this.hass.dockedSidebar,
+        });
+        setTimeout(() => this.appLayout.resetLayout());
       }
+    });
+
+    this.addEventListener("hass-show-notifications", () => {
+      showNotificationDrawer(this, {
+        narrow: this.narrow!,
+      });
     });
   }
 
   protected updated(changedProps: PropertyValues) {
     super.updated(changedProps);
 
-    if (changedProps.has("route") && this._narrow) {
+    this.toggleAttribute("expanded", this.narrow || this.hass.dockedSidebar);
+
+    if (changedProps.has("route") && this.narrow) {
       this.drawer.close();
     }
 
@@ -111,11 +126,15 @@ class HomeAssistantMain extends LitElement {
   }
 
   private _narrowChanged(ev: PolymerChangedEvent<boolean>) {
-    this._narrow = ev.detail.value;
+    this.narrow = ev.detail.value;
   }
 
   private get drawer(): AppDrawerElement {
     return this.shadowRoot!.querySelector("app-drawer")!;
+  }
+
+  private get appLayout(): AppDrawerLayoutElement {
+    return this.shadowRoot!.querySelector("app-drawer-layout")!;
   }
 
   static get styles(): CSSResult {
@@ -124,6 +143,10 @@ class HomeAssistantMain extends LitElement {
         color: var(--primary-text-color);
         /* remove the grey tap highlights in iOS on the fullscreen touch targets */
         -webkit-tap-highlight-color: rgba(0, 0, 0, 0);
+        --app-drawer-width: 64px;
+      }
+      :host([expanded]) {
+        --app-drawer-width: 256px;
       }
       partial-panel-resolver,
       ha-sidebar {

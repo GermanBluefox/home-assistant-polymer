@@ -615,11 +615,12 @@
                         "delete_confirm": "Êtes-vous sûr de vouloir supprimer cette intégration?",
                         "restart_confirm": "Redémarrez Home Assistant pour terminer la suppression de cette intégration",
                         "manuf": "par {manufacturer}",
-                        "hub": "Connecté via",
+                        "via": "Connecté via",
                         "firmware": "Firmware: {version}",
                         "device_unavailable": "appareil indisponible",
                         "entity_unavailable": "entité indisponible",
-                        "no_area": "Pas de pièce"
+                        "no_area": "Pas de pièce",
+                        "hub": "Connecté via"
                     },
                     "config_flow": {
                         "external_step": {
@@ -885,7 +886,7 @@
                     "finish": "Terminer"
                 },
                 "core-config": {
-                    "intro": "Bonjour {name} , bienvenue dans Home Assistant. Comment voudriez-vous nommer votre maison?",
+                    "intro": "Bonjour {name}, bienvenue dans Home Assistant. Comment voudriez-vous nommer votre maison?",
                     "intro_location": "Nous aimerions savoir où vous habitez. Ces informations vous aideront à afficher des informations et à configurer des automatismes basés sur le soleil. Ces données ne sont jamais partagées en dehors de votre réseau.",
                     "intro_location_detect": "Nous pouvons vous aider à renseigner ces informations en adressant une demande unique à un service externe.",
                     "location_name_default": "Maison",
@@ -939,9 +940,9 @@
                         "delete": "Supprimer la vue"
                     },
                     "save_config": {
-                        "header": "Prenez le controle de Lovelace UI",
+                        "header": "Prenez le contrôle de votre Interface Lovelace",
                         "para": "Par défaut, Home Assistant maintient votre interface utilisateur et la met à jour lorsque de nouvelles entités ou de nouveaux composants Lovelace sont disponibles. Si vous prenez le contrôle, nous ne ferons plus les changements automatiquement pour vous.",
-                        "para_sure": "Êtes-vous sûr de vouloir prendre le controle de l'interface utilisateur?",
+                        "para_sure": "Êtes-vous sûr de vouloir prendre le contrôle de l'interface utilisateur?",
                         "cancel": "Oublie ce que j'ai dit, c'est pas grave.",
                         "save": "Prenez le contrôle"
                     },
@@ -966,10 +967,53 @@
                     "entity_non_numeric": "L'entité est non numérique: {entity}"
                 },
                 "changed_toast": {
-                    "message": "La configuration de Lovelace á été changé, voulez-vous rafraîchir?",
+                    "message": "La configuration de Lovelace a été modifiée, voulez-vous rafraîchir?",
                     "refresh": "Rafraîchir"
                 },
                 "reload_lovelace": "Recharger Lovelace"
+            },
+            "page-demo": {
+                "cards": {
+                    "demo": {
+                        "demo_by": "par {name}",
+                        "next_demo": "Prochaine démo",
+                        "introduction": "Bienvenue à la maison ! Vous êtes sur la démo de Home Assistant, où nous présentons les meilleures interfaces utilisateur créées par notre communauté.",
+                        "learn_more": "En savoir plus sur Home Assistant"
+                    }
+                },
+                "config": {
+                    "arsaboo": {
+                        "names": {
+                            "upstairs": "A l'étage",
+                            "family_room": "Chambre Familiale",
+                            "kitchen": "Cuisine",
+                            "patio": "Patio",
+                            "hallway": "Couloir",
+                            "master_bedroom": "Chambre principale",
+                            "left": "Gauche",
+                            "right": "Droite",
+                            "mirror": "Miroir"
+                        },
+                        "labels": {
+                            "lights": "Lumières",
+                            "information": "Information",
+                            "morning_commute": "Trajet du matin",
+                            "commute_home": "Se rendre à la maison",
+                            "entertainment": "Divertissement",
+                            "activity": "Activité",
+                            "hdmi_input": "Entrée HDMI",
+                            "hdmi_switcher": "Sélecteur HDMI",
+                            "volume": "Volume",
+                            "total_tv_time": "Temps total de télévision",
+                            "turn_tv_off": "Éteindre la télévision",
+                            "air": "Air"
+                        },
+                        "unit": {
+                            "watching": "en train de regarder",
+                            "minutes_abbr": "min"
+                        }
+                    }
+                }
             }
         },
         "sidebar": {

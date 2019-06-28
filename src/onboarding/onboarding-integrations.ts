@@ -129,7 +129,9 @@ class OnboardingIntegrations extends LitElement {
     loadConfigFlowDialog();
     this._loadData();
     /* polyfill for paper-dropdown */
-    import(/* webpackChunkName: "polyfill-web-animations-next" */ "web-animations-js/web-animations-next-lite.min");
+    import(
+      /* webpackChunkName: "polyfill-web-animations-next" */ "web-animations-js/web-animations-next-lite.min"
+    );
   }
 
   private _createFlow() {
@@ -151,7 +153,10 @@ class OnboardingIntegrations extends LitElement {
       getConfigEntries(this.hass!),
     ]);
     this._discovered = discovered;
-    this._entries = entries;
+    // We filter out the config entry for the local weather.
+    // It is one that we create automatically and it will confuse the user
+    // if it starts showing up during onboarding.
+    this._entries = entries.filter((entry) => entry.domain !== "met");
   }
 
   private async _finish() {
