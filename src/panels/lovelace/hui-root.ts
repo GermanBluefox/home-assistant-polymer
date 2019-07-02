@@ -166,7 +166,10 @@ class HUIRoot extends LitElement {
             : html`
                 <app-toolbar>
                   <!-- Disabled for IoB -->
-                  <!--ha-menu-button></ha-menu-button-->
+                  <!--ha-menu-button
+                    .hass=${this.hass}
+                    .narrow=${this.narrow}
+                  ></ha-menu-button-->
                   <div main-title>${this.config.title || "Home Assistant"}</div>
                   <hui-notifications-button
                     .hass="${this.hass}"
