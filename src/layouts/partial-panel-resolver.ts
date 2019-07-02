@@ -17,10 +17,10 @@ const COMPONENTS = {
   //    import(/* webpackChunkName: "panel-config" */ "../panels/config/ha-panel-config"),
   //  custom: () =>
   //    import(/* webpackChunkName: "panel-custom" */ "../panels/custom/ha-panel-custom"),
-  "developer-tools": () =>
-    import(
-      /* webpackChunkName: "panel-developer-tools" */ "../panels/developer-tools/ha-panel-developer-tools"
-    ),
+  // "developer-tools": () =>
+  //   import(
+  //     /* webpackChunkName: "panel-developer-tools" */ "../panels/developer-tools/ha-panel-developer-tools"
+  //   ),
   //  "dev-event": () =>
   //    import(/* webpackChunkName: "panel-dev-event" */ "../panels/dev-event/ha-panel-dev-event"),
   //  "dev-info": () =>
