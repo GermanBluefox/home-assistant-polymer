@@ -225,7 +225,7 @@ class HaWeatherCard extends LocalizeMixin(EventsMixin(PolymerElement)) {
                   </div>
                   <template
                     is="dom-if"
-                    if="[[_showValue(item.condition) && !showWeatherImg(item.condition)]]"
+                    if="[[showWeatherAsCondition(item.condition)]]"
                   >
                     <div class="icon">
                       <ha-icon
@@ -366,6 +366,12 @@ class HaWeatherCard extends LocalizeMixin(EventsMixin(PolymerElement)) {
 
   showWeatherImg(iconURL) {
     return (iconURL || "").toString().match(/\.png|\.svg|\.jpg|\.jpeg/i);
+  }
+
+  showWeatherAsCondition(condition) {
+    return condition
+      ? !(condition || "").toString().match(/\.png|\.svg|\.jpg|\.jpeg/i)
+      : false;
   }
 
   getWeatherIcon(condition) {
