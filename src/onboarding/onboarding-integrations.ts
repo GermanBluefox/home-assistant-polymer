@@ -14,45 +14,40 @@ import {
   showConfigFlowDialog,
 } from "../dialogs/config-flow/show-dialog-config-flow";
 import { HomeAssistant } from "../types";
-import {
-  getConfigFlowsInProgress,
-  getConfigEntries,
-  ConfigEntry,
-  ConfigFlowProgress,
-  localizeConfigFlowTitle,
-} from "../data/config_entries";
+import { getConfigEntries, ConfigEntry } from "../data/config_entries";
 import { compare } from "../common/string/compare";
 import "./integration-badge";
 import { LocalizeFunc } from "../common/translations/localize";
-import { debounce } from "../common/util/debounce";
 import { fireEvent } from "../common/dom/fire_event";
 import { onboardIntegrationStep } from "../data/onboarding";
 import { genClientId } from "home-assistant-js-websocket";
+import { DataEntryFlowProgress } from "../data/data_entry_flow";
+import {
+  localizeConfigFlowTitle,
+  subscribeConfigFlowInProgress,
+  getConfigFlowInProgressCollection,
+} from "../data/config_flow";
 
 @customElement("onboarding-integrations")
 class OnboardingIntegrations extends LitElement {
   @property() public hass!: HomeAssistant;
   @property() public onboardingLocalize!: LocalizeFunc;
   @property() private _entries?: ConfigEntry[];
-  @property() private _discovered?: ConfigFlowProgress[];
+  @property() private _discovered?: DataEntryFlowProgress[];
   private _unsubEvents?: () => void;
 
   public connectedCallback() {
     super.connectedCallback();
-    this.hass.connection
-      .subscribeEvents(
-        debounce(() => this._loadData(), 500),
-        "config_entry_discovered"
-      )
-      .then((unsub) => {
-        this._unsubEvents = unsub;
-      });
+    this._unsubEvents = subscribeConfigFlowInProgress(this.hass, (flows) => {
+      this._discovered = flows;
+    });
   }
 
   public disconnectedCallback() {
     super.disconnectedCallback();
     if (this._unsubEvents) {
       this._unsubEvents();
+      this._unsubEvents = undefined;
     }
   }
 
@@ -127,7 +122,7 @@ class OnboardingIntegrations extends LitElement {
   protected firstUpdated(changedProps: PropertyValues) {
     super.firstUpdated(changedProps);
     loadConfigFlowDialog();
-    this._loadData();
+    this._loadConfigEntries();
     /* polyfill for paper-dropdown */
     import(
       /* webpackChunkName: "polyfill-web-animations-next" */ "web-animations-js/web-animations-next-lite.min"
@@ -136,23 +131,25 @@ class OnboardingIntegrations extends LitElement {
 
   private _createFlow() {
     showConfigFlowDialog(this, {
-      dialogClosedCallback: () => this._loadData(),
+      dialogClosedCallback: () => {
+        this._loadConfigEntries();
+        getConfigFlowInProgressCollection(this.hass!.connection).refresh();
+      },
     });
   }
 
   private _continueFlow(ev) {
     showConfigFlowDialog(this, {
       continueFlowId: ev.currentTarget.flowId,
-      dialogClosedCallback: () => this._loadData(),
+      dialogClosedCallback: () => {
+        this._loadConfigEntries();
+        getConfigFlowInProgressCollection(this.hass!.connection).refresh();
+      },
     });
   }
 
-  private async _loadData() {
-    const [discovered, entries] = await Promise.all([
-      getConfigFlowsInProgress(this.hass!),
-      getConfigEntries(this.hass!),
-    ]);
-    this._discovered = discovered;
+  private async _loadConfigEntries() {
+    const entries = await getConfigEntries(this.hass!);
     // We filter out the config entry for the local weather.
     // It is one that we create automatically and it will confuse the user
     // if it starts showing up during onboarding.

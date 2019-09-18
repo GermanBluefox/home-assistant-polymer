@@ -7,12 +7,8 @@
         "history": "História",
         "mailbox": "Poštová schránka",
         "shopping_list": "Nákupný zoznam",
-        "dev-services": "Služby",
-        "dev-states": "Stavy",
-        "dev-events": "Udalosti",
-        "dev-templates": "Šablóny",
-        "dev-mqtt": "MQTT",
         "dev-info": "Info",
+        "developer_tools": "Vývojárske nástroje",
         "calendar": "Kalendár",
         "profile": "Profil"
     },
@@ -311,6 +307,25 @@
                 "add_item": "Pridať položku",
                 "microphone_tip": "Kliknite na ikonu mikrofónu vpravo hore a povedzte “Add candy to my shopping list”"
             },
+            "developer-tools": {
+                "tabs": {
+                    "services": {
+                        "title": "Služby"
+                    },
+                    "states": {
+                        "title": "Stavy"
+                    },
+                    "events": {
+                        "title": "Udalosti"
+                    },
+                    "templates": {
+                        "title": "Šablóny"
+                    },
+                    "mqtt": {
+                        "title": "MQTT"
+                    }
+                }
+            },
             "history": {
                 "showing_entries": "Zobrazujú sa záznamy pre",
                 "period": "Obdobie"
@@ -333,8 +348,25 @@
                     "description": "Skontrolujte Váš konfiguračný súbor a ovládajte server",
                     "section": {
                         "core": {
-                            "header": "Konfigurácia a ovládanie servera",
+                            "header": "Všeobecná konfigurácia",
                             "introduction": "Zmena konfigurácie môže byť ťažkým procesom. My vieme. Táto sekcia sa Vám pokúsi zjednodušiť život.",
+                            "core_config": {
+                                "edit_requires_storage": "Editor je zablokovaný, pretože konfigurácia je uložená v configuration.yaml",
+                                "location_name": "Názov vašej Home Assistant inštalácie",
+                                "latitude": "Zemepisná šírka",
+                                "longitude": "Zemepisná dĺžka",
+                                "elevation": "Nadmorská výška",
+                                "elevation_meters": "metrov",
+                                "time_zone": "Časové pásmo",
+                                "unit_system": "Jednotková sústava",
+                                "unit_system_imperial": "Imperiálny",
+                                "unit_system_metric": "metrický",
+                                "imperial_example": "Fahrenheita, libry",
+                                "metric_example": "Celsia, kilogramy",
+                                "save_button": "Uložiť"
+                            }
+                        },
+                        "server_control": {
                             "validation": {
                                 "heading": "Kontrola konfigurácie",
                                 "introduction": "Overte svoju konfiguráciu, ak ste nedávno vykonali nejaké zmeny v konfigurácii a chcete sa uistiť, že je to všetko v poriadku",
@@ -355,21 +387,6 @@
                                 "introduction": "Ovládajte Váš Home Assistant server... z aplikácie Home Assistant.",
                                 "restart": "Reštartovať",
                                 "stop": "Zastaviť"
-                            },
-                            "core_config": {
-                                "edit_requires_storage": "Editor je zablokovaný, pretože konfigurácia je uložená v configuration.yaml",
-                                "location_name": "Názov vašej Home Assistant inštalácie",
-                                "latitude": "zemepisná šírka",
-                                "longitude": "zemepisná dĺžka",
-                                "elevation": "Nadmorská výška",
-                                "elevation_meters": "metrov",
-                                "time_zone": "Časové pásmo",
-                                "unit_system": "Jednotková sústava",
-                                "unit_system_imperial": "Imperiálny",
-                                "unit_system_metric": "metrický",
-                                "imperial_example": "Fahrenheita, libry",
-                                "metric_example": "Celsia, kilogramy",
-                                "save_button": "Uložiť"
                             }
                         }
                     }
@@ -523,6 +540,9 @@
                                     "label": "Zóna",
                                     "entity": "Entita s umiestnením",
                                     "zone": "Zóna"
+                                },
+                                "device": {
+                                    "label": "Zariadenie"
                                 }
                             },
                             "learn_more": "Získajte viac informácií o podmienkach"
@@ -557,6 +577,9 @@
                                     "label": "Odpáliť udalosť",
                                     "event": "Udalosť:",
                                     "service_data": "Dáta služby"
+                                },
+                                "device_id": {
+                                    "label": "Zariadenie"
                                 }
                             },
                             "learn_more": "Získajte viac informácií o akciách"
@@ -571,7 +594,10 @@
                 },
                 "zwave": {
                     "caption": "Z-Wave",
-                    "description": "Spravujte svoju Z-Wave sieť"
+                    "description": "Spravujte svoju Z-Wave sieť",
+                    "node_config": {
+                        "set_config_parameter": "Nastavte konfiguračný parameter"
+                    }
                 },
                 "users": {
                     "caption": "Používatelia",
@@ -694,6 +720,34 @@
                         "device_tracker_picked": "Sledovať zariadenie",
                         "device_tracker_pick": "Vyberte zariadenie na sledovanie"
                     }
+                },
+                "server_control": {
+                    "caption": "Správa servera",
+                    "description": "Reštartujte a zastavte server Home Assistant",
+                    "section": {
+                        "validation": {
+                            "heading": "Kontrola konfigurácie",
+                            "introduction": "Overte svoju konfiguráciu, ak ste nedávno vykonali nejaké zmeny v konfigurácii a chcete sa uistiť, že je to všetko v poriadku",
+                            "check_config": "Skontrolujte konfiguráciu",
+                            "valid": "Konfigurácia je platná!",
+                            "invalid": "Konfigurácia je neplatná"
+                        },
+                        "reloading": {
+                            "heading": "Načítavanie novej konfigurácie",
+                            "introduction": "Niektoré časti aplikácie Home Assistant sa môžu načítať bez nutnosti reštartovania. Opätovným načítaním sa zahodí aktuálna konfigurácia a načíta sa nová.",
+                            "core": "Znovu načítať jadro",
+                            "group": "Znovu načítať skupiny",
+                            "automation": "Znovu načítať automatizácie",
+                            "script": "Znovu načítať skripty",
+                            "scene": "Znovu načítať scény"
+                        },
+                        "server_management": {
+                            "heading": "Správa servera",
+                            "introduction": "Ovládajte Váš Home Assistant server... z aplikácie Home Assistant.",
+                            "restart": "Reštartovať",
+                            "stop": "Zastaviť"
+                        }
+                    }
                 }
             },
             "profile": {
@@ -744,7 +798,6 @@
                 },
                 "current_user": "Momentálne ste prihlásení ako {fullName}.",
                 "is_owner": "Ste vlastníkom.",
-                "logout": "Odhlásiť sa",
                 "change_password": {
                     "header": "Zmena hesla",
                     "current_password": "Aktuálne heslo",
@@ -765,6 +818,11 @@
                     "step_done": "Nastavenie dokončené krok {step}",
                     "close": "Zavrieť",
                     "submit": "Odoslať"
+                },
+                "logout": "Logga ut",
+                "force_narrow": {
+                    "header": "Vždy skryť bočný panel",
+                    "description": "Predvolene sa skryje bočný panel, podobne ako v prípade mobilných zariadení."
                 }
             },
             "page-authorize": {
@@ -909,9 +967,9 @@
                     "picture-elements": {
                         "hold": "Držať:",
                         "tap": "Ťuknite:",
-                        "navigate_to": "Navigovať do {Location}",
+                        "navigate_to": "Navigovať do {location}",
                         "toggle": "Prepnúť {name}",
-                        "call_service": "Zavolať službu",
+                        "call_service": "Zavolať službu {name}",
                         "more_info": "Zobraziť viac informácií: {name}"
                     }
                 },
@@ -954,6 +1012,10 @@
                         "save": "Uložiť",
                         "unsaved_changes": "Neuložené zmeny",
                         "saved": "Uložené"
+                    },
+                    "edit_lovelace": {
+                        "header": "Názov vášho Lovelace UI",
+                        "explanation": "Tento názov sa zobrazuje nad všetkými vašimi zobrazeniami v Lovelace."
                     }
                 },
                 "menu": {
@@ -971,11 +1033,53 @@
                     "refresh": "Obnoviť"
                 },
                 "reload_lovelace": "Znovu načítať Lovelace"
+            },
+            "page-demo": {
+                "cards": {
+                    "demo": {
+                        "demo_by": "podľa {name}",
+                        "next_demo": "Ďalšie demo",
+                        "introduction": "Vitaj ! Dostali ste sa na demo Home Assistanta, kde prezentujeme najlepšie používateľské rozhrania vytvorené našou komunitou.",
+                        "learn_more": "Získajte viac informácií o Home asistentovi"
+                    }
+                },
+                "config": {
+                    "arsaboo": {
+                        "names": {
+                            "upstairs": "Poschodie",
+                            "family_room": "Obývacia izba",
+                            "kitchen": "Kuchyňa",
+                            "patio": "Terasa",
+                            "hallway": "Chodba",
+                            "master_bedroom": "Spálňa",
+                            "left": "Vľavo",
+                            "right": "Vpravo",
+                            "mirror": "Zrkadlenie"
+                        },
+                        "labels": {
+                            "lights": "Svetlá",
+                            "information": "Informácie",
+                            "morning_commute": "Ranné dochádzanie",
+                            "commute_home": "Dochádzanie domov",
+                            "entertainment": "Zábava",
+                            "activity": "Aktivita",
+                            "hdmi_input": "Vstup HDMI",
+                            "hdmi_switcher": "HDMI prepínač",
+                            "volume": "Hlasitosť",
+                            "total_tv_time": "Celkový čas sledovanie TV",
+                            "turn_tv_off": "Vypnúť TV",
+                            "air": "Vzduch"
+                        },
+                        "unit": {
+                            "watching": "Sledovanie",
+                            "minutes_abbr": "Min"
+                        }
+                    }
+                }
             }
         },
         "sidebar": {
             "log_out": "Odhlásiť sa",
-            "developer_tools": "Vývojárske nástroje",
             "external_app_configuration": "Konfigurácia aplikácie"
         },
         "common": {
@@ -1079,7 +1183,8 @@
                 "fan_mode": "Režim ventilátora",
                 "swing_mode": "Vejárový režim",
                 "away_mode": "Režim neprítomnosti",
-                "aux_heat": "Prídavné kúrenie"
+                "aux_heat": "Prídavné kúrenie",
+                "preset_mode": "Predvoľba"
             },
             "lock": {
                 "code": "Kód",
@@ -1154,6 +1259,12 @@
                 "updater": {
                     "title": "Pokyny pre aktualizáciu"
                 }
+            },
+            "zha_device_info": {
+                "zha_device_card": {
+                    "area_picker_label": "Oblasť",
+                    "update_name_button": "Aktualizovať názov"
+                }
             }
         },
         "auth_store": {
@@ -1224,6 +1335,16 @@
                 "off": "Vypnutý",
                 "on": "Zapnutý",
                 "auto": "Auto"
+            },
+            "preset_mode": {
+                "none": "None",
+                "eco": "Eko",
+                "away": "Preč",
+                "boost": "Turbo",
+                "comfort": "Komfort",
+                "home": "Doma",
+                "sleep": "Pohotovostný režim",
+                "activity": "Aktívny"
             }
         }
     },

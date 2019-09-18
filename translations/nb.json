@@ -7,12 +7,8 @@
         "history": "Historie",
         "mailbox": "Postkasse",
         "shopping_list": "Handleliste",
-        "dev-services": "Tjenester",
-        "dev-states": "Statuser",
-        "dev-events": "Hendelser",
-        "dev-templates": "Maler",
-        "dev-mqtt": "MQTT",
         "dev-info": "Informasjon",
+        "developer_tools": "Utviklerverktøy",
         "calendar": "Kalender",
         "profile": "Profil"
     },
@@ -145,7 +141,8 @@
             "high_demand": "Høy etterspørsel",
             "heat_pump": "Varmepumpe",
             "gas": "Gass",
-            "manual": "Manuell"
+            "manual": "Manuell",
+            "heat_cool": "Varme\/kjøling"
         },
         "configurator": {
             "configure": "Konfigurer",
@@ -254,7 +251,8 @@
             "snowy-rainy": "Sludd",
             "sunny": "Solfylt",
             "windy": "Vind",
-            "windy-variant": "Vind"
+            "windy-variant": "Vind",
+            "exceptional": "Eksepsjonell"
         },
         "vacuum": {
             "cleaning": "Rengjør",
@@ -311,6 +309,31 @@
                 "add_item": "Legg til",
                 "microphone_tip": "Aktiver mikrofonen øverst til høyre og si “Add candy to my shopping list”"
             },
+            "developer-tools": {
+                "tabs": {
+                    "services": {
+                        "title": "Tjenester"
+                    },
+                    "states": {
+                        "title": "Statuser"
+                    },
+                    "events": {
+                        "title": "Hendelser"
+                    },
+                    "templates": {
+                        "title": "Mal"
+                    },
+                    "mqtt": {
+                        "title": "MQTT"
+                    },
+                    "info": {
+                        "title": "Info"
+                    },
+                    "logs": {
+                        "title": "Logger"
+                    }
+                }
+            },
             "history": {
                 "showing_entries": "Viser oppføringer for",
                 "period": "Periode"
@@ -330,11 +353,28 @@
                 "introduction": "Her er det mulig å konfigurere dine komponenter og Home Assistant. Ikke alt er mulig å konfigurere fra brukergrensesnittet enda, men vi jobber med det.",
                 "core": {
                     "caption": "Generelt",
-                    "description": "Valider konfigurasjonsfilen din og kontroller serveren",
+                    "description": "Endre den generelle konfigurasjonen for Home Assistant",
                     "section": {
                         "core": {
-                            "header": "Konfigurasjon og serverkontroll",
+                            "header": "Generell konfigurasjon",
                             "introduction": "Endring av konfigurasjonen kan være en slitsom prosess, det vet vi. Denne delen vil forsøke å gjøre livet ditt litt lettere.",
+                            "core_config": {
+                                "edit_requires_storage": "Redigering deaktivert da konfigurasjonen er lagret i configuration.yaml.",
+                                "location_name": "Navn på installasjonen av Home Assistant",
+                                "latitude": "Breddegrad",
+                                "longitude": "Lengdegrad",
+                                "elevation": "Høyde",
+                                "elevation_meters": "meter",
+                                "time_zone": "Tidssone",
+                                "unit_system": "Enhetssystem",
+                                "unit_system_imperial": "Imperisk",
+                                "unit_system_metric": "Metrisk",
+                                "imperial_example": "Fahrenheit, pund",
+                                "metric_example": "Celsius, kilogram",
+                                "save_button": "Lagre"
+                            }
+                        },
+                        "server_control": {
                             "validation": {
                                 "heading": "Konfigurasjonsvalidering",
                                 "introduction": "Sjekk konfigurasjon din hvis du nylig har gjort noen endringer og ønsker å være sikker på at den er gyldig ved å kjøre en valideringstest",
@@ -355,21 +395,6 @@
                                 "introduction": "Kontroller din Home Assistant server... fra Home Assistant.",
                                 "restart": "Start på nytt",
                                 "stop": "Stopp"
-                            },
-                            "core_config": {
-                                "edit_requires_storage": "Redigering deaktivert da konfigurasjonen er lagret i configuration.yaml.",
-                                "location_name": "Navn på installasjonen av Home Assistant",
-                                "latitude": "Breddegrad",
-                                "longitude": "Lengdegrad",
-                                "elevation": "Høyde",
-                                "elevation_meters": "meter",
-                                "time_zone": "Tidssone",
-                                "unit_system": "Enhetssystem",
-                                "unit_system_imperial": "Imperisk",
-                                "unit_system_metric": "Metrisk",
-                                "imperial_example": "Fahrenheit, pund",
-                                "metric_example": "Celsius, kilogram",
-                                "save_button": "Lagre"
                             }
                         }
                     }
@@ -477,13 +502,16 @@
                                     "event": "Hendelse:",
                                     "enter": "Ankommer",
                                     "leave": "Forlater"
+                                },
+                                "device": {
+                                    "label": "Enheten"
                                 }
                             },
                             "learn_more": "Lær mer om utløsere"
                         },
                         "conditions": {
                             "header": "Betingelser",
-                            "introduction": "Betingelser er en valgfri del av en automatiseringsregel og kan brukes til å forhindre at en handling skjer når den blir aktivert. \nBetingelsene ser veldig ut som utløsere, men er veldig forskjellige. \nEn utløser vil se på hendelser som skjer i systemet, mens en betingelse bare ser på hvordan systemet ser ut akkurat nå. En utløser kan observere at en bryter er slått på. En betingelse kan bare se om en bryter for øyeblikket er på eller av. \n\n[Lær mer om betingelser.](https:\/\/home-assistant.io\/docs\/scripts\/conditions\/)",
+                            "introduction": "Betingelser er en valgfri del av en automatiseringsregel og kan brukes til å forhindre at en handling skjer når den blir aktivert. \nBetingelsene ser veldig ut som utløsere, men er veldig forskjellige. \nEn utløser vil se på hendelser som skjer i systemet, mens en betingelse bare ser på hvordan systemet ser ut akkurat nå. En utløser kan observere at en bryter er slått på. En betingelse kan bare se om en bryter for øyeblikket er på eller av.",
                             "add": "Legg til betingelse",
                             "duplicate": "Dupliser",
                             "delete": "Slett",
@@ -523,6 +551,9 @@
                                     "label": "Sone",
                                     "entity": "Enhet med posisjon",
                                     "zone": "Sone"
+                                },
+                                "device": {
+                                    "label": "Enhet"
                                 }
                             },
                             "learn_more": "Lær mer om betingelser"
@@ -557,6 +588,9 @@
                                     "label": "Kjør hendelse",
                                     "event": "Hendelse",
                                     "service_data": "Tjeneste data"
+                                },
+                                "device_id": {
+                                    "label": "Enhet"
                                 }
                             },
                             "learn_more": "Lær mer om handlinger"
@@ -571,7 +605,51 @@
                 },
                 "zwave": {
                     "caption": "Z-Wave",
-                    "description": "Administrer ditt Z-Wave-nettverk"
+                    "description": "Administrer ditt Z-Wave-nettverk",
+                    "network_management": {
+                        "header": "Z-Wave nettverksadministrasjon",
+                        "introduction": "Kjør kommandoer som påvirker Z-Wave nettverket. Du får ikke tilbakemelding på om de fleste kommandoer lykkes, men du kan sjekke OZW-loggen for å prøve å finne det ut."
+                    },
+                    "network_status": {
+                        "network_stopped": "Z-Wave nettverket stoppet",
+                        "network_starting": "Starter Z-Wave nettverk...",
+                        "network_starting_note": "Dette kan ta en stund, avhengig av størrelsen på nettverket ditt.",
+                        "network_started": "Z-Wave nettverk startet",
+                        "network_started_note_some_queried": "Våkne noder har blitt forespurt. Sovende noder vil bli spurt når de våkner.",
+                        "network_started_note_all_queried": "Alle noder er forespurt."
+                    },
+                    "services": {
+                        "start_network": "Start nettverk",
+                        "stop_network": "Stopp nettverk",
+                        "heal_network": "Helbrede nettverk",
+                        "test_network": "Test nettverk",
+                        "soft_reset": "Myk tilbakestilling",
+                        "save_config": "Lagre konfigurasjon",
+                        "add_node_secure": "Legg til sikker node",
+                        "add_node": "Legg til node",
+                        "remove_node": "Fjern node",
+                        "cancel_command": "Avbryt kommando"
+                    },
+                    "common": {
+                        "value": "Verdi",
+                        "instance": "Forekomst",
+                        "index": "Indeks",
+                        "unknown": "ukjent",
+                        "wakeup_interval": "Våkningsintervall"
+                    },
+                    "values": {
+                        "header": "Nodeverdier"
+                    },
+                    "node_config": {
+                        "header": "Alternativer for nodekonfigurasjon",
+                        "seconds": "sekunder",
+                        "set_wakeup": "Angi vekkeintervall",
+                        "config_parameter": "Konfigurasjon parameter",
+                        "config_value": "Konfigurasjon verdi",
+                        "true": "Sant",
+                        "false": "Usant",
+                        "set_config_parameter": "Angi konfigurasjons parameter"
+                    }
                 },
                 "users": {
                     "caption": "Brukere",
@@ -682,7 +760,10 @@
                         "unavailable": "Denne enheten er ikke tilgjengelig for øyeblikket.",
                         "default_name": "Nytt område",
                         "delete": "SLETT",
-                        "update": "OPPDATER"
+                        "update": "OPPDATER",
+                        "enabled_label": "Aktiver enhet",
+                        "enabled_cause": "Deaktivert av {cause}.",
+                        "enabled_description": "Deaktiverte enheter vil ikke bli lagt til i Home Assistant."
                     }
                 },
                 "person": {
@@ -693,6 +774,36 @@
                         "device_tracker_intro": "Velg enhetene som tilhører denne personen.",
                         "device_tracker_picked": "Spor enhet",
                         "device_tracker_pick": "Velg en enhet å spore"
+                    }
+                },
+                "server_control": {
+                    "caption": "Server-kontroll",
+                    "description": "Start på nytt og stopp Home Assistant-serveren",
+                    "section": {
+                        "validation": {
+                            "heading": "Validering av konfigurasjon",
+                            "introduction": "Valider konfigurasjonen hvis du nylig har gjort endringer i konfigurasjonen og vil forsikre deg om at det hele er gyldig",
+                            "check_config": "Sjekk konfigurasjonen",
+                            "valid": "Gyldig konfigurasjon",
+                            "invalid": "Ugyldig konfigurasjon"
+                        },
+                        "reloading": {
+                            "heading": "Konfigurasjon lastes på nytt",
+                            "introduction": "Noen deler av Home Assistant kan laste inn uten å kreve omstart. Hvis du trykker last på nytt, vil du bytte den nåværende konfigurasjonen med den nye.",
+                            "core": "Last inn kjernen på nytt",
+                            "group": "Last inn grupper på nytt",
+                            "automation": "Last inn automatiseringer på nytt",
+                            "script": "Last inn skript på nytt",
+                            "scene": "Last inn scener på nytt"
+                        },
+                        "server_management": {
+                            "heading": "Serveradministrasjon",
+                            "introduction": "Kontroller din Home Assistant server... fra Home Assistant.",
+                            "restart": "Omstart",
+                            "stop": "Stopp",
+                            "confirm_restart": "Er du sikker på at du vil starte Home Assistant på nytt?",
+                            "confirm_stop": "Er du sikker på at du vil stoppe Home Assistant?"
+                        }
                     }
                 }
             },
@@ -744,7 +855,6 @@
                 },
                 "current_user": "Du er logget inn som {fullName}.",
                 "is_owner": "Du er en eier.",
-                "logout": "Logg ut",
                 "change_password": {
                     "header": "Endre passord",
                     "current_password": "Nåværende passord",
@@ -765,6 +875,11 @@
                     "step_done": "Oppsett fullført for {step}",
                     "close": "Lukk",
                     "submit": "Send inn"
+                },
+                "logout": "Logg ut",
+                "force_narrow": {
+                    "header": "Skjul alltid sidepanelet",
+                    "description": "Dette vil skjule sidepanelet som standard, tilsvarende opplevelsen på en mobil."
                 }
             },
             "page-authorize": {
@@ -954,6 +1069,10 @@
                         "save": "Lagre",
                         "unsaved_changes": "Ulagrede endringer",
                         "saved": "Lagret"
+                    },
+                    "edit_lovelace": {
+                        "header": "Tittel på Lovelace UI",
+                        "explanation": "Denne tittelen vises over alle visningene dine i Lovelace."
                     }
                 },
                 "menu": {
@@ -1018,13 +1137,13 @@
         },
         "sidebar": {
             "log_out": "Logg ut",
-            "developer_tools": "Utviklerverktøy",
             "external_app_configuration": "Appkonfigurasjon"
         },
         "common": {
             "loading": "Laster",
             "cancel": "Avbryt",
-            "save": "Lagre"
+            "save": "Lagre",
+            "successfully_saved": "Vellykket lagring"
         },
         "duration": {
             "day": "{count} {count, plural,\none {dag}\nother {dager}\n}",
@@ -1100,7 +1219,9 @@
             "fan": {
                 "speed": "Hastighet",
                 "oscillate": "Vandring",
-                "direction": "Retning"
+                "direction": "Retning",
+                "forward": "Framover",
+                "reverse": "Omvendt"
             },
             "light": {
                 "brightness": "Lysstyrke",
@@ -1122,7 +1243,8 @@
                 "fan_mode": "Viftemodus",
                 "swing_mode": "Svingmodus",
                 "away_mode": "Bortemodus",
-                "aux_heat": "Aux varme"
+                "aux_heat": "Aux varme",
+                "preset_mode": "Preset"
             },
             "lock": {
                 "code": "Kode",
@@ -1144,6 +1266,14 @@
                 "target_temperature": "Ønsket temperatur",
                 "operation": "Drift",
                 "away_mode": "Bortemodus"
+            },
+            "timer": {
+                "actions": {
+                    "start": "start",
+                    "pause": "pause",
+                    "cancel": "Avbryt",
+                    "finish": "Fullføre"
+                }
             }
         },
         "components": {
@@ -1196,6 +1326,33 @@
                 },
                 "updater": {
                     "title": "Oppdateringsanvisning"
+                }
+            },
+            "options_flow": {
+                "form": {
+                    "header": "Alternativer"
+                },
+                "success": {
+                    "description": "Alternativene er lagret."
+                }
+            },
+            "config_entry_system_options": {
+                "title": "Systemalternativer",
+                "enable_new_entities_label": "Aktiver enheter som nylig er lagt til.",
+                "enable_new_entities_description": "Hvis deaktivert, vil ikke nyoppdagede enheter automatisk bli lagt til i Home Assistant."
+            },
+            "zha_device_info": {
+                "manuf": "av {manufacturer}",
+                "no_area": "Intet område",
+                "services": {
+                    "reconfigure": "Rekonfigurer ZHA-enhet (heal enhet). Bruk dette hvis du har problemer med enheten. Hvis den aktuelle enheten er en batteridrevet enhet, sørg for at den er våken og aksepterer kommandoer når du bruker denne tjenesten.",
+                    "updateDeviceName": "Angi et egendefinert navn for denne enheten i enhetsregisteret.",
+                    "remove": "Fjern en enhet fra ZigBee-nettverket."
+                },
+                "zha_device_card": {
+                    "device_name_placeholder": "Brukers navn",
+                    "area_picker_label": "Område",
+                    "update_name_button": "Oppdater navn"
                 }
             }
         },
@@ -1267,6 +1424,24 @@
                 "off": "Av",
                 "on": "På",
                 "auto": "Auto"
+            },
+            "preset_mode": {
+                "none": "Ingen",
+                "eco": "Øko",
+                "away": "Borte",
+                "boost": "Øke",
+                "comfort": "Komfort",
+                "home": "Hjem",
+                "sleep": "Sove",
+                "activity": "Aktivitet"
+            },
+            "hvac_action": {
+                "off": "Av",
+                "heating": "Oppvarming",
+                "cooling": "Kjøling",
+                "drying": "Tørking",
+                "idle": "Inaktiv",
+                "fan": "Vifte"
             }
         }
     },
@@ -1274,5 +1449,12 @@
         "system-admin": "Administratorer",
         "system-users": "Brukere",
         "system-read-only": "Brukere med lesetilgang"
+    },
+    "config_entry": {
+        "disabled_by": {
+            "user": "Bruker",
+            "integration": "Integrering",
+            "config_entry": "Konfigurer oppføring"
+        }
     }
 }

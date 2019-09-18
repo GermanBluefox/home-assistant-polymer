@@ -7,12 +7,8 @@
         "history": "التاريخ",
         "mailbox": "البريد",
         "shopping_list": "قائمة التسوق",
-        "dev-services": "الخدمات",
-        "dev-states": "الحالات",
-        "dev-events": "أحداث",
-        "dev-templates": "نماذج",
-        "dev-mqtt": "MQTT",
         "dev-info": "معلومات",
+        "developer_tools": "ادوات المطورين",
         "calendar": "التقويم",
         "profile": "الملف الشخصي"
     },
@@ -294,6 +290,25 @@
                 "add_item": "أضف عنصر",
                 "microphone_tip": "اضغط على الميكروفون في أعلى اليمين وقل \"Add candy to my shopping list\""
             },
+            "developer-tools": {
+                "tabs": {
+                    "services": {
+                        "title": "الخدمات"
+                    },
+                    "states": {
+                        "title": "الحالات"
+                    },
+                    "events": {
+                        "title": "أحداث"
+                    },
+                    "templates": {
+                        "title": "نماذج"
+                    },
+                    "mqtt": {
+                        "title": "MQTT"
+                    }
+                }
+            },
             "history": {
                 "showing_entries": "عرض الأحداث لـ",
                 "period": "المدة"
@@ -316,7 +331,9 @@
                     "section": {
                         "core": {
                             "header": "التحكم بالإعدادات و الخادم",
-                            "introduction": "تغيير الإعدادات يعتبر عملية مزرية. نحن نعلم ذلك . لذا، سيحاول هذا القسم جعل حياتك أكثر سهولة.",
+                            "introduction": "تغيير الإعدادات يعتبر عملية مزرية. نحن نعلم ذلك . لذا، سيحاول هذا القسم جعل حياتك أكثر سهولة."
+                        },
+                        "server_control": {
                             "validation": {
                                 "heading": "تآكيد صلاحية الإعدادات",
                                 "introduction": "التحقق من صحة الإعدادات الخاصة بك إذا قمت مؤخرا بإجراء بعض التغييرات وتريد التأكد من أن كل شيء على ما يرام",
@@ -519,7 +536,10 @@
                 },
                 "zwave": {
                     "caption": "Z-Wave",
-                    "description": "إدارة شبكة Z-Wave"
+                    "description": "إدارة شبكة Z-Wave",
+                    "node_config": {
+                        "set_config_parameter": "تعيين معلمة التكوين"
+                    }
                 },
                 "users": {
                     "caption": "المستخدمين",
@@ -615,7 +635,6 @@
                 },
                 "current_user": "أنت مسجّل الدخول حاليًا كـ {fullName} .",
                 "is_owner": "أنت مالك",
-                "logout": "تسجيل الخروج",
                 "change_password": {
                     "header": "تغيير كلمة السر",
                     "current_password": "كلمة السر الحالية",
@@ -688,8 +707,7 @@
             }
         },
         "sidebar": {
-            "log_out": "تسجيل الخروج",
-            "developer_tools": "ادوات المطورين"
+            "log_out": "تسجيل الخروج"
         },
         "common": {
             "loading": "جار التحميل",

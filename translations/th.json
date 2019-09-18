@@ -7,12 +7,8 @@
         "history": "ประวัติการทำงาน",
         "mailbox": "กล่องจดหมาย",
         "shopping_list": "รายการซื้อของ",
-        "dev-services": "บริการ",
-        "dev-states": "สถานะ",
-        "dev-events": "เหตุการณ์",
-        "dev-templates": "แม่แบบ",
-        "dev-mqtt": "MQTT",
         "dev-info": "ข้อมูล",
+        "developer_tools": "เครื่องมือสำหรับนักพัฒนา",
         "calendar": "ปฏิทิน",
         "profile": "ข้อมูลส่วนตัว"
     },
@@ -311,6 +307,28 @@
                 "add_item": "เพิ่มรายการใหม่",
                 "microphone_tip": "ลองแตะไมโครโฟนที่ด้านบนขวาและพูดว่า \"เพิ่มลูกอมลงในรายการช้อปปิ้งของฉัน\" ดูสิ!"
             },
+            "developer-tools": {
+                "tabs": {
+                    "services": {
+                        "title": "บริการ"
+                    },
+                    "states": {
+                        "title": "สถานะ"
+                    },
+                    "events": {
+                        "title": "เหตุการณ์"
+                    },
+                    "templates": {
+                        "title": "แม่แบบ"
+                    },
+                    "mqtt": {
+                        "title": "MQTT"
+                    },
+                    "info": {
+                        "title": "ข้อมูล"
+                    }
+                }
+            },
             "history": {
                 "showing_entries": "วันที่ต้องการแสดง",
                 "period": "ช่วงเวลา"
@@ -335,6 +353,23 @@
                         "core": {
                             "header": "การกำหนดค่าและควบคุมเซิร์ฟเวอร์",
                             "introduction": "เรารู้นะว่าการตั้งค่าเนี่ยมันน่าเบื่อขนาดไหน ในส่วนนี้มันจะช่วยทำให้ชีวิตคุณง่ายขึ้นนิดหน่อย",
+                            "core_config": {
+                                "edit_requires_storage": "ตัวช่วยแก้ไขถูกปิดใช้งาน เนื่องจากการกำหนดค่าถูกกำหนดไว้ในไฟล์ configuration.yaml",
+                                "location_name": "ชื่อในการติดตั้ง Home Assistant ของคุณ",
+                                "latitude": "ละติจูด",
+                                "longitude": "ลองจิจูด",
+                                "elevation": "มุมเงย",
+                                "elevation_meters": "เมตร",
+                                "time_zone": "เขตเวลา",
+                                "unit_system": "ระบบหน่วย",
+                                "unit_system_imperial": "ของจักรพรรดิ",
+                                "unit_system_metric": "เมตริก",
+                                "imperial_example": "ฟาเรนไฮต์, ปอนด์",
+                                "metric_example": "เซลเซียส, กิโลกรัม",
+                                "save_button": "บันทึก"
+                            }
+                        },
+                        "server_control": {
                             "validation": {
                                 "heading": "ตรวจสอบการกำหนดค่า",
                                 "introduction": "ตรวจสอบความถูกต้องการกำหนดค่าของคุณหากคุณเพิ่งทำการเปลี่ยนแปลงบางอย่างกับการกำหนดค่าของคุณและต้องการตรวจสอบให้แน่ใจว่าถูกต้องทั้งหมด",
@@ -355,21 +390,6 @@
                                 "introduction": "สำหรับควบคุมเซิร์ฟเวอร์ Home Assistant อีกทีนึงจาก Home Assistant อีกที",
                                 "restart": "เริ่มต้นใหม่",
                                 "stop": "หยุด"
-                            },
-                            "core_config": {
-                                "edit_requires_storage": "ตัวช่วยแก้ไขถูกปิดใช้งาน เนื่องจากการกำหนดค่าถูกกำหนดไว้ในไฟล์ configuration.yaml",
-                                "location_name": "ชื่อในการติดตั้ง Home Assistant ของคุณ",
-                                "latitude": "ละติจูด",
-                                "longitude": "ลองจิจูด",
-                                "elevation": "มุมเงย",
-                                "elevation_meters": "เมตร",
-                                "time_zone": "เขตเวลา",
-                                "unit_system": "ระบบหน่วย",
-                                "unit_system_imperial": "ของจักรพรรดิ",
-                                "unit_system_metric": "เมตริก",
-                                "imperial_example": "ฟาเรนไฮต์, ปอนด์",
-                                "metric_example": "เซลเซียส, กิโลกรัม",
-                                "save_button": "บันทึก"
                             }
                         }
                     }
@@ -571,7 +591,15 @@
                 },
                 "zwave": {
                     "caption": "Z-Wave",
-                    "description": "จัดการเครือข่าย Z-Wave"
+                    "description": "จัดการเครือข่าย Z-Wave",
+                    "common": {
+                        "value": "ค่า",
+                        "unknown": "ไม่ทราบ"
+                    },
+                    "node_config": {
+                        "seconds": "วินาที",
+                        "set_config_parameter": "ตั้งค่าพารามิเตอร์การกำหนดค่า"
+                    }
                 },
                 "users": {
                     "caption": "ผู้ใช้",
@@ -693,6 +721,23 @@
                         "device_tracker_picked": "ติดตามอุปกรณ์",
                         "device_tracker_pick": "เลือกอุปกรณ์ที่จะติดตาม"
                     }
+                },
+                "server_control": {
+                    "section": {
+                        "validation": {
+                            "check_config": "ตรวจสอบการกำหนดค่า"
+                        },
+                        "reloading": {
+                            "core": "โหลดส่วนกลางใหม่",
+                            "group": "โหลดกลุ่มใหม่",
+                            "script": "โหลดสคริปต์อีกครั้ง"
+                        },
+                        "server_management": {
+                            "heading": "การจัดการเซิร์ฟเวอร์",
+                            "restart": "เริ่มต้นใหม่",
+                            "stop": "หยุด"
+                        }
+                    }
                 }
             },
             "profile": {
@@ -743,7 +788,6 @@
                 },
                 "current_user": "ขณะนี้คุณเข้าสู่ระบบในชื่อ {fullName}",
                 "is_owner": "ในฐานะ \"เจ้าของ\"",
-                "logout": "ชื่อผู้ใช้",
                 "change_password": {
                     "header": "เปลี่ยนรหัสผ่าน",
                     "current_password": "รหัสผ่านปัจจุบัน",
@@ -764,6 +808,9 @@
                     "step_done": "ติดตั้งเสร็จแล้วในขั้นตอนที่ {step}",
                     "close": "ปิด",
                     "submit": "ส่งข้อมูล"
+                },
+                "force_narrow": {
+                    "header": "ซ่อนแถบด้านข้างเสมอ"
                 }
             },
             "page-authorize": {
@@ -974,7 +1021,6 @@
         },
         "sidebar": {
             "log_out": "ออกจากระบบ",
-            "developer_tools": "เครื่องมือสำหรับนักพัฒนา",
             "external_app_configuration": "การกำหนดค่าแอพ"
         },
         "common": {
@@ -1223,6 +1269,14 @@
                 "off": "ปิด",
                 "on": "เปิด",
                 "auto": "อัตโนมัติ"
+            },
+            "preset_mode": {
+                "home": "บ้าน",
+                "activity": "กิจกรรม"
+            },
+            "hvac_action": {
+                "off": "ปิด",
+                "idle": "ไม่ได้ใช้งาน"
             }
         }
     },

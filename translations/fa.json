@@ -7,11 +7,6 @@
         "history": "تاریخچه",
         "mailbox": "صندوق پستی",
         "shopping_list": "لیست خرید",
-        "dev-services": "خدمات",
-        "dev-states": "ایالت ها",
-        "dev-events": "رویدادها",
-        "dev-templates": "قالب ها",
-        "dev-mqtt": "MQTT",
         "dev-info": "اطلاعات",
         "calendar": "تقویم"
     },
@@ -20,7 +15,7 @@
             "off": "خاموش",
             "on": "روشن",
             "unknown": "نامشخص",
-            "unavailable": "غیر قابل دسترس"
+            "unavailable": "غیرقابل دسترس"
         },
         "alarm_control_panel": {
             "armed": "مصلح شده",
@@ -268,7 +263,7 @@
     "state_badge": {
         "default": {
             "unknown": "نامشخص",
-            "unavailable": "غیر قابل دسترس",
+            "unavailable": "غیرقابل دسترس",
             "error": "خطا",
             "entity_not_found": "نهاد یافت نشد"
         },
@@ -298,6 +293,25 @@
             "shopping-list": {
                 "add_item": "اضافه کردن آیتم"
             },
+            "developer-tools": {
+                "tabs": {
+                    "services": {
+                        "title": "خدمات"
+                    },
+                    "states": {
+                        "title": "ایالت ها"
+                    },
+                    "events": {
+                        "title": "رویدادها"
+                    },
+                    "templates": {
+                        "title": "قالب ها"
+                    },
+                    "mqtt": {
+                        "title": "MQTT"
+                    }
+                }
+            },
             "history": {
                 "showing_entries": "نمایش نوشته ها برای"
             },
@@ -316,21 +330,6 @@
                         "core": {
                             "header": "پیکربندی و کنترل سرور",
                             "introduction": "تغییر پیکربندی شما می تواند یک روند خسته کننده باشد. ما میدانیم. این بخش سعی خواهد کرد زندگی شما را کمی ساده تر کند.",
-                            "validation": {
-                                "heading": "تایید  پیکربندی",
-                                "check_config": "بررسی پیکربندی"
-                            },
-                            "reloading": {
-                                "heading": "بارگذاری مجدد پیکربندی",
-                                "introduction": "برخی از قسمت های Home Assistant می توانند بدون نیاز به راه اندازی مجدد مجدد بارگیری شوند. برای بارگذاری مجدد ضربه بزنید. پیکربندی کنونی خود را بارگیری و اطلاعات جدید را بارگذاری می کند.",
-                                "core": "بارگذاری مجدد ",
-                                "group": "بارگذاری مجدد گروه ها",
-                                "automation": "بازنگری automations",
-                                "script": "بازنگری اسکریپت"
-                            },
-                            "server_management": {
-                                "introduction": "صفحه اصلی home assistant سرور خود را کنترل کنید ... از  home assistant"
-                            },
                             "core_config": {
                                 "edit_requires_storage": "ویرایشگر غیرفعال شده است چون پیکربندی ذخیره شده در configuration.yaml.",
                                 "location_name": "نام برای نصب صفحه اصلی دستیار شما",
@@ -345,6 +344,23 @@
                                 "imperial_example": "فارنهایت، پوند",
                                 "metric_example": "سانتیگراد، کیلوگرم",
                                 "save_button": "ذخیره"
+                            }
+                        },
+                        "server_control": {
+                            "validation": {
+                                "heading": "تایید  پیکربندی",
+                                "check_config": "بررسی پیکربندی"
+                            },
+                            "reloading": {
+                                "heading": "بارگذاری مجدد پیکربندی",
+                                "introduction": "برخی از قسمت های Home Assistant می توانند بدون نیاز به راه اندازی مجدد مجدد بارگیری شوند. برای بارگذاری مجدد ضربه بزنید. پیکربندی کنونی خود را بارگیری و اطلاعات جدید را بارگذاری می کند.",
+                                "core": "بارگذاری مجدد ",
+                                "group": "بارگذاری مجدد گروه ها",
+                                "automation": "بازنگری automations",
+                                "script": "بازنگری اسکریپت"
+                            },
+                            "server_management": {
+                                "introduction": "صفحه اصلی home assistant سرور خود را کنترل کنید ... از  home assistant"
                             }
                         }
                     }
@@ -506,7 +522,21 @@
                     }
                 },
                 "zwave": {
-                    "caption": "Z-Wave"
+                    "caption": "Z-Wave",
+                    "common": {
+                        "unknown": "نامشخص",
+                        "wakeup_interval": "فاصله Wakeup"
+                    },
+                    "node_config": {
+                        "header": "گزینه‌های پیکربندی گره",
+                        "seconds": "ثانیه‌ها",
+                        "set_wakeup": "تنظیم فاصله Wakeup",
+                        "config_parameter": "پارامتر پیکربندی",
+                        "config_value": "مقدار پیکربندی",
+                        "true": "صحیح",
+                        "false": "نادرست",
+                        "set_config_parameter": "تنظیم پارامتر پیکربندی"
+                    }
                 },
                 "users": {
                     "caption": "کاربران",
@@ -632,6 +662,24 @@
                         "device_tracker_picked": "پیگیری دستگاه",
                         "device_tracker_pick": "دستگاه را برای پیگیری انتخاب کنید"
                     }
+                },
+                "server_control": {
+                    "section": {
+                        "reloading": {
+                            "introduction": "برخی از قسمت‌های Home Assistant بدون نیاز به راه‌اندازی مجدد می‌توانند بارگیری شوند.  با بارگیری مجدد، تنظیمات فعلی آنها حذف می‌شوند و نسخه جدید را بارگیری خواهد شد.",
+                            "core": "بارگذاری مجدد هسته",
+                            "group": "بارگیری مجدد گروه‌ها",
+                            "automation": "بارگیری مجدد اتوماسیون",
+                            "script": "بارگزاری مجدد اسکریپت",
+                            "scene": "بارگذاری سناریوها"
+                        },
+                        "server_management": {
+                            "heading": "مدیریت سرور",
+                            "introduction": "سرور Home Assistant خود را کنترل کنید ... از Home Assistant.",
+                            "restart": "راه‌اندازی مجدد",
+                            "stop": "بایست"
+                        }
+                    }
                 }
             },
             "profile": {
@@ -653,10 +701,10 @@
                     "learn_auth_requests": "با نحوه انجام درخواست های تأیید اعتبار آشنا شوید.",
                     "created_at": "ایجاد شده در {date}",
                     "confirm_delete": "آیا مطمئن هستید که میخواهید token زیر را برای {name} حذف کنید؟",
+                    "last_used": "آخرین مورد استفاده در {date} از {location}",
                     "not_used": "هرگز استفاده نشده است"
                 },
                 "current_user": "شما در حال حاضر به عنوان {fullName} وارد شده اید.",
-                "logout": "خروج",
                 "change_password": {
                     "header": "تغییر رمز عبور"
                 },
@@ -844,7 +892,6 @@
             "day": "\n{count} {count, plural,\n  one {روز}\n  other {روز ها}\n}\n",
             "week": "\n{count} {count, plural,\n  one {هفته}\n  other {هفته ها}\n}\n",
             "second": "ویرایشگر اتوماسیون اجازه می دهد تا شما را به ایجاد و ویرایش اتوماسیون بپردازید. لطفا پیوند زیر را بخوانید تا دستورالعمل ها را متوجه بشید تا مطمئن شوید که صفحه اصلی دستیار را به درستی پیکربندی کرده اید.",
-            "minute": "{count} {count, plural, <span class=\"lokalise linebreak notranslate\"> one {<\/span> دقیقه {count, plural, <span class=\"lokalise linebreak notranslate\"> one {<\/span> دقیقه } <span class=\"lokalise linebreak notranslate\"> other {<\/span> دقیقه } <span class=\"lokalise linebreak notranslate\"> }<\/span>",
             "hour": "{count} {تعداد, جمع,\nیکی {ساعت}\nدیگر {ساعت}\n}"
         },
         "login-form": {

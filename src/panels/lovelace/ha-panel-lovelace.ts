@@ -20,7 +20,7 @@ import {
   property,
 } from "lit-element";
 import { showSaveDialog } from "./editor/show-save-config-dialog";
-import { generateLovelaceConfig } from "./common/generate-lovelace-config";
+import { generateLovelaceConfigFromHass } from "./common/generate-lovelace-config";
 import { showToast } from "../../util/toast";
 
 interface LovelacePanelConfig {
@@ -49,7 +49,7 @@ class LovelacePanel extends LitElement {
 
   private mqls?: MediaQueryList[];
 
-  private _saving: boolean = false;
+  private _ignoreNextUpdateEvent = false;
 
   constructor() {
     super();
@@ -161,7 +161,7 @@ class LovelacePanel extends LitElement {
   }
 
   private async _regenerateConfig() {
-    const conf = await generateLovelaceConfig(this.hass!, this.hass!.localize);
+    const conf = await generateLovelaceConfigFromHass(this.hass!);
     this._setLovelaceConfig(conf, "generated");
     this._state = "loaded";
   }
@@ -178,24 +178,25 @@ class LovelacePanel extends LitElement {
     // Do -1 column if the menu is docked and open
     this._columns = Math.max(
       1,
-      matchColumns - Number(!this.narrow && this.hass!.dockedSidebar)
+      matchColumns -
+        Number(!this.narrow && this.hass!.dockedSidebar === "docked")
     );
   }
 
   private _lovelaceChanged() {
-    if (this._saving) {
-      this._saving = false;
-    } else {
-      showToast(this, {
-        message: this.hass!.localize("ui.panel.lovelace.changed_toast.message"),
-        action: {
-          action: () => this._fetchConfig(false),
-          text: this.hass!.localize("ui.panel.lovelace.changed_toast.refresh"),
-        },
-        duration: 0,
-        dismissable: false,
-      });
+    if (this._ignoreNextUpdateEvent) {
+      this._ignoreNextUpdateEvent = false;
+      return;
     }
+    showToast(this, {
+      message: this.hass!.localize("ui.panel.lovelace.changed_toast.message"),
+      action: {
+        action: () => this._fetchConfig(false),
+        text: this.hass!.localize("ui.panel.lovelace.changed_toast.refresh"),
+      },
+      duration: 0,
+      dismissable: false,
+    });
   }
 
   private _forceFetchConfig() {
@@ -213,6 +214,13 @@ class LovelacePanel extends LitElement {
       confProm = llWindow.llConfProm;
       llWindow.llConfProm = undefined;
     } else {
+      // Refreshing a YAML config can trigger an update event. We will ignore
+      // all update events while fetching the config and for 2 seconds after the cnofig is back.
+      // We ignore because we already have the latest config.
+      if (this.lovelace && this.lovelace.mode === "yaml") {
+        this._ignoreNextUpdateEvent = true;
+      }
+
       confProm = fetchConfig(this.hass!.connection, forceDiskRefresh);
     }
 
@@ -226,8 +234,15 @@ class LovelacePanel extends LitElement {
         this._errorMsg = err.message;
         return;
       }
-      conf = await generateLovelaceConfig(this.hass!, this.hass!.localize);
+      conf = await generateLovelaceConfigFromHass(this.hass!);
       confMode = "generated";
+    } finally {
+      // Ignore updates for another 2 seconds.
+      if (this.lovelace && this.lovelace.mode === "yaml") {
+        setTimeout(() => {
+          this._ignoreNextUpdateEvent = false;
+        }, 2000);
+      }
     }
 
     this._state = "loaded";
@@ -264,7 +279,7 @@ class LovelacePanel extends LitElement {
             config: newConfig,
             mode: "storage",
           });
-          this._saving = true;
+          this._ignoreNextUpdateEvent = true;
           await saveConfig(this.hass!, newConfig);
         } catch (err) {
           // tslint:disable-next-line

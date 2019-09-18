@@ -36,6 +36,7 @@ const TRANSLATION_FRAGMENTS = [
   "page-authorize",
   "page-demo",
   "page-onboarding",
+  "developer-tools",
 ];
 
 const tasks = [];
@@ -124,18 +125,28 @@ gulp.task(taskName, function() {
 });
 tasks.push(taskName);
 
-taskName = "create-test-metadata";
-gulp.task(taskName, function(cb) {
-  fs.writeFile(
-    workDir + "/testMetadata.json",
-    JSON.stringify({
-      test: {
-        nativeName: "Test",
-      },
-    }),
-    cb
-  );
+gulp.task("ensure-translations-build-dir", (done) => {
+  if (!fs.existsSync(workDir)) {
+    fs.mkdirSync(workDir);
+  }
+  done();
 });
+
+taskName = "create-test-metadata";
+gulp.task(
+  taskName,
+  gulp.series("ensure-translations-build-dir", function writeTestMetaData(cb) {
+    fs.writeFile(
+      workDir + "/testMetadata.json",
+      JSON.stringify({
+        test: {
+          nativeName: "Test",
+        },
+      }),
+      cb
+    );
+  })
+);
 tasks.push(taskName);
 
 taskName = "create-test-translation";
@@ -203,7 +214,7 @@ gulp.task(
             const lang = subtags.slice(0, i).join("-");
             if (lang === "test") {
               src.push(workDir + "/test.json");
-            } else {
+            } else if (lang !== "en") {
               src.push(inDir + "/" + lang + ".json");
             }
           }

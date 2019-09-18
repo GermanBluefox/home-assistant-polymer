@@ -7,12 +7,8 @@
         "history": "Historique",
         "mailbox": "Boîtes aux lettres",
         "shopping_list": "Liste de courses",
-        "dev-services": "Services",
-        "dev-states": "États",
-        "dev-events": "Événements",
-        "dev-templates": "Templates",
-        "dev-mqtt": "MQTT",
         "dev-info": "Info",
+        "developer_tools": "Outils de développement",
         "calendar": "Calendrier",
         "profile": "Profil"
     },
@@ -24,7 +20,7 @@
             "unavailable": "Indisponible"
         },
         "alarm_control_panel": {
-            "armed": "Enclenchée",
+            "armed": "Activé",
             "disarmed": "Désactivée",
             "armed_home": "Enclenchée (présent)",
             "armed_away": "Enclenchée (absent)",
@@ -132,7 +128,7 @@
         },
         "climate": {
             "off": "Off",
-            "on": "On",
+            "on": "Marche",
             "heat": "Chauffe",
             "cool": "Frais",
             "idle": "Inactif",
@@ -145,7 +141,8 @@
             "high_demand": "Forte demande",
             "heat_pump": "Pompe à chaleur",
             "gas": "Gaz",
-            "manual": "Manuel"
+            "manual": "Manuel",
+            "heat_cool": "Chaud\/Froid"
         },
         "configurator": {
             "configure": "Configurer",
@@ -163,8 +160,8 @@
             "not_home": "Absent"
         },
         "fan": {
-            "off": "Off",
-            "on": "On"
+            "off": "Éteint",
+            "on": "Marche"
         },
         "group": {
             "off": "Off",
@@ -182,20 +179,20 @@
             "problem": "Problème"
         },
         "input_boolean": {
-            "off": "Off",
-            "on": "On"
+            "off": "Arrêté",
+            "on": "Marche"
         },
         "light": {
-            "off": "Off",
-            "on": "On"
+            "off": "Éteinte",
+            "on": "Allumée"
         },
         "lock": {
             "locked": "Verrouillé",
             "unlocked": "Déverrouillé"
         },
         "media_player": {
-            "off": "Off",
-            "on": "On",
+            "off": "Éteint",
+            "on": "Marche",
             "playing": "Lecture en cours",
             "paused": "En pause",
             "idle": "En veille",
@@ -206,7 +203,7 @@
             "problem": "Problème"
         },
         "remote": {
-            "off": "Off",
+            "off": "Arrêt",
             "on": "On"
         },
         "scene": {
@@ -254,7 +251,8 @@
             "snowy-rainy": "Neige \/ Pluie",
             "sunny": "Soleil",
             "windy": "Vent",
-            "windy-variant": "Vent"
+            "windy-variant": "Vent",
+            "exceptional": "Exceptionnel"
         },
         "vacuum": {
             "cleaning": "Nettoyage",
@@ -268,7 +266,7 @@
         },
         "timer": {
             "active": "actif",
-            "idle": "En veille",
+            "idle": "en veille",
             "paused": "en pause"
         },
         "person": {
@@ -293,11 +291,11 @@
             "arming": "Activer",
             "disarming": "Désarmement",
             "triggered": "Déclenchée",
-            "armed_custom_bypass": "Activée"
+            "armed_custom_bypass": "Armée"
         },
         "device_tracker": {
             "home": "Maison",
-            "not_home": "Absent.e"
+            "not_home": "Absent(e)"
         },
         "person": {
             "home": "Présent",
@@ -310,6 +308,31 @@
                 "clear_completed": "Effacement accompli",
                 "add_item": "Ajouter un élément",
                 "microphone_tip": "Cliquez sur le microphone en haut à droite et dites “Ajouter des bonbons à ma liste d'achat”"
+            },
+            "developer-tools": {
+                "tabs": {
+                    "services": {
+                        "title": "Services"
+                    },
+                    "states": {
+                        "title": "États"
+                    },
+                    "events": {
+                        "title": "Événements"
+                    },
+                    "templates": {
+                        "title": "Template"
+                    },
+                    "mqtt": {
+                        "title": "MQTT"
+                    },
+                    "info": {
+                        "title": "Info"
+                    },
+                    "logs": {
+                        "title": "Journaux"
+                    }
+                }
             },
             "history": {
                 "showing_entries": "Afficher les entrées pour",
@@ -330,11 +353,28 @@
                 "introduction": "Ici, il est possible de configurer vos composants et Home Assistant. Tout n'est pas encore possible de configurer à partir de l'interface utilisateur, mais nous y travaillons.",
                 "core": {
                     "caption": "Général",
-                    "description": "Validez votre fichier de configuration et contrôlez le serveur",
+                    "description": "Changer la configuration générale de votre Home Assistant.",
                     "section": {
                         "core": {
-                            "header": "Configuration et contrôle du serveur",
+                            "header": "Configuration générale",
                             "introduction": "Changer votre configuration peut être un processus fastidieux. Nous le savons. Cette section va essayer de vous rendre la vie un peu plus facile.",
+                            "core_config": {
+                                "edit_requires_storage": "L'éditeur est désactivé car la configuration est stockée dans configuration.yaml.",
+                                "location_name": "Nom de votre installation Home Assistant",
+                                "latitude": "Latitude",
+                                "longitude": "Longitude",
+                                "elevation": "Élévation",
+                                "elevation_meters": "mètres",
+                                "time_zone": "Fuseau horaire",
+                                "unit_system": "Système d'unité",
+                                "unit_system_imperial": "Impérial",
+                                "unit_system_metric": "Métrique",
+                                "imperial_example": "Fahrenheit, livres",
+                                "metric_example": "Celsius, kilogrammes",
+                                "save_button": "Enregistrer"
+                            }
+                        },
+                        "server_control": {
                             "validation": {
                                 "heading": "Validation de la configuration",
                                 "introduction": "Validez votre configuration si vous l'avez récemment modifiée et que vous voulez vous assurer que tout est valide",
@@ -355,21 +395,6 @@
                                 "introduction": "Contrôlez votre serveur Home Assistant... depuis Home Assistant.",
                                 "restart": "Redémarrer",
                                 "stop": "Arrêter"
-                            },
-                            "core_config": {
-                                "edit_requires_storage": "L'éditeur est désactivé car la configuration est stockée dans configuration.yaml.",
-                                "location_name": "Nom de votre installation Home Assistant",
-                                "latitude": "Latitude",
-                                "longitude": "Longitude",
-                                "elevation": "Élévation",
-                                "elevation_meters": "mètres",
-                                "time_zone": "Fuseau horaire",
-                                "unit_system": "Système d'unité",
-                                "unit_system_imperial": "Impérial",
-                                "unit_system_metric": "Métrique",
-                                "imperial_example": "Fahrenheit, livres",
-                                "metric_example": "Celsius, kilogrammes",
-                                "save_button": "Enregistrer"
                             }
                         }
                     }
@@ -384,10 +409,10 @@
                 },
                 "automation": {
                     "caption": "Automatisation",
-                    "description": "Créer et modifier des automatisations",
+                    "description": "Créer et modifier des automatisations.",
                     "picker": {
                         "header": "Éditeur d'automatisation",
-                        "introduction": "L'éditeur d'automatisation vous permet de créer et éditer des automatisations. Veuillez lire [les instructions](https:\/\/home-assistant.io\/docs\/automation\/editor\/) pour être sûr d'avoir configuré Home-Assistant correctement.",
+                        "introduction": "L'éditeur d'automatisation vous permet de créer et éditer des automatisations. Veuillez lire les instructions ci-dessous pour vous assurer d'avoir configuré Home-Assistant correctement.",
                         "pick_automation": "Choisissez l'automatisation à éditer",
                         "no_automations": "Il n'y a aucune automatisation modifiable.",
                         "add_automation": "Ajouter une automatisation",
@@ -477,18 +502,21 @@
                                     "event": "Événement :",
                                     "enter": "Entre",
                                     "leave": "Quitte"
+                                },
+                                "device": {
+                                    "label": "Équipements"
                                 }
                             },
                             "learn_more": "En savoir plus sur les déclencheurs"
                         },
                         "conditions": {
                             "header": "Conditions",
-                            "introduction": "Les conditions sont une partie optionnelle d'une règle d'automatisation et peuvent être utilisées pour empêcher une action d'avoir lieu lorsque la règle est déclenchée. Les conditions ressemblent aux déclencheurs mais sont très différentes. Un déclencheur regardera les événements sur le système tandis qu'une condition ne regarde que l'état courant du système. Un déclencheur peut observer qu'un interrupteur est en train d'être allumé. Une condition ne peut que voir si l'interrupteur est allumé ou éteint.\n\n[En apprendre plus sur les conditions.](https:\/\/home-assistant.io\/docs\/scripts\/conditions\/)",
+                            "introduction": "Les conditions sont une partie optionnelle d'une règle d'automatisation et peuvent être utilisées pour empêcher une action d'avoir lieu lorsque la règle est déclenchée. Les conditions ressemblent aux déclencheurs mais sont très différentes. Un déclencheur regardera les événements sur le système tandis qu'une condition ne regarde que l'état courant du système. Un déclencheur peut observer qu'un interrupteur est en train d'être allumé. Une condition ne peut que voir si l'interrupteur est allumé ou éteint.",
                             "add": "Ajouter une condition",
                             "duplicate": "Dupliquer",
                             "delete": "Effacement",
                             "delete_confirm": "Voulez-vous vraiment effacer ?",
-                            "unsupported_condition": "Condition non supportée : {condition}",
+                            "unsupported_condition": "Condition non supportée: {condition}",
                             "type_select": "Type de condition",
                             "type": {
                                 "state": {
@@ -523,18 +551,21 @@
                                     "label": "Zone",
                                     "entity": "Entité avec localisation",
                                     "zone": "Zone"
+                                },
+                                "device": {
+                                    "label": "Appareil"
                                 }
                             },
                             "learn_more": "En savoir plus sur les conditions"
                         },
                         "actions": {
                             "header": "Actions",
-                            "introduction": "Les actions sont ce que Home Assistant fera quand une automatisation est déclenchée.\n\n[En apprendre plus sur les actions.](https:\/\/home-assistant.io\/docs\/automation\/action\/)",
+                            "introduction": "Les actions sont ce que Home Assistant fera quand une automatisation est déclenchée.",
                             "add": "Ajouter une action",
                             "duplicate": "Dupliquer",
                             "delete": "Supprimer",
                             "delete_confirm": "Voulez-vous vraiment effacer ?",
-                            "unsupported_action": "Action non supportée : {action}",
+                            "unsupported_action": "Action non supportée : {action}",
                             "type_select": "Type d'action",
                             "type": {
                                 "service": {
@@ -557,6 +588,9 @@
                                     "label": "Déclencher l'évènement",
                                     "event": "Évènement :",
                                     "service_data": "Données du service"
+                                },
+                                "device_id": {
+                                    "label": "Appareil"
                                 }
                             },
                             "learn_more": "En savoir plus sur les actions"
@@ -567,11 +601,55 @@
                 },
                 "script": {
                     "caption": "Script",
-                    "description": "Créer et modifier des scripts"
+                    "description": "Créer et modifier des scripts."
                 },
                 "zwave": {
                     "caption": "Z-Wave",
-                    "description": "Gérez votre réseau Z-Wave"
+                    "description": "Gérez votre réseau Z-Wave.",
+                    "network_management": {
+                        "header": "Gestion de réseau Z-Wave",
+                        "introduction": "Exécutez les commandes qui affectent le réseau Z-Wave. Vous ne saurez pas si la plupart des commandes ont réussi, mais vous pouvez consulter le journal OZW pour essayer de le savoir."
+                    },
+                    "network_status": {
+                        "network_stopped": "Réseau Z-Wave arrêté",
+                        "network_starting": "Démarrage du réseau Z-Wave...",
+                        "network_starting_note": "Ceci peut prendre un certain temps en fonction du débit de votre réseau.",
+                        "network_started": "Le réseau Z-Wave a été démarré",
+                        "network_started_note_some_queried": "Les nœuds éveillés ont été interrogés. Les nœuds en veille seront interrogés à leur réveil.",
+                        "network_started_note_all_queried": "Tous les nœuds ont été interrogés."
+                    },
+                    "services": {
+                        "start_network": "Démarrer le réseau",
+                        "stop_network": "Arrêter le réseau",
+                        "heal_network": "Soigner le réseau",
+                        "test_network": "Tester le réseau",
+                        "soft_reset": "Redémarrage",
+                        "save_config": "Enregistrer la configuration",
+                        "add_node_secure": "Ajouter un nœud sécurisé",
+                        "add_node": "Ajouter un nœud",
+                        "remove_node": "Supprimer un nœud",
+                        "cancel_command": "Annuler la commande"
+                    },
+                    "common": {
+                        "value": "Valeur",
+                        "instance": "Instance",
+                        "index": "Indice",
+                        "unknown": "inconnu",
+                        "wakeup_interval": "Intervalle de réveil"
+                    },
+                    "values": {
+                        "header": "Valeurs des nœuds"
+                    },
+                    "node_config": {
+                        "header": "Options de configuration du nœud",
+                        "seconds": "secondes",
+                        "set_wakeup": "Définir l'intervalle de réveil",
+                        "config_parameter": "Paramètre de configuration",
+                        "config_value": "Valeur de configuration",
+                        "true": "Vrai",
+                        "false": "Faux",
+                        "set_config_parameter": "Définir le paramètre de configuration"
+                    }
                 },
                 "users": {
                     "caption": "Utilisateurs",
@@ -682,7 +760,10 @@
                         "unavailable": "Cette entité n'est pas disponible actuellement.",
                         "default_name": "Nouvelle pièce",
                         "delete": "SUPPRIMER",
-                        "update": "METTRE À JOUR"
+                        "update": "METTRE À JOUR",
+                        "enabled_label": "Activer l'entité",
+                        "enabled_cause": "Désactivé par {cause}.",
+                        "enabled_description": "Les entités désactivées ne seront pas ajoutées à Home Assistant."
                     }
                 },
                 "person": {
@@ -693,6 +774,36 @@
                         "device_tracker_intro": "Sélectionnez les appareils appartenant à cette personne.",
                         "device_tracker_picked": "Appareil suivi",
                         "device_tracker_pick": "Choisissez le périphérique à suivre"
+                    }
+                },
+                "server_control": {
+                    "caption": "Contrôle du serveur",
+                    "description": "Redémarrez et arrêtez le serveur Home Assistant.",
+                    "section": {
+                        "validation": {
+                            "heading": "Validation de la configuration",
+                            "introduction": "Validez votre configuration si vous l'avez récemment modifiée et que vous voulez vous assurer que tout est valide",
+                            "check_config": "Vérifiez la configuration",
+                            "valid": "Configuration valide !",
+                            "invalid": "Configuration invalide"
+                        },
+                        "reloading": {
+                            "heading": "Rechargement de la configuration",
+                            "introduction": "Certaines parties de Home Assistant peuvent être rechargées sans nécessiter un redémarrage. Appuyer sur \"recharger\" déchargera leur configuration actuelle et chargera la nouvelle.",
+                            "core": "Recharger le noyau",
+                            "group": "Recharger les groupes",
+                            "automation": "Recharger les automatisations",
+                            "script": "Recharger les scripts",
+                            "scene": "Recharger les scènes"
+                        },
+                        "server_management": {
+                            "heading": "Gestion du serveur",
+                            "introduction": "Contrôlez votre serveur Home Assistant ... depuis Home Assistant.",
+                            "restart": "Redémarrer",
+                            "stop": "Arrêter",
+                            "confirm_restart": "Êtes-vous sûr de vouloir redémarrer Home Assistant?",
+                            "confirm_stop": "Êtes-vous sûr de vouloir arrêter Home Assistant?"
+                        }
                     }
                 }
             },
@@ -742,9 +853,8 @@
                     "last_used": "Dernière utilisation le {date} à partir de {location}",
                     "not_used": "N'a jamais été utilisé"
                 },
-                "current_user": "Vous êtes actuellement connecté tant que {fullName}.",
+                "current_user": "Vous êtes actuellement connecté en tant que {fullName}.",
                 "is_owner": "Vous êtes propriétaire",
-                "logout": "Déconnexion",
                 "change_password": {
                     "header": "Changer le mot de passe",
                     "current_password": "Mot de passe actuel",
@@ -765,6 +875,11 @@
                     "step_done": "Configuration terminée pour {step}",
                     "close": "Fermer",
                     "submit": "Envoyer"
+                },
+                "logout": "Déconnexion",
+                "force_narrow": {
+                    "header": "Toujours cacher la barre latérale",
+                    "description": "Cela masquera la barre latérale par défaut, semblable à l'expérience mobile."
                 }
             },
             "page-authorize": {
@@ -954,6 +1069,10 @@
                         "save": "Enregistrer",
                         "unsaved_changes": "Modifications non enregistrées",
                         "saved": "Enregistré"
+                    },
+                    "edit_lovelace": {
+                        "header": "Titre de votre UI Lovelace",
+                        "explanation": "Ce titre est affiché au-dessus de toutes vos vues dans Lovelace."
                     }
                 },
                 "menu": {
@@ -1018,13 +1137,13 @@
         },
         "sidebar": {
             "log_out": "Déconnexion",
-            "developer_tools": "Outils de développement",
             "external_app_configuration": "Configuration de l'application"
         },
         "common": {
             "loading": "Chargement",
             "cancel": "Annuler",
-            "save": "Enregistrer"
+            "save": "Enregistrer",
+            "successfully_saved": "Enregistré avec succès"
         },
         "duration": {
             "day": "{count} {count, plural,\none {jour}\nother {jours}\n}",
@@ -1091,7 +1210,7 @@
             },
             "automation": {
                 "last_triggered": "Dernier déclenchement",
-                "trigger": "Déclencheur"
+                "trigger": "Déclencher"
             },
             "cover": {
                 "position": "Emplacement",
@@ -1100,7 +1219,9 @@
             "fan": {
                 "speed": "Vitesse",
                 "oscillate": "Osciller",
-                "direction": "Direction"
+                "direction": "Direction",
+                "forward": "En avant",
+                "reverse": "Sens inverse"
             },
             "light": {
                 "brightness": "Luminosité",
@@ -1122,7 +1243,8 @@
                 "fan_mode": "Mode de ventilation",
                 "swing_mode": "Mode de balancement",
                 "away_mode": "Mode \"Absent\"",
-                "aux_heat": "Chauffage d'appoint"
+                "aux_heat": "Chauffage d'appoint",
+                "preset_mode": "Préréglage"
             },
             "lock": {
                 "code": "Code",
@@ -1144,6 +1266,14 @@
                 "target_temperature": "Température cible",
                 "operation": "Opération",
                 "away_mode": "Mode \"Absent\""
+            },
+            "timer": {
+                "actions": {
+                    "start": "démarrer",
+                    "pause": "pause",
+                    "cancel": "annuler",
+                    "finish": "terminer"
+                }
             }
         },
         "components": {
@@ -1182,7 +1312,7 @@
         "dialogs": {
             "more_info_settings": {
                 "save": "Sauvegarder",
-                "name": "Nom",
+                "name": "Outrepasser le nom",
                 "entity_id": "ID de l'entité"
             },
             "more_info_control": {
@@ -1196,6 +1326,33 @@
                 },
                 "updater": {
                     "title": "Instructions de mise à jour"
+                }
+            },
+            "options_flow": {
+                "form": {
+                    "header": "Options"
+                },
+                "success": {
+                    "description": "Option enregistrées avec succès."
+                }
+            },
+            "config_entry_system_options": {
+                "title": "Options du système",
+                "enable_new_entities_label": "Activer les entités nouvellement ajoutées.",
+                "enable_new_entities_description": "Si désactivé, les entités nouvellement découvertes ne seront pas ajoutées automatiquement à Home Assistant."
+            },
+            "zha_device_info": {
+                "manuf": "par {manufacturer}",
+                "no_area": "Pas de pièce",
+                "services": {
+                    "reconfigure": "Reconfigurer le périphérique ZHA. Utilisez cette option si vous rencontrez des problèmes avec le périphérique. Si l'appareil en question est un appareil alimenté par batterie, assurez-vous qu'il soit allumé et qu'il accepte les commandes lorsque vous utilisez ce service.",
+                    "updateDeviceName": "Définissez un nom personnalisé pour ce périphérique dans le registre de périphériques.",
+                    "remove": "Supprimer un appareil du réseau ZigBee."
+                },
+                "zha_device_card": {
+                    "device_name_placeholder": "Nom personnalisé",
+                    "area_picker_label": "Pièce",
+                    "update_name_button": "Modifier le nom"
                 }
             }
         },
@@ -1267,6 +1424,24 @@
                 "off": "Off",
                 "on": "On",
                 "auto": "Auto"
+            },
+            "preset_mode": {
+                "none": "Aucun",
+                "eco": "Eco",
+                "away": "Absent",
+                "boost": "Renforcer",
+                "comfort": "Confort",
+                "home": "Accueil",
+                "sleep": "Veille",
+                "activity": "Activité"
+            },
+            "hvac_action": {
+                "off": "Éteint",
+                "heating": "Chauffage",
+                "cooling": "Refroidissement",
+                "drying": "Séchage",
+                "idle": "Inactif",
+                "fan": "Ventilateur"
             }
         }
     },
@@ -1274,5 +1449,12 @@
         "system-admin": "Administrateurs",
         "system-users": "Utilisateurs",
         "system-read-only": "Utilisateurs en lecture seule"
+    },
+    "config_entry": {
+        "disabled_by": {
+            "user": "Utilisateur",
+            "integration": "Intégration",
+            "config_entry": "Paramètre de configuration"
+        }
     }
 }

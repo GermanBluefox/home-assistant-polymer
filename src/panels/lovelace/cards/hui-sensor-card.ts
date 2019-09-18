@@ -141,12 +141,14 @@ const coordinates = (
 @customElement("hui-sensor-card")
 class HuiSensorCard extends LitElement implements LovelaceCard {
   public static async getConfigElement(): Promise<LovelaceCardEditor> {
-    await import(/* webpackChunkName: "hui-sensor-card-editor" */ "../editor/config-elements/hui-sensor-card-editor");
+    await import(
+      /* webpackChunkName: "hui-sensor-card-editor" */ "../editor/config-elements/hui-sensor-card-editor"
+    );
     return document.createElement("hui-sensor-card-editor");
   }
 
   public static getStubConfig(): object {
-    return {};
+    return { entity: "" };
   }
 
   @property() public hass?: HomeAssistant;

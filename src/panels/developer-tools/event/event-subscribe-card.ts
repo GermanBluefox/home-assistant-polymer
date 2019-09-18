@@ -18,9 +18,13 @@ import format_time from "../../../common/datetime/format_time";
 @customElement("event-subscribe-card")
 class EventSubscribeCard extends LitElement {
   @property() public hass?: HomeAssistant;
+
   @property() private _eventType = "";
+
   @property() private _subscribed?: () => void;
+
   @property() private _events: Array<{ id: number; event: HassEvent }> = [];
+
   private _eventCount = 0;
 
   public disconnectedCallback() {
@@ -33,7 +37,7 @@ class EventSubscribeCard extends LitElement {
 
   protected render(): TemplateResult {
     return html`
-      <ha-card heading="Listen to events">
+      <ha-card header="Listen to events">
         <form>
           <paper-input
             .label=${this._subscribed

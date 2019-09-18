@@ -7,7 +7,6 @@ const CompressionPlugin = require("compression-webpack-plugin");
 const zopfli = require("@gfx/zopfli");
 const ManifestPlugin = require("webpack-manifest-plugin");
 const paths = require("./paths.js");
-const { babelLoaderConfig } = require("./babel.js");
 
 let version = fs
   .readFileSync(path.resolve(paths.polymer_dir, "setup.py"), "utf8")
@@ -41,6 +40,20 @@ const resolve = {
   },
 };
 
+const tsLoader = (latestBuild) => ({
+  test: /\.ts|tsx$/,
+  exclude: /node_modules/,
+  use: [
+    {
+      loader: "ts-loader",
+      options: {
+        compilerOptions: latestBuild
+          ? { noEmit: false }
+          : { target: "es5", noEmit: false },
+      },
+    },
+  ],
+});
 const cssLoader = {
   test: /\.css$/,
   use: "raw-loader",
@@ -96,7 +109,7 @@ const createAppConfig = ({ isProdBuild, latestBuild, isStatsBuild }) => {
   // Create an object mapping browser urls to their paths during build
   const translationMetadata = require("../build-translations/translationMetadata.json");
   const workBoxTranslationsTemplatedURLs = {};
-  const englishFP = translationMetadata["translations"]["en"]["fingerprints"];
+  const englishFP = translationMetadata.translations.en.fingerprints;
   Object.keys(englishFP).forEach((key) => {
     workBoxTranslationsTemplatedURLs[
       `/static/translations/${englishFP[key]}`
@@ -118,7 +131,7 @@ const createAppConfig = ({ isProdBuild, latestBuild, isStatsBuild }) => {
     devtool: genDevTool(isProdBuild),
     entry,
     module: {
-      rules: [babelLoaderConfig({ latestBuild }), cssLoader, htmlLoader],
+      rules: [tsLoader(latestBuild), cssLoader, htmlLoader],
     },
     optimization: optimization(latestBuild),
     plugins: [
@@ -170,6 +183,8 @@ const createAppConfig = ({ isProdBuild, latestBuild, isStatsBuild }) => {
       chunkFilename: genChunkFilename(isProdBuild, isStatsBuild),
       path: latestBuild ? paths.output : paths.output_es5,
       publicPath: latestBuild ? "/frontend_latest/" : "/frontend_es5/",
+      // For workerize loader
+      globalObject: "self",
     },
     resolve,
   };
@@ -184,7 +199,7 @@ const createDemoConfig = ({ isProdBuild, latestBuild, isStatsBuild }) => {
       compatibility: "./src/entrypoints/compatibility.ts",
     },
     module: {
-      rules: [babelLoaderConfig({ latestBuild }), cssLoader, htmlLoader],
+      rules: [tsLoader(latestBuild), cssLoader, htmlLoader],
     },
     optimization: optimization(latestBuild),
     plugins: [
@@ -192,7 +207,7 @@ const createDemoConfig = ({ isProdBuild, latestBuild, isStatsBuild }) => {
       new webpack.DefinePlugin({
         __DEV__: !isProdBuild,
         __BUILD__: JSON.stringify(latestBuild ? "latest" : "es5"),
-        __VERSION__: JSON.stringify("DEMO"),
+        __VERSION__: JSON.stringify(`DEMO-${version}`),
         __DEMO__: true,
         __STATIC_PATH__: "/static/",
         "process.env.NODE_ENV": JSON.stringify(
@@ -210,6 +225,55 @@ const createDemoConfig = ({ isProdBuild, latestBuild, isStatsBuild }) => {
         latestBuild ? "frontend_latest" : "frontend_es5"
       ),
       publicPath: latestBuild ? "/frontend_latest/" : "/frontend_es5/",
+      // For workerize loader
+      globalObject: "self",
+    },
+  };
+};
+
+const createCastConfig = ({ isProdBuild, latestBuild }) => {
+  const isStatsBuild = false;
+  const entry = {
+    launcher: "./cast/src/launcher/entrypoint.ts",
+  };
+
+  if (latestBuild) {
+    entry.receiver = "./cast/src/receiver/entrypoint.ts";
+  }
+
+  return {
+    mode: genMode(isProdBuild),
+    devtool: genDevTool(isProdBuild),
+    entry,
+    module: {
+      rules: [tsLoader(latestBuild), cssLoader, htmlLoader],
+    },
+    optimization: optimization(latestBuild),
+    plugins: [
+      new ManifestPlugin(),
+      new webpack.DefinePlugin({
+        __DEV__: !isProdBuild,
+        __BUILD__: JSON.stringify(latestBuild ? "latest" : "es5"),
+        __VERSION__: JSON.stringify(version),
+        __DEMO__: false,
+        __STATIC_PATH__: "/static/",
+        "process.env.NODE_ENV": JSON.stringify(
+          isProdBuild ? "production" : "development"
+        ),
+      }),
+      ...plugins,
+    ].filter(Boolean),
+    resolve,
+    output: {
+      filename: genFilename(isProdBuild),
+      chunkFilename: genChunkFilename(isProdBuild, isStatsBuild),
+      path: path.resolve(
+        paths.cast_root,
+        latestBuild ? "frontend_latest" : "frontend_es5"
+      ),
+      publicPath: latestBuild ? "/frontend_latest/" : "/frontend_es5/",
+      // For workerize loader
+      globalObject: "self",
     },
   };
 };
@@ -220,4 +284,5 @@ module.exports = {
   optimization,
   createAppConfig,
   createDemoConfig,
+  createCastConfig,
 };

@@ -21,6 +21,7 @@ import { PolymerChangedEvent } from "../polymer-types";
 // tslint:disable-next-line: no-duplicate-imports
 import { AppDrawerLayoutElement } from "@polymer/app-layout/app-drawer-layout/app-drawer-layout";
 import { showNotificationDrawer } from "../dialogs/notifications/show-notification-drawer";
+import { toggleAttribute } from "../common/dom/toggle_attribute";
 
 const NON_SWIPABLE_PANELS = ["kiosk", "map"];
 
@@ -44,8 +45,10 @@ class HomeAssistantMain extends LitElement {
       return;
     }
 
+    const sidebarNarrow = this._sidebarNarrow;
+
     const disableSwipe =
-      !this.narrow || NON_SWIPABLE_PANELS.indexOf(hass.panelUrl) !== -1;
+      !sidebarNarrow || NON_SWIPABLE_PANELS.indexOf(hass.panelUrl) !== -1;
 
     return html`
       <iron-media-query
@@ -55,7 +58,7 @@ class HomeAssistantMain extends LitElement {
 
       <app-drawer-layout
         fullbleed
-        .forceNarrow=${this.narrow}
+        .forceNarrow=${sidebarNarrow}
         responsive-width="0"
       >
         <!-- Disabled for IoB -->
@@ -65,12 +68,14 @@ class HomeAssistantMain extends LitElement {
           slot="drawer"
           .disableSwipe=${disableSwipe}
           .swipeOpen=${!disableSwipe}
-          .persistent=${!this.narrow}
+          .persistent=${!this.narrow &&
+          this.hass.dockedSidebar !== "always_hidden"}
         >
           <ha-sidebar
             .hass=${hass}
-            .narrow=${this.narrow}
-            .alwaysExpand=${this.narrow || hass.dockedSidebar}
+            .narrow=${sidebarNarrow}
+            .alwaysExpand=${sidebarNarrow ||
+          this.hass.dockedSidebar === "docked"}
           ></ha-sidebar>
         </app-drawer-->
 
@@ -87,7 +92,7 @@ class HomeAssistantMain extends LitElement {
     // import(/* webpackChunkName: "ha-sidebar" */ "../components/ha-sidebar"); // IoB
 
     this.addEventListener("hass-toggle-menu", () => {
-      if (this.narrow) {
+      if (this._sidebarNarrow) {
         if (this.drawer.opened) {
           this.drawer.close();
         } else {
@@ -95,7 +100,7 @@ class HomeAssistantMain extends LitElement {
         }
       } else {
         fireEvent(this, "hass-dock-sidebar", {
-          dock: !this.hass.dockedSidebar,
+          dock: this.hass.dockedSidebar === "auto" ? "docked" : "auto",
         });
         setTimeout(() => this.appLayout.resetLayout());
       }
@@ -111,9 +116,13 @@ class HomeAssistantMain extends LitElement {
   protected updated(changedProps: PropertyValues) {
     super.updated(changedProps);
 
-    this.toggleAttribute("expanded", this.narrow || this.hass.dockedSidebar);
+    toggleAttribute(
+      this,
+      "expanded",
+      this.narrow || this.hass.dockedSidebar !== "auto"
+    );
 
-    if (changedProps.has("route") && this.narrow) {
+    if (changedProps.has("route") && this._sidebarNarrow) {
       this.drawer.close();
     }
 
@@ -127,6 +136,10 @@ class HomeAssistantMain extends LitElement {
 
   private _narrowChanged(ev: PolymerChangedEvent<boolean>) {
     this.narrow = ev.detail.value;
+  }
+
+  private get _sidebarNarrow() {
+    return this.narrow || this.hass.dockedSidebar === "always_hidden";
   }
 
   private get drawer(): AppDrawerElement {

@@ -7,12 +7,8 @@
         "history": "Historie",
         "mailbox": "Postkasse",
         "shopping_list": "Handleliste",
-        "dev-services": "Tenester",
-        "dev-states": "Statusar",
-        "dev-events": "Hendingar",
-        "dev-templates": "Malar",
-        "dev-mqtt": "MQTT",
         "dev-info": "Info",
+        "developer_tools": "Utviklarverkty",
         "calendar": "Kalendrar",
         "profile": "Profil"
     },
@@ -311,6 +307,25 @@
                 "add_item": "Legg til",
                 "microphone_tip": "Trykk på mikorfonen øvst til høgre og sei \"Add candy to my shopping list\""
             },
+            "developer-tools": {
+                "tabs": {
+                    "services": {
+                        "title": "Tenester"
+                    },
+                    "states": {
+                        "title": "Statusar"
+                    },
+                    "events": {
+                        "title": "Hendingar"
+                    },
+                    "templates": {
+                        "title": "Malar"
+                    },
+                    "mqtt": {
+                        "title": "MQTT"
+                    }
+                }
+            },
             "history": {
                 "showing_entries": "Viser oppføringer for",
                 "period": "Periode"
@@ -335,6 +350,22 @@
                         "core": {
                             "header": "Konfigurasjon og serverkontroll",
                             "introduction": "Vi veit at endringar i konfigurasjonen kan vere ein slitsam prosess. Denne delen vil forsøke å gjere livet ditt litt lettare.",
+                            "core_config": {
+                                "location_name": "Namnet på din Home Assistant installasjon",
+                                "latitude": "Breiddegrad",
+                                "longitude": "Lengdegrad",
+                                "elevation": "Høgde",
+                                "elevation_meters": "Meter",
+                                "time_zone": "Tidssone",
+                                "unit_system": "Måleining",
+                                "unit_system_imperial": "Imperisk",
+                                "unit_system_metric": "Metrisk",
+                                "imperial_example": "Fahrenheit, pund",
+                                "metric_example": "Celsius, kilogram",
+                                "save_button": "Spare"
+                            }
+                        },
+                        "server_control": {
                             "validation": {
                                 "heading": "Konfigurasjonsvalidering",
                                 "introduction": "Sjekk konfigurasjonen din dersom du nyleg har gjort endringar og ønsker å vere sikker på at den er gyldig ved å køyre ein valideringstest",
@@ -355,20 +386,6 @@
                                 "introduction": "Kontroller Home Assistant-serveren din... frå Home Assistant.",
                                 "restart": "Omstart",
                                 "stop": "Stopp"
-                            },
-                            "core_config": {
-                                "location_name": "Namnet på din Home Assistant installasjon",
-                                "latitude": "Breiddegrad",
-                                "longitude": "Lengdegrad",
-                                "elevation": "Høgde",
-                                "elevation_meters": "Meter",
-                                "time_zone": "Tidssone",
-                                "unit_system": "Måleining",
-                                "unit_system_imperial": "Imperisk",
-                                "unit_system_metric": "Metrisk",
-                                "imperial_example": "Fahrenheit, pund",
-                                "metric_example": "Celsius, kilogram",
-                                "save_button": "Spare"
                             }
                         }
                     }
@@ -570,7 +587,10 @@
                 },
                 "zwave": {
                     "caption": "Z-Wave",
-                    "description": "Administrer Z-Wave-nettverket ditt"
+                    "description": "Administrer Z-Wave-nettverket ditt",
+                    "node_config": {
+                        "set_config_parameter": "Angi konfigurasjonsparameter"
+                    }
                 },
                 "users": {
                     "caption": "Brukarar",
@@ -678,7 +698,10 @@
                         "unavailable": "Denne eininga er for augeblinken ikkje tilgjengeleg.",
                         "default_name": "Nytt område",
                         "delete": "SLETT",
-                        "update": "OPPDATER"
+                        "update": "OPPDATER",
+                        "enabled_label": "Aktiver oppføringa",
+                        "enabled_cause": "Deaktivert av {cause} .",
+                        "enabled_description": "Deaktiverte eininga kjem ikkje til å verta lagt til i Home Assistant"
                     }
                 },
                 "person": {
@@ -740,7 +763,6 @@
                 },
                 "current_user": "Du er for augeblinken logga inn som {fullName}.",
                 "is_owner": "Du er ein eigar",
-                "logout": "Logg ut",
                 "change_password": {
                     "header": "Bytt passord",
                     "current_password": "Noverande passord",
@@ -958,8 +980,8 @@
                     "entity_non_numeric": "Oppføringa er ikkje numerisk: {entity}"
                 },
                 "changed_toast": {
-                    "message": "Lovelace konfigurasjonen blei oppdatert, ønskjer du å oppfriske?",
-                    "refresh": "Oppfrisk"
+                    "message": "Lovelace konfigurasjonen vart oppdatert. Ønsker du å friske opp?",
+                    "refresh": "Friske opp"
                 },
                 "reload_lovelace": "Omlast Lovelace"
             },
@@ -986,8 +1008,7 @@
             }
         },
         "sidebar": {
-            "log_out": "Logg ut",
-            "developer_tools": "Utviklarverkty"
+            "log_out": "Logg ut"
         },
         "common": {
             "loading": "Lastar",

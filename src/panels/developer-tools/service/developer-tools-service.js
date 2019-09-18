@@ -115,9 +115,9 @@ class HaPanelDevService extends PolymerElement {
             autocomplete="off"
             spellcheck="false"
           ></paper-textarea>
-          <mwc-button on-click="_callService" raised disabled="[[!validJSON]]"
-            >Call Service</mwc-button
-          >
+          <mwc-button on-click="_callService" raised disabled="[[!validJSON]]">
+            Call Service
+          </mwc-button>
           <template is="dom-if" if="[[!validJSON]]">
             <span class="error">Invalid JSON</span>
           </template>
@@ -153,6 +153,12 @@ class HaPanelDevService extends PolymerElement {
                 </tr>
               </template>
             </table>
+
+            <template is="dom-if" if="[[_attributes.length]]">
+              <mwc-button on-click="_fillExampleData">
+                Fill Example Data
+              </mwc-button>
+            </template>
           </template>
         </template>
       </div>
@@ -218,7 +224,7 @@ class HaPanelDevService extends PolymerElement {
 
     const fields = serviceDomains[domain][service].fields;
     return Object.keys(fields).map(function(field) {
-      return Object.assign({ key: field }, fields[field]);
+      return { key: field, ...fields[field] };
     });
   }
 
@@ -274,11 +280,17 @@ class HaPanelDevService extends PolymerElement {
     this.hass.callService(this._domain, this._service, this.parsedJSON);
   }
 
+  _fillExampleData() {
+    const example = {};
+    this._attributes.forEach((attribute) => {
+      example[attribute.key] = attribute.example;
+    });
+    this.serviceData = JSON.stringify(example, null, 2);
+  }
+
   _entityPicked(ev) {
     this.serviceData = JSON.stringify(
-      Object.assign({}, this.parsedJSON, {
-        entity_id: ev.target.value,
-      }),
+      { ...this.parsedJSON, entity_id: ev.target.value },
       null,
       2
     );

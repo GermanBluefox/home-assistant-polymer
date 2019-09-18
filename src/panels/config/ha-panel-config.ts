@@ -56,6 +56,20 @@ class HaPanelConfig extends HassRouterPage {
             /* webpackChunkName: "panel-config-core" */ "./core/ha-config-core"
           ),
       },
+      devices: {
+        tag: "ha-config-devices",
+        load: () =>
+          import(
+            /* webpackChunkName: "panel-config-devices" */ "./devices/ha-config-devices"
+          ),
+      },
+      server_control: {
+        tag: "ha-config-server-control",
+        load: () =>
+          import(
+            /* webpackChunkName: "panel-config-server-control" */ "./server_control/ha-config-server-control"
+          ),
+      },
       customize: {
         tag: "ha-config-customize",
         load: () =>
@@ -172,7 +186,8 @@ class HaPanelConfig extends HassRouterPage {
     const showAdvanced = !!(
       this._coreUserData && this._coreUserData.showAdvanced
     );
-    const isWide = this.hass.dockedSidebar ? this._wideSidebar : this._wide;
+    const isWide =
+      this.hass.dockedSidebar === "docked" ? this._wideSidebar : this._wide;
 
     if ("setProperties" in el) {
       // As long as we have Polymer panels

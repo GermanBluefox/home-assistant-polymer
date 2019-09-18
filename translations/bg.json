@@ -7,12 +7,8 @@
         "history": "История",
         "mailbox": "Пощенска кутия",
         "shopping_list": "Списък за пазаруване",
-        "dev-services": "Услуги",
-        "dev-states": "Състояния",
-        "dev-events": "Събития",
-        "dev-templates": "Шаблони",
-        "dev-mqtt": "MQTT",
         "dev-info": "Информация",
+        "developer_tools": "Инструменти за разработчици",
         "calendar": "Календар",
         "profile": "Профил"
     },
@@ -145,7 +141,8 @@
             "high_demand": "Високо натоварване",
             "heat_pump": "Термопомпа",
             "gas": "Газ",
-            "manual": "Ръчен режим"
+            "manual": "Ръчен режим",
+            "heat_cool": "Отопление\/Охлаждане"
         },
         "configurator": {
             "configure": "Настройване",
@@ -254,7 +251,8 @@
             "snowy-rainy": "Снежно, дъждовно",
             "sunny": "Слънчево",
             "windy": "Ветровито",
-            "windy-variant": "Ветровито"
+            "windy-variant": "Ветровито",
+            "exceptional": "Изключително"
         },
         "vacuum": {
             "cleaning": "Почистване",
@@ -311,6 +309,31 @@
                 "add_item": "Добави артикул",
                 "microphone_tip": "Докоснете микрофона горе вдясно и кажете \"Add candy to my shopping list\""
             },
+            "developer-tools": {
+                "tabs": {
+                    "services": {
+                        "title": "Услуги"
+                    },
+                    "states": {
+                        "title": "Състояния"
+                    },
+                    "events": {
+                        "title": "Събития"
+                    },
+                    "templates": {
+                        "title": "Шаблони"
+                    },
+                    "mqtt": {
+                        "title": "MQTT"
+                    },
+                    "info": {
+                        "title": "Информация"
+                    },
+                    "logs": {
+                        "title": "Журнали"
+                    }
+                }
+            },
             "history": {
                 "showing_entries": "Показване на записите за",
                 "period": "Период"
@@ -335,6 +358,23 @@
                         "core": {
                             "header": "Конфигуриране и управление на сървъра",
                             "introduction": "Промяната на конфигурацията може да бъде труден процес. Знаем това. Този раздел ще се опита да направи живота Ви малко по-лесен.",
+                            "core_config": {
+                                "edit_requires_storage": "Редакторът е деактивиран, защото конфигурацията е съхранена в configuration.yaml.",
+                                "location_name": "Име на Вашия Home Assistant",
+                                "latitude": "Географска ширина",
+                                "longitude": "Географска дължина",
+                                "elevation": "Надморска височина",
+                                "elevation_meters": "метра",
+                                "time_zone": "Часова зона",
+                                "unit_system": "Система единици",
+                                "unit_system_imperial": "Имперски единици",
+                                "unit_system_metric": "Метрични единици",
+                                "imperial_example": "Фаренхайт, паунд",
+                                "metric_example": "Целзий, килограми",
+                                "save_button": "Запази"
+                            }
+                        },
+                        "server_control": {
                             "validation": {
                                 "heading": "Проверка на конфигурацията",
                                 "introduction": "Проверете конфигурацията, ако скоро сте направили промени и искате да се уверите, че всичко работи",
@@ -355,21 +395,6 @@
                                 "introduction": "Управление на Home Assistant сървъра... от Home Assistant.",
                                 "restart": "Рестарт",
                                 "stop": "Спиране"
-                            },
-                            "core_config": {
-                                "edit_requires_storage": "Редакторът е деактивиран, защото конфигурацията е съхранена в configuration.yaml.",
-                                "location_name": "Име на Вашия Home Assistant",
-                                "latitude": "Географска ширина",
-                                "longitude": "Географска дължина",
-                                "elevation": "Надморска височина",
-                                "elevation_meters": "метра",
-                                "time_zone": "Часова зона",
-                                "unit_system": "Система единици",
-                                "unit_system_imperial": "Имперски единици",
-                                "unit_system_metric": "Метрични единици",
-                                "imperial_example": "Фаренхайт, паунд",
-                                "metric_example": "Целзий, килограми",
-                                "save_button": "Запази"
                             }
                         }
                     }
@@ -477,6 +502,9 @@
                                     "event": "Събитие:",
                                     "enter": "Влизане",
                                     "leave": "Излизане"
+                                },
+                                "device": {
+                                    "label": "Устройство"
                                 }
                             },
                             "learn_more": "Научете повече за тригерите"
@@ -523,6 +551,9 @@
                                     "label": "Зона",
                                     "entity": "Обект с местоположение",
                                     "zone": "Зона"
+                                },
+                                "device": {
+                                    "label": "Устройство"
                                 }
                             },
                             "learn_more": "Научете повече за условията"
@@ -557,6 +588,9 @@
                                     "label": "Стартирай събитие",
                                     "event": "Събитие",
                                     "service_data": "Сервизна информация"
+                                },
+                                "device_id": {
+                                    "label": "Устройство"
                                 }
                             },
                             "learn_more": "Научете повече за действията"
@@ -571,7 +605,51 @@
                 },
                 "zwave": {
                     "caption": "Z-Wave",
-                    "description": "Управлявайте своята Z-Wave мрежа"
+                    "description": "Управлявайте своята Z-Wave мрежа",
+                    "network_management": {
+                        "header": "Управление на Z-Wave мрежата",
+                        "introduction": "Изпълнение на команди, които засягат Z-Wave мрежата. Няма да получите обратна информация за това дали повечето команди са успели, но можете да проверите OZW лог файла, за да се опитате да разберете."
+                    },
+                    "network_status": {
+                        "network_stopped": "Z-Wave мрежата е спряна",
+                        "network_starting": "Стартиране на Z-Wave мрежа...",
+                        "network_starting_note": "Това може да отнеме известно време в зависимост от размера на мрежата Ви.",
+                        "network_started": "Z-Wave мрежата е стартирана",
+                        "network_started_note_some_queried": "Будните устройства бяха разпитани. Спящите устройства ще бъдат разпитани, когато са на линия.",
+                        "network_started_note_all_queried": "Всички устройства бяха разпитани."
+                    },
+                    "services": {
+                        "start_network": "Стартиране на мрежата",
+                        "stop_network": "Спиране на мрежата",
+                        "heal_network": "Оздравяване на мрежата",
+                        "test_network": "Тестване на мрежата",
+                        "soft_reset": "Soft Reset",
+                        "save_config": "Запазване на конфигурацията",
+                        "add_node_secure": "Добавяне на криптирано устройство",
+                        "add_node": "Добавяне на устройство",
+                        "remove_node": "Премахване на устройство",
+                        "cancel_command": "Отмени командата"
+                    },
+                    "common": {
+                        "value": "Стойност",
+                        "instance": "Устройство",
+                        "index": "Индекс",
+                        "unknown": "неизвестно",
+                        "wakeup_interval": "Интервал за събуждане"
+                    },
+                    "values": {
+                        "header": "Стойности на устройсто"
+                    },
+                    "node_config": {
+                        "header": "Конфигурационни опции на устройството",
+                        "seconds": "секунди",
+                        "set_wakeup": "Настрой интервал за събуждане",
+                        "config_parameter": "Конфигурационен параметър",
+                        "config_value": "Конфигурационна стойност",
+                        "true": "Вярно",
+                        "false": "Невярно",
+                        "set_config_parameter": "Задайте параметър Config"
+                    }
                 },
                 "users": {
                     "caption": "Потребители",
@@ -682,7 +760,10 @@
                         "unavailable": "Този обект не е достъпeн към момента.",
                         "default_name": "Нова област",
                         "delete": "ИЗТРИВАНЕ",
-                        "update": "АКТУАЛИЗАЦИЯ"
+                        "update": "АКТУАЛИЗАЦИЯ",
+                        "enabled_label": "Активирай обекта",
+                        "enabled_cause": "Изключено от {cause}",
+                        "enabled_description": "Изключените обекти няма да бъдат добавени в Home Assistant."
                     }
                 },
                 "person": {
@@ -693,6 +774,36 @@
                         "device_tracker_intro": "Изберете устройствата, които принадлежат на това лице.",
                         "device_tracker_picked": "Устройство за проследяване",
                         "device_tracker_pick": "Изберете устройство за проследяване"
+                    }
+                },
+                "server_control": {
+                    "caption": "Управление на сървъра",
+                    "description": "Рестартиране и спиране на Home Assistant сървъра",
+                    "section": {
+                        "validation": {
+                            "heading": "Проверка на конфигурацията",
+                            "introduction": "Проверете конфигурацията, ако скоро сте направили промени и искате да се уверите, че всичко работи",
+                            "check_config": "Проверка на конфигурацията",
+                            "valid": "Валидна конфигурация!",
+                            "invalid": "Невалидна конфигурация"
+                        },
+                        "reloading": {
+                            "heading": "Презареждане на конфигурацията",
+                            "introduction": "Някои части от Home Assistant могат да се презаредят без да е необходимо рестартиране. Натискането на Презареди ще отхвърли настоящата конфигурация и ще зареди новата конфигурация.",
+                            "core": "Презареждане на ядрото",
+                            "group": "Презареждане на гурпите",
+                            "automation": "Презареждане на автоматизациите",
+                            "script": "Презареждане на скриптовете",
+                            "scene": "Презареди сцените"
+                        },
+                        "server_management": {
+                            "heading": "Управление на сървъра",
+                            "introduction": "Управляване на Home Assistant сървъра... от Home Assistant.",
+                            "restart": "Рестартирай",
+                            "stop": "Спри",
+                            "confirm_restart": "Сигурни ли сте, че искате да рестартирате Home Assistant?",
+                            "confirm_stop": "Сигурни ли сте, че искате да спрете Home Assistant?"
+                        }
                     }
                 }
             },
@@ -744,7 +855,6 @@
                 },
                 "current_user": "В момента сте влезли като {fullName}.",
                 "is_owner": "Вие сте собственик.",
-                "logout": "Изход",
                 "change_password": {
                     "header": "Смяна на парола",
                     "current_password": "Настояща парола",
@@ -765,6 +875,11 @@
                     "step_done": "Настройката е извършена за {step}",
                     "close": "Затвори",
                     "submit": "Изпращане"
+                },
+                "logout": "Изход",
+                "force_narrow": {
+                    "header": "Винаги скривай страничната лента",
+                    "description": "Това ще скрие страничната лента по подразбиране, подобно на изгледа в мобилната версия."
                 }
             },
             "page-authorize": {
@@ -954,6 +1069,10 @@
                         "save": "Запазване",
                         "unsaved_changes": "Незапазени промени",
                         "saved": "Запазено"
+                    },
+                    "edit_lovelace": {
+                        "header": "Заглавие на вашия Lovelace потребителски интерфейс",
+                        "explanation": "Това заглавие се показва над всичките ви изгледи в Lovelace"
                     }
                 },
                 "menu": {
@@ -1018,13 +1137,13 @@
         },
         "sidebar": {
             "log_out": "Изход",
-            "developer_tools": "Инструменти за разработчици",
             "external_app_configuration": "Конфигурация на приложение"
         },
         "common": {
             "loading": "Зареждане",
             "cancel": "Отмени",
-            "save": "Запазване"
+            "save": "Запазване",
+            "successfully_saved": "Успешно запазено"
         },
         "duration": {
             "day": "{count}{count, plural,\n  one {ден}\n  other {дни}\n}",
@@ -1100,7 +1219,9 @@
             "fan": {
                 "speed": "Скорост",
                 "oscillate": "Въртене",
-                "direction": "Посока"
+                "direction": "Посока",
+                "forward": "Напред",
+                "reverse": "Назад"
             },
             "light": {
                 "brightness": "Яркост",
@@ -1122,7 +1243,8 @@
                 "fan_mode": "Режим на вентилатора",
                 "swing_mode": "Режим на люлеене",
                 "away_mode": "Режим на отсъствие",
-                "aux_heat": "Помощен нагревател"
+                "aux_heat": "Помощен нагревател",
+                "preset_mode": "Предварително-зададени настройки"
             },
             "lock": {
                 "code": "Код",
@@ -1144,6 +1266,14 @@
                 "target_temperature": "Желана температура",
                 "operation": "Режим",
                 "away_mode": "Режим на отсъствие"
+            },
+            "timer": {
+                "actions": {
+                    "start": "старт",
+                    "pause": "пауза",
+                    "cancel": "прекратяване",
+                    "finish": "финал"
+                }
             }
         },
         "components": {
@@ -1196,6 +1326,33 @@
                 },
                 "updater": {
                     "title": "Инструкции за актуализиране"
+                }
+            },
+            "options_flow": {
+                "form": {
+                    "header": "Опции"
+                },
+                "success": {
+                    "description": "Опциите бяха запазени успешно."
+                }
+            },
+            "config_entry_system_options": {
+                "title": "Системни опции",
+                "enable_new_entities_label": "Активирай новодобавените устройства.",
+                "enable_new_entities_description": "Ако е изключено, новооткритите устройства няма да бъдат автоматично добавени в Home Assistant"
+            },
+            "zha_device_info": {
+                "manuf": "от {manufacturer}",
+                "no_area": "Без област",
+                "services": {
+                    "reconfigure": "Преконфигурирайте ZHA устройство (оздравяване на устройство). Използвайте това, ако имате проблеми с устройството. Ако въпросното устройство е захранвано с батерии, моля, уверете се, че е будно и приема команди, когато използвате тази услуга.",
+                    "updateDeviceName": "Задайте персонализирано име за това устройство в регистъра на устройствата.",
+                    "remove": "Премахване на устройство от ZigBee мрежата."
+                },
+                "zha_device_card": {
+                    "device_name_placeholder": "Име, зададено от потребителя",
+                    "area_picker_label": "Област",
+                    "update_name_button": "Актуализиране на името"
                 }
             }
         },
@@ -1267,6 +1424,24 @@
                 "off": "Изключен",
                 "on": "Включен",
                 "auto": "Автоматичен"
+            },
+            "preset_mode": {
+                "none": "Без",
+                "eco": "Еко",
+                "away": "Отсъства",
+                "boost": "Ускорен",
+                "comfort": "Комфорт",
+                "home": "Вкъщи",
+                "sleep": "Сън",
+                "activity": "Дейност"
+            },
+            "hvac_action": {
+                "off": "Изключен",
+                "heating": "Отопление",
+                "cooling": "Охлаждане",
+                "drying": "Изсушаване",
+                "idle": "Неработещ",
+                "fan": "Вентилатор"
             }
         }
     },
@@ -1274,5 +1449,12 @@
         "system-admin": "Администратори",
         "system-users": "Потребители",
         "system-read-only": "Потребители с достъп само за четене"
+    },
+    "config_entry": {
+        "disabled_by": {
+            "user": "Потребител",
+            "integration": "Интеграция",
+            "config_entry": "Конфигурационен запис"
+        }
     }
 }

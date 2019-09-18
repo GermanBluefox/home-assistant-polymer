@@ -21,6 +21,7 @@ import {
   FORMAT_NUMBER,
 } from "../../../data/alarm_control_panel";
 import { AlarmPanelCardConfig } from "./types";
+import { PaperInputElement } from "@polymer/paper-input/paper-input";
 
 const ICONS = {
   armed_away: "hass:shield-lock",
@@ -37,12 +38,14 @@ const BUTTONS = ["1", "2", "3", "4", "5", "6", "7", "8", "9", "", "0", "clear"];
 @customElement("hui-alarm-panel-card")
 class HuiAlarmPanelCard extends LitElement implements LovelaceCard {
   public static async getConfigElement() {
-    await import(/* webpackChunkName: "hui-alarm-panel-card-editor" */ "../editor/config-elements/hui-alarm-panel-card-editor");
+    await import(
+      /* webpackChunkName: "hui-alarm-panel-card-editor" */ "../editor/config-elements/hui-alarm-panel-card-editor"
+    );
     return document.createElement("hui-alarm-panel-card-editor");
   }
 
   public static getStubConfig() {
-    return { states: ["arm_home", "arm_away"] };
+    return { states: ["arm_home", "arm_away"], entity: "" };
   }
 
   @property() public hass?: HomeAssistant;
@@ -114,7 +117,11 @@ class HuiAlarmPanelCard extends LitElement implements LovelaceCard {
     }
 
     return html`
-      <ha-card .header="${this._config.name || this._label(stateObj.state)}">
+      <ha-card
+        .header="${this._config.name ||
+          stateObj.attributes.friendly_name ||
+          this._label(stateObj.state)}"
+      >
         <ha-label-badge
           class="${classMap({ [stateObj.state]: true })}"
           .icon="${ICONS[stateObj.state] || "hass:shield-outline"}"
@@ -140,6 +147,7 @@ class HuiAlarmPanelCard extends LitElement implements LovelaceCard {
           ? html``
           : html`
               <paper-input
+                id="alarmCode"
                 label="Alarm Code"
                 type="password"
                 .value="${this._code}"
@@ -194,11 +202,17 @@ class HuiAlarmPanelCard extends LitElement implements LovelaceCard {
   }
 
   private _handleActionClick(e: MouseEvent): void {
+    const input = this.shadowRoot!.querySelector(
+      "#alarmCode"
+    ) as PaperInputElement;
+    const code =
+      this._code ||
+      (input && input.value && input.value.length > 0 ? input.value : "");
     callAlarmAction(
       this.hass!,
       this._config!.entity,
       (e.currentTarget! as any).action,
-      this._code!
+      code
     );
     this._code = "";
   }

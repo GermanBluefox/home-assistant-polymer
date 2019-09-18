@@ -68,8 +68,9 @@ class MoreInfoControls extends EventsMixin(PolymerElement) {
 
       <app-toolbar>
         <paper-icon-button
+          aria-label="Dismiss dialog"
           icon="hass:close"
-          dialog-dismiss=""
+          dialog-dismiss
         ></paper-icon-button>
         <div class="main-title" main-title="" on-click="enlarge">
           [[_computeStateName(stateObj)]]
@@ -192,9 +193,10 @@ class MoreInfoControls extends EventsMixin(PolymerElement) {
     }
 
     if (this._cacheConfig.cacheKey !== `more_info.${newVal.entity_id}`) {
-      this._cacheConfig = Object.assign({}, this._cacheConfig, {
+      this._cacheConfig = {
+        ...this._cacheConfig,
         cacheKey: `more_info.${newVal.entity_id}`,
-      });
+      };
     }
   }
 

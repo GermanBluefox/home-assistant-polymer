@@ -215,7 +215,9 @@ class HaChartBase extends mixinBehaviors(
     }
 
     if (scriptsLoaded === null) {
-      scriptsLoaded = import(/* webpackChunkName: "load_chart" */ "../../resources/ha-chart-scripts.js");
+      scriptsLoaded = import(
+        /* webpackChunkName: "load_chart" */ "../../resources/ha-chart-scripts.js"
+      );
     }
     scriptsLoaded.then((ChartModule) => {
       this.ChartClass = ChartModule.default;
@@ -287,11 +289,12 @@ class HaChartBase extends mixinBehaviors(
     }
     positionX += this._chart.canvas.offsetLeft;
     // Display, position, and set styles for font
-    this.tooltip = Object.assign({}, this.tooltip, {
+    this.tooltip = {
+      ...this.tooltip,
       opacity: 1,
       left: `${positionX}px`,
       top: `${positionY}px`,
-    });
+    };
   }
 
   _legendClick(event) {

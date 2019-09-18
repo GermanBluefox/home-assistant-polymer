@@ -7,12 +7,8 @@
         "history": "Verlaf",
         "mailbox": "Bréifkëscht",
         "shopping_list": "Akafslëscht",
-        "dev-services": "Servicen",
-        "dev-states": "Zoustänn",
-        "dev-events": "Evenementer",
-        "dev-templates": "Modeller",
-        "dev-mqtt": "MQTT",
         "dev-info": "Info",
+        "developer_tools": "Entwécklungsgeschir",
         "calendar": "Kalenner",
         "profile": "Profil"
     },
@@ -145,7 +141,8 @@
             "high_demand": "Héich Ufro",
             "heat_pump": "Heizung",
             "gas": "Gas",
-            "manual": "Manuell"
+            "manual": "Manuell",
+            "heat_cool": "Hëtzen\/Ofkillen"
         },
         "configurator": {
             "configure": "Astellen",
@@ -254,7 +251,8 @@
             "snowy-rainy": "Schnéi, Reen",
             "sunny": "Sonneg",
             "windy": "Lëfteg",
-            "windy-variant": "Lëfteg"
+            "windy-variant": "Lëfteg",
+            "exceptional": "Aussergewéinlech"
         },
         "vacuum": {
             "cleaning": "Botzt",
@@ -311,6 +309,31 @@
                 "add_item": "Objet dobäisetze",
                 "microphone_tip": "Tipp uewe riets op de Mikro a so “Add candy to my shopping list”"
             },
+            "developer-tools": {
+                "tabs": {
+                    "services": {
+                        "title": "Servicen"
+                    },
+                    "states": {
+                        "title": "Zoustänn"
+                    },
+                    "events": {
+                        "title": "Evenementer"
+                    },
+                    "templates": {
+                        "title": "Modeller"
+                    },
+                    "mqtt": {
+                        "title": "MQTT"
+                    },
+                    "info": {
+                        "title": "Info"
+                    },
+                    "logs": {
+                        "title": "Logbicher"
+                    }
+                }
+            },
             "history": {
                 "showing_entries": "Weist Beiträg fir",
                 "period": "Zäitraum"
@@ -330,11 +353,28 @@
                 "introduction": "Hei ass et méiglech är Komponenten vum Home Assistant ze konfiguréieren. Net alles ass méiglech fir iwwert den Interface anzestellen, mee mir schaffen drun.",
                 "core": {
                     "caption": "Generell",
-                    "description": "Konfiguratioun validéieren an de Server kontrolléieren",
+                    "description": "Ännert är generell Home Assistant Konfiguratioun",
                     "section": {
                         "core": {
                             "header": "Konfiguratioun an Server Kontroll",
                             "introduction": "D'Ännere vun der Konfiguratioun kann e lästege Prozess sinn. Mir wëssen dat. Dës Sektioun probéiert fir Äert Liewen e bësse méi einfach ze maachen.",
+                            "core_config": {
+                                "edit_requires_storage": "Editeur ass desaktivéiert well d'Konfiguratioun an der configuration.yaml gespäichert ass.",
+                                "location_name": "Numm vun der Home Assistant Installatioun",
+                                "latitude": "Breedegrad",
+                                "longitude": "Längegrad",
+                                "elevation": "Héicht",
+                                "elevation_meters": "Meter",
+                                "time_zone": "Zäitzone",
+                                "unit_system": "Eenheetesystem",
+                                "unit_system_imperial": "Imperial",
+                                "unit_system_metric": "Metresch",
+                                "imperial_example": "Fahrenheit, Pënner",
+                                "metric_example": "Celsius, Kilogramm",
+                                "save_button": "Späicheren"
+                            }
+                        },
+                        "server_control": {
                             "validation": {
                                 "heading": "Validatioun vun der Konfiguratioun",
                                 "introduction": "Validéiert är Konfiguratioun wann Dir viru kuerzem e puer Ännerungen an ärer Konfiguratioun gemaacht hutt a wëllt sécher sinn datt alles gëlteg ass",
@@ -355,21 +395,6 @@
                                 "introduction": "Kontrolléiert ären Home Assistant Server ... vun Home Assistant aus.",
                                 "restart": "Neistart",
                                 "stop": "Stop"
-                            },
-                            "core_config": {
-                                "edit_requires_storage": "Editeur ass desaktivéiert well d'Konfiguratioun an der configuration.yaml gespäichert ass.",
-                                "location_name": "Numm vun der Home Assistant Installatioun",
-                                "latitude": "Breedegrad",
-                                "longitude": "Längegrad",
-                                "elevation": "Héicht",
-                                "elevation_meters": "Meter",
-                                "time_zone": "Zäitzone",
-                                "unit_system": "Eenheetesystem",
-                                "unit_system_imperial": "Imperial",
-                                "unit_system_metric": "Metresch",
-                                "imperial_example": "Fahrenheit, Pënner",
-                                "metric_example": "Celsius, Kilogramm",
-                                "save_button": "Späicheren"
                             }
                         }
                     }
@@ -477,6 +502,9 @@
                                     "event": "Evenement",
                                     "enter": "Betrieden",
                                     "leave": "Verloossen"
+                                },
+                                "device": {
+                                    "label": "Apparat"
                                 }
                             },
                             "learn_more": "Méi iwwert Ausléiser liesen"
@@ -485,7 +513,7 @@
                             "header": "Konditiounen",
                             "introduction": "Konditioune sinn een optionalen Deel vun engem Automatismus a kënne benotzt gi fir ze bestëmme wann eng Aktioun ausgeféiert gëtt. Konditioune gläichen den Ausléiser mee sinn awer ganz ënnerschiddlech. Een Ausléiser iwwerwaacht d'Evenementer am System, an eng Konditioun iwwerwaacht de Status vum System. Een Ausléiser gesäit wann ee Schalter ugeschalt gëtt. Eng Konditioun gesäit nëmmen op de Schalter un oder aus ass.\n\n[Léier méi iwwer Konditioune.](https:\/\/home-assistant.io\/docs\/scripts\/conditions\/)",
                             "add": "Konditioun dobäisetzen",
-                            "duplicate": "Replikéiere",
+                            "duplicate": "Duplikéiere",
                             "delete": "Läschen",
                             "delete_confirm": "Sëcher fir ze läschen?",
                             "unsupported_condition": "Net ënnerstëtzte Konditioun: {condition}",
@@ -523,6 +551,9 @@
                                     "label": "Zon",
                                     "entity": "Entitéit mam Standuert",
                                     "zone": "Zon"
+                                },
+                                "device": {
+                                    "label": "Apparat"
                                 }
                             },
                             "learn_more": "Méi iwwert Konditioune liesen"
@@ -531,7 +562,7 @@
                             "header": "Aktiounen",
                             "introduction": "Aktioune déi den Home Assistant ausféiert wann den Automatismus ausgeléist gouf.\n[Léier méi iwwert Aktiounen.](https:\/\/home-assistant.io\/docs\/automation\/action\/)",
                             "add": "Aktioun dobäisetzen",
-                            "duplicate": "Replikéiere",
+                            "duplicate": "Duplikéiere",
                             "delete": "Läschen",
                             "delete_confirm": "Element sécher läschen?",
                             "unsupported_action": "Net ënnerstëtzten Aktioun: {action}",
@@ -557,6 +588,9 @@
                                     "label": "Evenement starten",
                                     "event": "Evenement:",
                                     "service_data": "Service-Donnéeën"
+                                },
+                                "device_id": {
+                                    "label": "Apparat"
                                 }
                             },
                             "learn_more": "Méi iwwert Aktioune liesen"
@@ -571,7 +605,51 @@
                 },
                 "zwave": {
                     "caption": "Z-Wave",
-                    "description": "Verwalt är Z-Wave Netzwierk"
+                    "description": "Verwalt är Z-Wave Netzwierk",
+                    "network_management": {
+                        "header": "Z-Wave Netzwierk Verwaltung",
+                        "introduction": "Féiert Commande aus am Z-Wave Netzwierk. Di kritt kee Feedback op déi meeschte Commande erfollegräich ausgeféiert goufen, mee dir kënnt de OZW Log ënnersiche fir weider Detailer"
+                    },
+                    "network_status": {
+                        "network_stopped": "Z-Wave Netzwierk gestoppt",
+                        "network_starting": "Z-Wave Netzwierk start",
+                        "network_starting_note": "Dës kann eng Weil dauere jee no gréisst vum Netzwierk.",
+                        "network_started": "Z-Wave Netzwierk gestart",
+                        "network_started_note_some_queried": "Aktiv Apparater sinn ofgefrot. Inaktiv Apparater ginn ofgefrot soubal sie aktiv sinn.",
+                        "network_started_note_all_queried": "All Apparater sinn ofgefrot"
+                    },
+                    "services": {
+                        "start_network": "Netzwierk starten",
+                        "stop_network": "Netzwierk stoppen",
+                        "heal_network": "Netzwierk heelen",
+                        "test_network": "Netzwierk testen",
+                        "soft_reset": "Soft Reset",
+                        "save_config": "Konfiguratioun späicheren",
+                        "add_node_secure": "Sëcheren Apparat dobäisetzen",
+                        "add_node": "Apparat dobäisetzen",
+                        "remove_node": "Apparat läschen",
+                        "cancel_command": "Commande ofbriechen"
+                    },
+                    "common": {
+                        "value": "Wäert",
+                        "instance": "Instanz",
+                        "index": "Index",
+                        "unknown": "Onbekannt",
+                        "wakeup_interval": "Intervall fir z'erwächen"
+                    },
+                    "values": {
+                        "header": "Wäerter vum Apparat"
+                    },
+                    "node_config": {
+                        "header": "Node Konfiguratioun Optiounen",
+                        "seconds": "Sekonnen",
+                        "set_wakeup": "Intervall fir z'erwächen définéieren",
+                        "config_parameter": "Konfiguratioun's Parameter",
+                        "config_value": "Konfiguratioun's Wäert",
+                        "true": "Richteg",
+                        "false": "Falsch",
+                        "set_config_parameter": "Konfiguratioun's Parameter setzen"
+                    }
                 },
                 "users": {
                     "caption": "Benotzer",
@@ -682,7 +760,10 @@
                         "unavailable": "Dës Entitéit ass net erreechbar fir de Moment.",
                         "default_name": "Neie Beräich",
                         "delete": "Läschen",
-                        "update": "Aktualiséieren"
+                        "update": "Aktualiséieren",
+                        "enabled_label": "Entitéit aktivéieren",
+                        "enabled_cause": "Desaktivéiert duerch {cause}.",
+                        "enabled_description": "Desaktivéiert Entitéiten ginn net am Home Assistant bäigesat."
                     }
                 },
                 "person": {
@@ -694,6 +775,40 @@
                         "device_tracker_picked": "Aparat suivéieren",
                         "device_tracker_pick": "Wielt den Apparat aus fir ze suivéieren"
                     }
+                },
+                "server_control": {
+                    "caption": "Kontroll vum Server",
+                    "description": "Start an Stop vum Home Assistant Server",
+                    "section": {
+                        "validation": {
+                            "heading": "Validatioun vun der Konfiguratioun",
+                            "introduction": "Validéiert är Konfiguratioun wann Dir viru kuerzem e puer Ännerungen an ärer Konfiguratioun gemaacht hutt a wëllt sécher sinn datt alles gëlteg ass",
+                            "check_config": "Konfiguratioun iwwerpréiwen",
+                            "valid": "Konfiguratioun gëlteg!",
+                            "invalid": "Konfiguratioun ongëlteg"
+                        },
+                        "reloading": {
+                            "heading": "Konfiguratioun gëtt frësch gelueden",
+                            "introduction": "E puer Deeler vum Home Assistant kënne frësch geluede ginn ouni datt een Neistart néideg ass. Klick op nei luede fir di aktuell Konfiguratioun z'entlueden an di nei Konfiguratioun ze lueden.",
+                            "core": "Kär néi lueden",
+                            "group": "Gruppe nei lueden",
+                            "automation": "Automatisme nei lueden",
+                            "script": "Skripte nei lueden",
+                            "scene": "Szeene néi lueden"
+                        },
+                        "server_management": {
+                            "heading": "Serververwaltung",
+                            "introduction": "Kontrolléiert ären Home Assistant Server ... vun Home Assistant aus.",
+                            "restart": "Neistart",
+                            "stop": "Stop",
+                            "confirm_restart": "Sécher fir Home Assistant frësch ze starten?",
+                            "confirm_stop": "Sécher fir Home Assistant ze stoppen?"
+                        }
+                    }
+                },
+                "devices": {
+                    "caption": "Apparater",
+                    "description": "Verwalt verbonnen Apparater"
                 }
             },
             "profile": {
@@ -744,7 +859,6 @@
                 },
                 "current_user": "Dir sidd aktuell ageloggt als {fullName}.",
                 "is_owner": "Dir sidd Proprietär.",
-                "logout": "Ausloggen",
                 "change_password": {
                     "header": "Passwuert änneren",
                     "current_password": "Aktuellt Passwuert",
@@ -765,6 +879,11 @@
                     "step_done": "Konfiguratioun ofgeschloss fir {step}",
                     "close": "Zoumaachen",
                     "submit": "Ofschécken"
+                },
+                "logout": "Ausloggen",
+                "force_narrow": {
+                    "header": "Säiteleescht ëmmer verstoppen",
+                    "description": "Dës Optioun verstoppt d'Säiteleescht, esou wéi op engem mobillen Apparat."
                 }
             },
             "page-authorize": {
@@ -954,6 +1073,10 @@
                         "save": "Späicheren",
                         "unsaved_changes": "Net gespäicherten Ännerungen",
                         "saved": "Gespäichert"
+                    },
+                    "edit_lovelace": {
+                        "header": "Titel vun ärem Lovelace Benotzer Interface",
+                        "explanation": "Dësen Titel gëtt iwwert den Usiichte vu Lovelace ugewisen."
                     }
                 },
                 "menu": {
@@ -1018,13 +1141,13 @@
         },
         "sidebar": {
             "log_out": "Ausloggen",
-            "developer_tools": "Entwécklungsgeschir",
             "external_app_configuration": "App Konfiguratioun"
         },
         "common": {
             "loading": "Lued",
             "cancel": "Ofbriechen",
-            "save": "Späicheren"
+            "save": "Späicheren",
+            "successfully_saved": "Erfollegräich gespäichert."
         },
         "duration": {
             "day": "{count} {count, plural,\none {Dag}\nother {Deeg}\n}",
@@ -1100,7 +1223,9 @@
             "fan": {
                 "speed": "Vitesse",
                 "oscillate": "Pendele",
-                "direction": "Richtung"
+                "direction": "Richtung",
+                "forward": "Vir",
+                "reverse": "Hannerzeg"
             },
             "light": {
                 "brightness": "Hellegkeet",
@@ -1122,7 +1247,8 @@
                 "fan_mode": "Ventilatioun Modus",
                 "swing_mode": "Schwenk Modus",
                 "away_mode": "Modus Keen Doheem",
-                "aux_heat": "Zousätzlech Heizung"
+                "aux_heat": "Zousätzlech Heizung",
+                "preset_mode": "Virastellung"
             },
             "lock": {
                 "code": "Code",
@@ -1144,6 +1270,14 @@
                 "target_temperature": "Zieltemperatur",
                 "operation": "Aktioun",
                 "away_mode": "Modus Keen Doheem"
+            },
+            "timer": {
+                "actions": {
+                    "start": "Start",
+                    "pause": "Pause",
+                    "cancel": "Ofbriechen",
+                    "finish": "Ofschléissen"
+                }
             }
         },
         "components": {
@@ -1182,7 +1316,7 @@
         "dialogs": {
             "more_info_settings": {
                 "save": "Späicheren",
-                "name": "Numm",
+                "name": "Numm iwwerschreiwen",
                 "entity_id": "Entitéit ID"
             },
             "more_info_control": {
@@ -1196,6 +1330,33 @@
                 },
                 "updater": {
                     "title": "Instruktioune fir d'Mise à jour"
+                }
+            },
+            "options_flow": {
+                "form": {
+                    "header": "Optiounen"
+                },
+                "success": {
+                    "description": "Optiounen erfollegräich gespäichert."
+                }
+            },
+            "config_entry_system_options": {
+                "title": "System Optiounen",
+                "enable_new_entities_label": "Aktivéiert nei dobäigesate Entitéiten.",
+                "enable_new_entities_description": "Falls desaktivéiert, ginn nei entdeckten Entitéiten net automatesch zu Home Assistant dobäigesat."
+            },
+            "zha_device_info": {
+                "manuf": "vun {manufacturer}",
+                "no_area": "Kee Beräich",
+                "services": {
+                    "reconfigure": "ZHA Apparat rekonfiguréieren (Apparat heelen). Benotzt dëst am Fall vu Problemer mam Apparat. Falls den Apparat duerch eng Batterie gespeist gëtt stellt sécher dass en un ass a Befeeler entgéint kann huelen",
+                    "updateDeviceName": "Personaliséiert den Numm fir dësen Apparat an der Iwwersiicht vun den Apparaten.",
+                    "remove": "Een Apparat vum Zigbee Reseau läschen."
+                },
+                "zha_device_card": {
+                    "device_name_placeholder": "Virnumm",
+                    "area_picker_label": "Beräich",
+                    "update_name_button": "Numm änneren"
                 }
             }
         },
@@ -1267,6 +1428,24 @@
                 "off": "Aus",
                 "on": "Un",
                 "auto": "Autmatesch"
+            },
+            "preset_mode": {
+                "none": "Keen",
+                "eco": "Eco",
+                "away": "Ënnerwee",
+                "boost": "Boost",
+                "comfort": "Bequem",
+                "home": "Doheem",
+                "sleep": "Schlofen",
+                "activity": "Aktivitéit"
+            },
+            "hvac_action": {
+                "off": "Aus",
+                "heating": "Hëtzen",
+                "cooling": "Ofkillen",
+                "drying": "Dréchnen",
+                "idle": "Waart",
+                "fan": "Ventilator"
             }
         }
     },
@@ -1274,5 +1453,12 @@
         "system-admin": "Administrateuren",
         "system-users": "Benotzer",
         "system-read-only": "Benotzer mat nëmmen Lies Rechter"
+    },
+    "config_entry": {
+        "disabled_by": {
+            "user": "Benotzer",
+            "integration": "Integratioun",
+            "config_entry": "Konfiguratioun's Entrée"
+        }
     }
 }

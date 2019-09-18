@@ -7,12 +7,8 @@
         "history": "היסטוריה",
         "mailbox": "תיבת דואר",
         "shopping_list": "רשימת קניות",
-        "dev-services": "שירותים",
-        "dev-states": "מצבים",
-        "dev-events": "אירועים",
-        "dev-templates": "תבניות",
-        "dev-mqtt": "MQTT",
         "dev-info": "מידע",
+        "developer_tools": "כלים למפתחים",
         "calendar": "לוח שנה",
         "profile": "פרופיל"
     },
@@ -145,7 +141,8 @@
             "high_demand": "ביקוש גבוה",
             "heat_pump": "משאבת חום",
             "gas": "גז",
-            "manual": "מדריך ל"
+            "manual": "מדריך ל",
+            "heat_cool": "חימום\/קירור"
         },
         "configurator": {
             "configure": "הגדר",
@@ -311,6 +308,28 @@
                 "add_item": "הוסף פריט",
                 "microphone_tip": "לחץ על המיקרופון למעלה מצד ימין ותאמר \"הוסף סוכריה לרשימת הקניות שלי\""
             },
+            "developer-tools": {
+                "tabs": {
+                    "services": {
+                        "title": "שירותים"
+                    },
+                    "states": {
+                        "title": "מצבים"
+                    },
+                    "events": {
+                        "title": "אירועים"
+                    },
+                    "templates": {
+                        "title": "תבניות"
+                    },
+                    "mqtt": {
+                        "title": "MQTT"
+                    },
+                    "info": {
+                        "title": "מידע"
+                    }
+                }
+            },
             "history": {
                 "showing_entries": "מציג רשומות עבור",
                 "period": "תקופה"
@@ -335,6 +354,23 @@
                         "core": {
                             "header": "שליטה על הקונפיגורציה ועל השרת",
                             "introduction": "שינוי התצורה שלך יכול להיות תהליך מייגע. אנחנו יודעים. חלק זה ינסה להפוך את החיים שלך קצת יותר קלים.",
+                            "core_config": {
+                                "edit_requires_storage": "עורך מושבת משום שתצורה מאוחסנת ב- configuration.yaml.",
+                                "location_name": "שם ההתקנה של הבית שלך",
+                                "latitude": "קו רוחב",
+                                "longitude": "קו אורך",
+                                "elevation": "גובה",
+                                "elevation_meters": "מטר",
+                                "time_zone": "איזור זמן",
+                                "unit_system": "יחידת מידה",
+                                "unit_system_imperial": "אימפריאלי",
+                                "unit_system_metric": "מטרי",
+                                "imperial_example": "פרנהייט, פאונד",
+                                "metric_example": "צלזיוס, ק\"ג",
+                                "save_button": "שמור"
+                            }
+                        },
+                        "server_control": {
                             "validation": {
                                 "heading": "בדיקת הקונפיגורציה",
                                 "introduction": "אמת את הקונפיגורציה שלך אם ביצעת לאחרונה שינויים מסוימים וברצונך לוודא שהיא תקניה",
@@ -355,21 +391,6 @@
                                 "introduction": "לשלוט על שרת הHome Assistant שלך... מHome Assistant.",
                                 "restart": "הפעלה מחדש",
                                 "stop": "עצור"
-                            },
-                            "core_config": {
-                                "edit_requires_storage": "עורך מושבת משום שתצורה מאוחסנת ב- configuration.yaml.",
-                                "location_name": "שם ההתקנה של הבית שלך",
-                                "latitude": "קו רוחב",
-                                "longitude": "קו אורך",
-                                "elevation": "גובה",
-                                "elevation_meters": "מטר",
-                                "time_zone": "איזור זמן",
-                                "unit_system": "יחידת מידה",
-                                "unit_system_imperial": "אימפריאלי",
-                                "unit_system_metric": "מטרי",
-                                "imperial_example": "פרנהייט, פאונד",
-                                "metric_example": "צלזיוס, ק\"ג",
-                                "save_button": "שמור"
                             }
                         }
                     }
@@ -571,7 +592,51 @@
                 },
                 "zwave": {
                     "caption": "Z-Wave",
-                    "description": "נהל את רשת ה- Z-Wave שלך"
+                    "description": "נהל את רשת ה- Z-Wave שלך",
+                    "network_management": {
+                        "header": "ניהול רשת ה Z-Wave",
+                        "introduction": "הפעל פקודות המשפיעות על רשת ה-Z Wave. לא תקבל משוב אם רוב הפקודות הצליחו, אך באפשרותך לבדוק את יומן ה-OZW כדי לנסות לגלות."
+                    },
+                    "network_status": {
+                        "network_stopped": "רשת ה Z-Wave נעצרה",
+                        "network_starting": "מפעיל את רשת ה Z-Wave",
+                        "network_starting_note": "הדבר עשוי להימשך זמן מה בהתאם לגודל הרשת.",
+                        "network_started": "רשת ה Z-Wave הופעלה",
+                        "network_started_note_some_queried": "רכיבים דלוקים נבדקו. רכיבים כבויים יבדקו כאשר ידלקו.",
+                        "network_started_note_all_queried": "כל הרכיבים נבדקו"
+                    },
+                    "services": {
+                        "start_network": "הפעל רשת",
+                        "stop_network": "עצור רשת",
+                        "heal_network": "ריפוי רשת",
+                        "test_network": "בדיקת רשת",
+                        "soft_reset": "איפוס רך",
+                        "save_config": "שמור קונפיגורציה",
+                        "add_node_secure": "הוסף רכיב מאובטח",
+                        "add_node": "הוסף רכיב",
+                        "remove_node": "הסר רכיב",
+                        "cancel_command": "ביטול פקודה"
+                    },
+                    "common": {
+                        "value": "ערך תצורה",
+                        "instance": "פרמטר",
+                        "index": "אינדקס",
+                        "unknown": "לא ידוע",
+                        "wakeup_interval": "מרווח פעולה"
+                    },
+                    "values": {
+                        "header": "ערכים"
+                    },
+                    "node_config": {
+                        "header": "עריכת קונפיגורציה",
+                        "seconds": "שניות",
+                        "set_wakeup": "בחירת מרווח פעולה",
+                        "config_parameter": "פרמטר תצורה",
+                        "config_value": "ערך תצורה",
+                        "true": "True",
+                        "false": "False",
+                        "set_config_parameter": "הגדר פרמטר Config"
+                    }
                 },
                 "users": {
                     "caption": "משתמשים",
@@ -650,7 +715,7 @@
                 },
                 "area_registry": {
                     "caption": "מאגר האזורים",
-                    "description": "סקירה של כל האזורים בביתך.",
+                    "description": "סקירה של כל האזורים בביתך",
                     "picker": {
                         "header": "מאגר האזורים",
                         "introduction": "אזורים משמשים לארגון המיקום של ההתקנים. Home Assistant יעשה שימוש במידע זה בכדי לסייע לך בארגון הממשק, ההרשאות והאינטגרציות שלך עם מערכות אחרות.",
@@ -693,6 +758,33 @@
                         "device_tracker_intro": "בחר את המכשירים השייכים לאדם זה.",
                         "device_tracker_picked": "עקוב אחר מכשיר",
                         "device_tracker_pick": "בחר מכשיר למעקב"
+                    }
+                },
+                "server_control": {
+                    "caption": "בקרת שרת",
+                    "description": "אתחל וכבה את שרת ה Home Assistant",
+                    "section": {
+                        "validation": {
+                            "heading": "בדיקת הקונפיגורציה",
+                            "introduction": "אמת את הקונפיגורציה שלך אם ביצעת לאחרונה שינויים מסוימים וברצונך לוודא שהיא תקינה",
+                            "check_config": "בדיקת הקונפיגורציה",
+                            "valid": "קונפיגורציה תקינה!",
+                            "invalid": "קונפיגורציה לא תקנית"
+                        },
+                        "reloading": {
+                            "heading": "טען מחדש קונפיגורציה",
+                            "introduction": "חלקים מסוימים של Home Assistant יכולים להטען מחדש ללא צורך בהפעלה מחדש.\nטעינה מחדש תשנה את הקונפיגורציה הנוכחית ותטען קונפיגורציה חדשה.",
+                            "core": "טען מחדש את הליבה",
+                            "group": "טען מחדש קבוצות",
+                            "automation": "טען מחדש אוטומציות",
+                            "script": "טען מחדש סקריפטים"
+                        },
+                        "server_management": {
+                            "heading": "ניהול שרת",
+                            "introduction": "לשלוט על שרת הHome Assistant שלך... מHome Assistant.",
+                            "restart": "אתחול",
+                            "stop": "עצור"
+                        }
                     }
                 }
             },
@@ -744,7 +836,6 @@
                 },
                 "current_user": "אתה מחובר כעת כ- {fullName} .",
                 "is_owner": "אתה הבעלים.",
-                "logout": "התנתק",
                 "change_password": {
                     "header": "שינוי סיסמה",
                     "current_password": "סיסמה נוכחית",
@@ -765,6 +856,11 @@
                     "step_done": "הגדרה בוצעה עבור {step}",
                     "close": "סגור",
                     "submit": "שלח"
+                },
+                "logout": "התנתק",
+                "force_narrow": {
+                    "header": "הסתר תמיד את הסרגל הצידי",
+                    "description": "פעולה זו תסתיר את הסרגל הצדדי כברירת מחדל, בדומה לחוויה בנייד."
                 }
             },
             "page-authorize": {
@@ -1018,7 +1114,6 @@
         },
         "sidebar": {
             "log_out": "התנתק",
-            "developer_tools": "כלים למפתחים",
             "external_app_configuration": "הגדרות היישום"
         },
         "common": {
@@ -1122,7 +1217,8 @@
                 "fan_mode": "מצב מאורר",
                 "swing_mode": "מצב נדנוד",
                 "away_mode": "מצב מחוץ לבית",
-                "aux_heat": "מסייע חום"
+                "aux_heat": "מסייע חום",
+                "preset_mode": "מצב מוגדר"
             },
             "lock": {
                 "code": "קוד",
@@ -1197,6 +1293,19 @@
                 "updater": {
                     "title": "הוראות עדכון"
                 }
+            },
+            "options_flow": {
+                "success": {
+                    "description": "האפשרויות נשמרו בהצלחה."
+                }
+            },
+            "config_entry_system_options": {
+                "title": "אפשרויות מערכת"
+            },
+            "zha_device_info": {
+                "services": {
+                    "remove": "הסר מכשיר מרשת ה-ZigBee"
+                }
             }
         },
         "auth_store": {
@@ -1267,6 +1376,24 @@
                 "off": "כבוי",
                 "on": "דולק",
                 "auto": "Auto"
+            },
+            "preset_mode": {
+                "none": "לא נבחר",
+                "eco": "חסכון",
+                "away": "לא בבית",
+                "boost": "מוגבר",
+                "comfort": "נוחות",
+                "home": "בבית",
+                "sleep": "שינה",
+                "activity": "פעילות"
+            },
+            "hvac_action": {
+                "off": "כבוי",
+                "heating": "חימום",
+                "cooling": "קירור",
+                "drying": "מייבש",
+                "idle": "כבוי",
+                "fan": "מאוורר"
             }
         }
     },
@@ -1274,5 +1401,11 @@
         "system-admin": "מנהלים",
         "system-users": "משתמשים",
         "system-read-only": "משתמשים לקריאה בלבד"
+    },
+    "config_entry": {
+        "disabled_by": {
+            "user": "משתמש",
+            "integration": "אינטגרציה"
+        }
     }
 }

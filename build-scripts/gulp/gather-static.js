@@ -69,10 +69,6 @@ function copyMapPanel(staticDir) {
 
 function compressStatic(staticDir) {
   const staticPath = genStaticPath(staticDir);
-  const fonts = gulp
-    .src(staticPath("fonts/**/*.ttf"))
-    .pipe(zopfli())
-    .pipe(gulp.dest(staticPath("fonts")));
   const polyfills = gulp
     .src(staticPath("polyfills/*.js"))
     .pipe(zopfli())
@@ -82,7 +78,7 @@ function compressStatic(staticDir) {
     .pipe(zopfli())
     .pipe(gulp.dest(staticPath("translations")));
 
-  return merge(fonts, polyfills, translations);
+  return merge(polyfills, translations);
 }
 
 gulp.task("copy-static", (done) => {
@@ -116,5 +112,17 @@ gulp.task("copy-static-demo", (done) => {
   copyMapPanel(paths.demo_static);
   copyFonts(paths.demo_static);
   copyTranslations(paths.demo_static);
+  done();
+});
+
+gulp.task("copy-static-cast", (done) => {
+  // Copy app static files
+  fs.copySync(polyPath("public/static"), paths.cast_static);
+  // Copy cast static files
+  fs.copySync(path.resolve(paths.cast_dir, "public"), paths.cast_root);
+
+  copyMapPanel(paths.cast_static);
+  copyFonts(paths.cast_static);
+  copyTranslations(paths.cast_static);
   done();
 });

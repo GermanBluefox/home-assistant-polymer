@@ -10,11 +10,10 @@ import {
 import { HomeAssistant } from "../../../types";
 import { haStyle } from "../../../resources/styles";
 
-import "./system-log-card";
-import "./error-log-card";
 import "./system-health-card";
 
-const JS_VERSION = __BUILD__;
+const JS_TYPE = __BUILD__;
+const JS_VERSION = __VERSION__;
 const OPT_IN_PANEL = "states";
 
 class HaPanelDevInfo extends LitElement {
@@ -92,7 +91,7 @@ class HaPanelDevInfo extends LitElement {
           >.
         </p>
         <p>
-          Frontend JavaScript version: ${JS_VERSION}
+          Frontend version: ${JS_VERSION} - ${JS_TYPE}
           ${customUiList.length > 0
             ? html`
                 <div>
@@ -116,9 +115,9 @@ class HaPanelDevInfo extends LitElement {
           </mwc-button>
         </p>
       </div>
-      <system-health-card .hass=${this.hass}></system-health-card>
-      <system-log-card .hass=${this.hass}></system-log-card>
-      <error-log-card .hass=${this.hass}></error-log-card>
+      <div class="content">
+        <system-health-card .hass=${this.hass}></system-health-card>
+      </div>
     `;
   }
 
@@ -154,7 +153,6 @@ class HaPanelDevInfo extends LitElement {
         }
 
         .content {
-          padding: 16px 0px 16px 0;
           direction: ltr;
         }
 
@@ -179,6 +177,7 @@ class HaPanelDevInfo extends LitElement {
           display: block;
           max-width: 600px;
           margin: 0 auto;
+          padding-bottom: 16px;
         }
       `,
     ];

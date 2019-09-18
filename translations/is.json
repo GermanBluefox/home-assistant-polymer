@@ -7,12 +7,8 @@
         "history": "Saga",
         "mailbox": "Pósthólf",
         "shopping_list": "Innkaupalisti",
-        "dev-services": "Þjónustur",
-        "dev-states": "Stöður",
-        "dev-events": "Viðburðir",
-        "dev-templates": "Skapalón",
-        "dev-mqtt": "MQTT",
         "dev-info": "Upplýsingar",
+        "developer_tools": "Þróunarverkfæri",
         "calendar": "Dagatal",
         "profile": "Prófíll"
     },
@@ -122,13 +118,15 @@
             "eco": "Sparnaður",
             "heat_pump": "Hitadæla",
             "gas": "Gas",
-            "manual": "Handvirkt"
+            "manual": "Handvirkt",
+            "heat_cool": "Hita\/Kæla"
         },
         "cover": {
             "open": "Opin",
             "opening": "Opna",
             "closed": "Lokað",
-            "closing": "Loka"
+            "closing": "Loka",
+            "stopped": "Stöðvuð"
         },
         "device_tracker": {
             "home": "Heima",
@@ -226,11 +224,14 @@
             "windy-variant": "Vindasamt"
         },
         "vacuum": {
+            "cleaning": "Að ryksuga",
+            "docked": "í tengikví",
             "error": "Villa",
             "idle": "Aðgerðalaus",
             "off": "Slökkt",
             "on": "Í gangi",
-            "paused": "Í bið"
+            "paused": "Í bið",
+            "returning": "Á leið tilbaka í tengikví"
         },
         "timer": {
             "active": "virkur",
@@ -248,6 +249,9 @@
             "error": "Villa",
             "entity_not_found": "Eining fannst ekki"
         },
+        "alarm_control_panel": {
+            "triggered": "Kveik"
+        },
         "device_tracker": {
             "home": "Heima",
             "not_home": "Fjarverandi"
@@ -263,6 +267,28 @@
                 "clear_completed": "Hreinsa lokið",
                 "add_item": "Bæta við hlut",
                 "microphone_tip": "Ýttu á hljóðnemann efst til hægri og segðu \"Add candy to my shopping list\""
+            },
+            "developer-tools": {
+                "tabs": {
+                    "services": {
+                        "title": "Þjónustur"
+                    },
+                    "states": {
+                        "title": "Stöður"
+                    },
+                    "events": {
+                        "title": "Viðburðir"
+                    },
+                    "templates": {
+                        "title": "Skapalón"
+                    },
+                    "mqtt": {
+                        "title": "MQTT"
+                    },
+                    "info": {
+                        "title": "Upplýsingar"
+                    }
+                }
             },
             "history": {
                 "showing_entries": "Sýni færslur fyrir",
@@ -288,6 +314,23 @@
                         "core": {
                             "header": "Stillingar og stjórnun þjóns",
                             "introduction": "Að breyta stillingum getur verið þreytandi ferli og við vitum það. Þetta svæði mun reyna að létta þér lífið hvað það varðar.",
+                            "core_config": {
+                                "edit_requires_storage": "Ritill er óvirkur af því að stillingar eru vistaðar í configuration.yaml.",
+                                "location_name": "Nafnið á Home Assistant uppsetningunni",
+                                "latitude": "Breiddargráða",
+                                "longitude": "Lengdargráða",
+                                "elevation": "Hækkun",
+                                "elevation_meters": "metrar",
+                                "time_zone": "Tímabelti",
+                                "unit_system": "Einingarkerfi",
+                                "unit_system_imperial": "Imperial",
+                                "unit_system_metric": "Metra",
+                                "imperial_example": "Fahrenheit, pund",
+                                "metric_example": "Celsíus, kílógrömm",
+                                "save_button": "Vista"
+                            }
+                        },
+                        "server_control": {
                             "validation": {
                                 "heading": "Staðfesta stillingar",
                                 "introduction": "Staðfestu stillingarnar þínar ef þú hefur gert breytingar á stillingum og vilt ganga úr skugga um að þær séu í lagi",
@@ -308,21 +351,6 @@
                                 "introduction": "Stjórna Home Assistant miðlara... frá Home Assistant.",
                                 "restart": "Endurræsa",
                                 "stop": "Stöðva"
-                            },
-                            "core_config": {
-                                "edit_requires_storage": "Ritill er óvirkur af því að stillingar eru vistaðar í configuration.yaml.",
-                                "location_name": "Nafnið á Home Assistant uppsetningunni",
-                                "latitude": "Breiddargráða",
-                                "longitude": "Lengdargráða",
-                                "elevation": "Hækkun",
-                                "elevation_meters": "metrar",
-                                "time_zone": "Tímabelti",
-                                "unit_system": "Einingarkerfi",
-                                "unit_system_imperial": "Imperial",
-                                "unit_system_metric": "Metra",
-                                "imperial_example": "Fahrenheit, pund",
-                                "metric_example": "Celsíus, kílógrömm",
-                                "save_button": "Vista"
                             }
                         }
                     }
@@ -351,10 +379,14 @@
                         "unsaved_confirm": "Þú ert með óvistaðar breytingar. Ertu viss um að þú viljir fara?",
                         "alias": "Nafn",
                         "triggers": {
+                            "header": "Kveikjur",
+                            "introduction": "Kveikjur sjá um að ræsa sjálfvirkni reglur. Það er mögulegt að tilgreina margar kveikjur fyrir sömu regluna. Þegar kveikja er ræst þá mun Home Assistant sannreyna skilyrðin ef einhver og kalla á aðgerðina.",
+                            "add": "Bæta við kveikju",
                             "duplicate": "Fjölfalda",
                             "delete": "Eyða",
                             "delete_confirm": "Ert þú viss um að þú viljir eyða?",
                             "unsupported_platform": "Vettvangur ekki studdur: {platform}",
+                            "type_select": "Gerð kveikju",
                             "type": {
                                 "event": {
                                     "label": "Viðburður",
@@ -378,13 +410,18 @@
                                 },
                                 "numeric_state": {
                                     "above": "Yfir",
-                                    "below": "Undir"
+                                    "below": "Undir",
+                                    "value_template": "Gildissniðmát (valfrjálst)"
                                 },
                                 "sun": {
                                     "label": "Sól",
                                     "event": "Viðburður:",
                                     "sunrise": "Sólarupprás",
                                     "sunset": "Sólsetur"
+                                },
+                                "template": {
+                                    "label": "Sniðmát",
+                                    "value_template": "Gildissniðmát"
                                 },
                                 "time": {
                                     "label": "Tími",
@@ -393,6 +430,7 @@
                                 "zone": {
                                     "label": "Öryggissvæði",
                                     "entity": "Eining með staðsetningu",
+                                    "zone": "Svæði",
                                     "event": "Viðburður:",
                                     "enter": "Koma",
                                     "leave": "Brottför"
@@ -414,8 +452,12 @@
                                     "event": "Viðburður:",
                                     "enter": "Koma",
                                     "leave": "Brottför"
+                                },
+                                "device": {
+                                    "label": "Tæki"
                                 }
-                            }
+                            },
+                            "learn_more": "Læra meira um kveikjur"
                         },
                         "conditions": {
                             "header": "Skilyrði",
@@ -432,7 +474,8 @@
                                 },
                                 "numeric_state": {
                                     "above": "Yfir",
-                                    "below": "Undir"
+                                    "below": "Undir",
+                                    "value_template": "Gildissniðmát (valfrjálst)"
                                 },
                                 "sun": {
                                     "label": "Sól",
@@ -440,6 +483,10 @@
                                     "after": "Eftir:",
                                     "sunrise": "Sólarupprás",
                                     "sunset": "Sólsetur"
+                                },
+                                "template": {
+                                    "label": "Sniðmát",
+                                    "value_template": "Gildissniðmát"
                                 },
                                 "time": {
                                     "label": "Tími",
@@ -474,14 +521,19 @@
                                 },
                                 "wait_template": {
                                     "label": "Bið",
-                                    "wait_template": "Bið skapalón",
+                                    "wait_template": "Bið sniðmát",
                                     "timeout": "Tímamörk (valfrjálst)"
                                 },
                                 "condition": {
                                     "label": "Skilyrði"
                                 },
                                 "event": {
+                                    "label": "Skjóta viðburði",
+                                    "event": "Viðburður:",
                                     "service_data": "Þjónustu gögn"
+                                },
+                                "device_id": {
+                                    "label": "Tæki"
                                 }
                             },
                             "learn_more": "Læra meira um aðgerðir"
@@ -496,7 +548,33 @@
                 },
                 "zwave": {
                     "caption": "Z-Wave",
-                    "description": "Stjórnaðu Z-Wave netinu þínu"
+                    "description": "Stjórnaðu Z-Wave netinu þínu",
+                    "network_management": {
+                        "header": "Z-Wave netumsýsla"
+                    },
+                    "network_status": {
+                        "network_stopped": "Z-Wave net stöðvað",
+                        "network_starting": "Ræsi Z-Wave net...",
+                        "network_starting_note": "Þetta gæti tekið smá stund, veltur á stærð netsins.",
+                        "network_started": "Z-Wave net ræst"
+                    },
+                    "services": {
+                        "start_network": "Ræsa net",
+                        "stop_network": "Stöðva net",
+                        "heal_network": "Lækna net",
+                        "test_network": "Prófa net",
+                        "soft_reset": "Mjúk endurstilling",
+                        "save_config": "Vista stillingar",
+                        "cancel_command": "Hætta við skipun"
+                    },
+                    "common": {
+                        "unknown": "óþekkt"
+                    },
+                    "node_config": {
+                        "seconds": "sekúndur",
+                        "config_value": "Stillingargildi",
+                        "set_config_parameter": "Stilltu Config Parameter"
+                    }
                 },
                 "users": {
                     "caption": "Notendur",
@@ -617,6 +695,34 @@
                         "device_tracker_picked": "Rekja tæki",
                         "device_tracker_pick": "Velja tæki til að rekja"
                     }
+                },
+                "server_control": {
+                    "caption": "Stjórnun þjóns",
+                    "description": "Endurræsa og stöðva Home Assistant þjóni",
+                    "section": {
+                        "validation": {
+                            "heading": "Staðfesta stillingar",
+                            "introduction": "Staðfestu stillingarnar þínar ef þú hefur gert breytingar á stillingum og vilt ganga úr skugga um að þær séu í lagi",
+                            "check_config": "Athuga stillingar",
+                            "valid": "Stillingar í lagi!",
+                            "invalid": "Stillingar ógildar"
+                        },
+                        "reloading": {
+                            "heading": "Endurhleðsla stillinga",
+                            "introduction": "Sumir hlutar af Home Assistant er hægt að hlaða inn að nýju án þess að það krefjist endurræsingar. Með því að velja að endurhlaða þá mun sú aðgerð hlaða inn nýjum stillingum.",
+                            "core": "Endurhlaða kjarna",
+                            "group": "Endurhlaða hópa",
+                            "automation": "Endurhlaða sjálfvirkni",
+                            "script": "Endurhlaða skriftum",
+                            "scene": "Endurhlaða senum"
+                        },
+                        "server_management": {
+                            "heading": "Stjórnun miðlara",
+                            "introduction": "Stjórna Home Assistant miðlara... frá Home Assistant.",
+                            "restart": "Endurræsa",
+                            "stop": "Stöðva"
+                        }
+                    }
                 }
             },
             "profile": {
@@ -662,7 +768,6 @@
                 },
                 "current_user": "Þú ert skráð(ur) inn sem {fullName}.",
                 "is_owner": "Þú ert eigandi.",
-                "logout": "Skrá út",
                 "change_password": {
                     "header": "Breyta lykilorði",
                     "current_password": "Núverandi lykilorð",
@@ -683,6 +788,11 @@
                     "step_done": "Uppsetningu lokið fyrir {step}",
                     "close": "Loka",
                     "submit": "Senda"
+                },
+                "logout": "Skrá út",
+                "force_narrow": {
+                    "header": "Alltaf fela hliðarstikuna",
+                    "description": "Þetta mun fela hliðarstikuna með sambærilegum hætti og á snjalltækum."
                 }
             },
             "page-authorize": {
@@ -779,7 +889,7 @@
             "page-onboarding": {
                 "intro": "Ertu tilbúinn að vekja heimilið þitt, endurheimta friðhelgi þína og gerast þáttakandi í  samfélagi grúskara á heimsvísu?",
                 "user": {
-                    "intro": "Hefjumst handa með því að byrja á að stona notanda aðgang.",
+                    "intro": "Hefjumst handa með því að byrja á að stofna notanda aðgang.",
                     "required_field": "Skilyrt",
                     "data": {
                         "name": "Nafn",
@@ -794,11 +904,13 @@
                     }
                 },
                 "integration": {
+                    "intro": "Tæki og þjónustur koma fram í Home Assistant sem samþættingar. Þú getur farið í uppsetningu á þeim núna eða síðar í gegnum stillingar skjáinn.",
                     "more_integrations": "Meira",
                     "finish": "Ljúka"
                 },
                 "core-config": {
                     "intro": "Hæ {name}, velkomin(n) í Home Assistant. Hvað á heimilið þitt að heita?",
+                    "intro_location": "Okkur langar að vita hvar þú býrð. Þessar upplýsingar munu hjálpa varðandi upplýsingar og uppsetningu á sólar-tengdri sjálfvirkni. Þessum upplýsingum er aldrei deilt út fyrir þitt net.",
                     "location_name_default": "Heima",
                     "button_detect": "Uppgötva",
                     "finish": "Næsta"
@@ -890,8 +1002,12 @@
                 "config": {
                     "arsaboo": {
                         "names": {
+                            "upstairs": "Uppi",
                             "family_room": "Fjölskyldurými",
                             "kitchen": "Eldhús",
+                            "patio": "Verönd",
+                            "hallway": "Gangur",
+                            "master_bedroom": "Hjónaherbergi",
                             "left": "Vinstri",
                             "right": "Hægri",
                             "mirror": "Spegill"
@@ -899,6 +1015,8 @@
                         "labels": {
                             "lights": "Ljós",
                             "information": "Upplýsingar",
+                            "morning_commute": "Morgunferðalag",
+                            "commute_home": "Á leiðinni heim",
                             "entertainment": "Skemmtun",
                             "activity": "Virkni",
                             "hdmi_input": "HDMI inntak",
@@ -917,7 +1035,6 @@
         },
         "sidebar": {
             "log_out": "Skrá út",
-            "developer_tools": "Þróunarverkfæri",
             "external_app_configuration": "Stillingar forrits"
         },
         "common": {
@@ -982,6 +1099,10 @@
                 "code": "Kóði",
                 "clear_code": "Hreinsa"
             },
+            "automation": {
+                "last_triggered": "Síðast kveikt",
+                "trigger": "Kveikja"
+            },
             "cover": {
                 "position": "Staðsetning"
             },
@@ -1003,9 +1124,13 @@
             "climate": {
                 "currently": "Er núna",
                 "on_off": "Kveikt \/ slökkt",
+                "target_temperature": "Viðmiðunar hitastig",
+                "target_humidity": "Viðmiðunar rakastig",
                 "operation": "Aðgerð",
                 "fan_mode": "Viftuhamur",
-                "swing_mode": "Sveifluhamur"
+                "swing_mode": "Sveifluhamur",
+                "away_mode": "Fjarverandi hamur",
+                "preset_mode": "Forstilling"
             },
             "lock": {
                 "code": "Kóði",
@@ -1025,7 +1150,16 @@
                 "currently": "Er núna",
                 "on_off": "Kveikt \/ slökkt",
                 "target_temperature": "Viðmiðunarhitastig",
-                "operation": "Aðgerð"
+                "operation": "Aðgerð",
+                "away_mode": "Fjarverandi hamur"
+            },
+            "timer": {
+                "actions": {
+                    "start": "byrja",
+                    "pause": "hlé",
+                    "cancel": "hætta við",
+                    "finish": "lokið"
+                }
             }
         },
         "components": {
@@ -1079,6 +1213,11 @@
                 "updater": {
                     "title": "Uppfærslu leiðbeiningar"
                 }
+            },
+            "options_flow": {
+                "form": {
+                    "header": "Valkostir"
+                }
             }
         },
         "auth_store": {
@@ -1094,6 +1233,7 @@
     },
     "domain": {
         "automation": "Sjálfvirkni",
+        "binary_sensor": "Tvíundar skynjari",
         "calendar": "Dagatal",
         "camera": "Myndavél",
         "climate": "Loftslag",
@@ -1145,6 +1285,14 @@
                 "off": "Slökkt",
                 "on": "Kveikt",
                 "auto": "Sjálfvirkt"
+            },
+            "preset_mode": {
+                "none": "Ekkert",
+                "eco": "Sparnaður",
+                "away": "Fjarverandi",
+                "comfort": "Þægindi",
+                "home": "Heima",
+                "sleep": "Svefn"
             }
         }
     },
@@ -1152,5 +1300,10 @@
         "system-admin": "Stjórnendur",
         "system-users": "Notendur",
         "system-read-only": "Notendur með lesaðgang"
+    },
+    "config_entry": {
+        "disabled_by": {
+            "user": "Notandi"
+        }
     }
 }

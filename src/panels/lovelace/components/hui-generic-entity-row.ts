@@ -17,6 +17,7 @@ import "../components/hui-warning";
 import { HomeAssistant } from "../../../types";
 import { computeRTL } from "../../../common/util/compute_rtl";
 import { EntitiesCardEntityConfig } from "../cards/types";
+import { toggleAttribute } from "../../../common/dom/toggle_attribute";
 
 class HuiGenericEntityRow extends LitElement {
   @property() public hass?: HomeAssistant;
@@ -47,8 +48,9 @@ class HuiGenericEntityRow extends LitElement {
 
     return html`
       <state-badge
-        .stateObj="${stateObj}"
-        .overrideIcon="${this.config.icon}"
+        .hass=${this.hass}
+        .stateObj=${stateObj}
+        .overrideIcon=${this.config.icon}
       ></state-badge>
       <div class="flex">
         <div class="info">
@@ -63,8 +65,8 @@ class HuiGenericEntityRow extends LitElement {
               : this.config.secondary_info === "last-changed"
               ? html`
                   <ha-relative-time
-                    .hass="${this.hass}"
-                    .datetime="${stateObj.last_changed}"
+                    .hass=${this.hass}
+                    .datetime=${stateObj.last_changed}
                   ></ha-relative-time>
                 `
               : ""}
@@ -79,7 +81,7 @@ class HuiGenericEntityRow extends LitElement {
   protected updated(changedProps: PropertyValues): void {
     super.updated(changedProps);
     if (changedProps.has("hass")) {
-      this.toggleAttribute("rtl", computeRTL(this.hass!));
+      toggleAttribute(this, "rtl", computeRTL(this.hass!));
     }
   }
 

@@ -6,8 +6,7 @@
         "logbook": "பதிவேடுகள்",
         "history": "வரலாறு",
         "mailbox": "அஞ்சல் பெட்டி",
-        "shopping_list": "பொருட்கள் பட்டியல்",
-        "dev-mqtt": "MQTT"
+        "shopping_list": "பொருட்கள் பட்டியல்"
     },
     "state": {
         "default": {
@@ -236,17 +235,27 @@
         "sidebar": {
             "log_out": "வெளியேறு"
         },
+        "panel": {
+            "developer-tools": {
+                "tabs": {
+                    "mqtt": {
+                        "title": "MQTT"
+                    }
+                }
+            },
+            "config": {
+                "zwave": {
+                    "caption": "Z-Wave",
+                    "node_config": {
+                        "set_config_parameter": "கட்டமைப்பு அளவுருவை அமைக்கவும்"
+                    }
+                }
+            }
+        },
         "login-form": {
             "password": "கடவுச்சொல்",
             "remember": "நினைவில் கொள்",
             "log_in": "உள் நுழை"
-        },
-        "panel": {
-            "config": {
-                "zwave": {
-                    "caption": "Z-Wave"
-                }
-            }
         }
     },
     "domain": {

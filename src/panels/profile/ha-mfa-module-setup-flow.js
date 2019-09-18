@@ -73,6 +73,7 @@ class HaMfaModuleSetupFlow extends LocalizeMixin(EventsMixin(PolymerElement)) {
           <template is="dom-if" if="[[_step]]">
             <template is="dom-if" if="[[_equals(_step.type, 'abort')]]">
               <ha-markdown
+                allowsvg
                 content="[[_computeStepAbortedReason(localize, _step)]]"
               ></ha-markdown>
             </template>
@@ -90,8 +91,8 @@ class HaMfaModuleSetupFlow extends LocalizeMixin(EventsMixin(PolymerElement)) {
                 if="[[_computeStepDescription(localize, _step)]]"
               >
                 <ha-markdown
+                  allowsvg
                   content="[[_computeStepDescription(localize, _step)]]"
-                  allow-svg
                 ></ha-markdown>
               </template>
 
@@ -286,9 +287,7 @@ class HaMfaModuleSetupFlow extends LocalizeMixin(EventsMixin(PolymerElement)) {
 
   _computeStepDescription(localize, step) {
     const args = [
-      `component.auth.mfa_setup.${step.handler}.step.${
-        step.step_id
-      }.description`,
+      `component.auth.mfa_setup.${step.handler}.step.${step.step_id}.description`,
     ];
     const placeholders = step.description_placeholders || {};
     Object.keys(placeholders).forEach((key) => {
@@ -302,9 +301,7 @@ class HaMfaModuleSetupFlow extends LocalizeMixin(EventsMixin(PolymerElement)) {
     // Returns a callback for ha-form to calculate labels per schema object
     return (schema) =>
       localize(
-        `component.auth.mfa_setup.${step.handler}.step.${step.step_id}.data.${
-          schema.name
-        }`
+        `component.auth.mfa_setup.${step.handler}.step.${step.step_id}.data.${schema.name}`
       ) || schema.name;
   }
 

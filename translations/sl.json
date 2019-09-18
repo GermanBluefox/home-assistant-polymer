@@ -7,12 +7,8 @@
         "history": "Zgodovina",
         "mailbox": "Nabiralnik",
         "shopping_list": "Nakupovalni seznam",
-        "dev-services": "Storitve",
-        "dev-states": "Stanja",
-        "dev-events": "Dogodki",
-        "dev-templates": "Predloge",
-        "dev-mqtt": "MQTT",
         "dev-info": "Info",
+        "developer_tools": "Orodja za razvijalce",
         "calendar": "Koledar",
         "profile": "Profil"
     },
@@ -145,7 +141,8 @@
             "high_demand": "Visoka poraba",
             "heat_pump": "Toplotna črpalka",
             "gas": "Plin",
-            "manual": "Ročno"
+            "manual": "Ročno",
+            "heat_cool": "Gretje\/Hlajenje"
         },
         "configurator": {
             "configure": "Konfiguriraj",
@@ -254,7 +251,8 @@
             "snowy-rainy": "Snežno, deževno",
             "sunny": "Sončno",
             "windy": "Vetrovno",
-            "windy-variant": "Vetrovno"
+            "windy-variant": "Vetrovno",
+            "exceptional": "Izjemno"
         },
         "vacuum": {
             "cleaning": "Čistim",
@@ -311,6 +309,31 @@
                 "add_item": "Dodaj potrebščino",
                 "microphone_tip": "Tapnite mikrofon zgoraj desno in recite (Le ANG) \"Add candy to my shopping list\""
             },
+            "developer-tools": {
+                "tabs": {
+                    "services": {
+                        "title": "Storitve"
+                    },
+                    "states": {
+                        "title": "Stanja"
+                    },
+                    "events": {
+                        "title": "Dogodki"
+                    },
+                    "templates": {
+                        "title": "Predloge"
+                    },
+                    "mqtt": {
+                        "title": "MQTT"
+                    },
+                    "info": {
+                        "title": "Info"
+                    },
+                    "logs": {
+                        "title": "Dnevniki"
+                    }
+                }
+            },
             "history": {
                 "showing_entries": "Prikaz vnosov za",
                 "period": "Obdobje"
@@ -335,6 +358,23 @@
                         "core": {
                             "header": "Konfiguracija in nadzor strežnika",
                             "introduction": "Spreminjanje konfiguracije je lahko zapleten proces. Vemo. Ta del bo poskušal narediti vaše življenje malo lažje.",
+                            "core_config": {
+                                "edit_requires_storage": "Urejevalnik je onemogočen, ker je konfiguracija shranjena v config.yaml.",
+                                "location_name": "Ime vašega instalacije vašega Home Assistant-a.",
+                                "latitude": "Zemljepisna širina",
+                                "longitude": "Zemljepisna dolžina",
+                                "elevation": "Nadmorska višina",
+                                "elevation_meters": "metrov",
+                                "time_zone": "Časovni pas",
+                                "unit_system": "Sistem enot",
+                                "unit_system_imperial": "Imperial",
+                                "unit_system_metric": "Metrično",
+                                "imperial_example": "Fahrenheit, funtov",
+                                "metric_example": "Celzija, kilogramov",
+                                "save_button": "Shrani"
+                            }
+                        },
+                        "server_control": {
                             "validation": {
                                 "heading": "Preverjanje konfiguracije",
                                 "introduction": "Potrdite svojo konfiguracijo, če ste nedavno spremenili svojo konfiguracijo in se prepričajte, da je vse veljavno",
@@ -355,21 +395,6 @@
                                 "introduction": "Nadzirajte strežnik Home Assistant ... iz Home Assistanta",
                                 "restart": "Ponovni zagon",
                                 "stop": "Ustavi"
-                            },
-                            "core_config": {
-                                "edit_requires_storage": "Urejevalnik je onemogočen, ker je konfiguracija shranjena v config.yaml.",
-                                "location_name": "Ime vašega instalacije vašega Home Assistant-a.",
-                                "latitude": "Zemljepisna širina",
-                                "longitude": "Zemljepisna dolžina",
-                                "elevation": "Nadmorska višina",
-                                "elevation_meters": "metrov",
-                                "time_zone": "Časovni pas",
-                                "unit_system": "Sistem enot",
-                                "unit_system_imperial": "Imperial",
-                                "unit_system_metric": "Metrično",
-                                "imperial_example": "Fahrenheit, funtov",
-                                "metric_example": "Celzija, kilogramov",
-                                "save_button": "Shrani"
                             }
                         }
                     }
@@ -477,6 +502,9 @@
                                     "event": "Dogodek:",
                                     "enter": "Vnesite",
                                     "leave": "Odidi"
+                                },
+                                "device": {
+                                    "label": "Naprava"
                                 }
                             },
                             "learn_more": "Več o sprožilcih"
@@ -523,6 +551,9 @@
                                     "label": "Območje",
                                     "entity": "Entitete z lokacijo",
                                     "zone": "Območje"
+                                },
+                                "device": {
+                                    "label": "Naprava"
                                 }
                             },
                             "learn_more": "Več o pogojih"
@@ -557,6 +588,9 @@
                                     "label": "Požarni dogodek",
                                     "event": "Dogodek:",
                                     "service_data": "Podatki storitve"
+                                },
+                                "device_id": {
+                                    "label": "Naprava"
                                 }
                             },
                             "learn_more": "Več o akcijah"
@@ -571,7 +605,51 @@
                 },
                 "zwave": {
                     "caption": "Z-Wave",
-                    "description": "Upravljajte Z-Wave omrežje"
+                    "description": "Upravljajte Z-Wave omrežje",
+                    "network_management": {
+                        "header": "Upravljanje z omrežjem Z-Wave",
+                        "introduction": "Zaženite ukaze, ki vplivajo na omrežje Z-Wave. Ne boste dobili povratne informacije o tem, ali je večina ukazov uspela, vendar lahko preverite dnevnik OZW, da boste izvedeli več."
+                    },
+                    "network_status": {
+                        "network_stopped": "Omrežje Z-Wave ustavljeno",
+                        "network_starting": "Zaganjam Z-Wave Omrežje...",
+                        "network_starting_note": "Odvisno od velikosti vašega omrežja, lahko to traja nekaj časa.",
+                        "network_started": "Z-Wave omrežje zagnano",
+                        "network_started_note_some_queried": "Budna vozlišča so bila poizvedana. Speča bodo, ko se zbudijo.",
+                        "network_started_note_all_queried": "Vsa vozlišča so bila poizvedena."
+                    },
+                    "services": {
+                        "start_network": "Zaženite omrežje",
+                        "stop_network": "Ustavite omrežje",
+                        "heal_network": "Pozdravite omrežje",
+                        "test_network": "Preizkusite omrežje",
+                        "soft_reset": "Resetiraj",
+                        "save_config": "Shrani konfiguracijo",
+                        "add_node_secure": "Dodaj vozlišče varno",
+                        "add_node": "Dodaj vozlišče",
+                        "remove_node": "Odstrani vozlišče",
+                        "cancel_command": "Prekliči ukaz"
+                    },
+                    "common": {
+                        "value": "Vrednost",
+                        "instance": "Instanca",
+                        "index": "Indeks",
+                        "unknown": "Neznano",
+                        "wakeup_interval": "Interval bujenja"
+                    },
+                    "values": {
+                        "header": "Vrednosti vozlišča"
+                    },
+                    "node_config": {
+                        "header": "Možnosti konfiguracije vozlišča",
+                        "seconds": "Sekund",
+                        "set_wakeup": "Nastavite Interval bujenja",
+                        "config_parameter": "Vrednostni parameter",
+                        "config_value": "vrednost nastavite",
+                        "true": "Prav",
+                        "false": "Lažno",
+                        "set_config_parameter": "Nastavite Config Parameter"
+                    }
                 },
                 "users": {
                     "caption": "Uporabniki",
@@ -682,7 +760,10 @@
                         "unavailable": "Ta entiteta trenutno ni na voljo.",
                         "default_name": "Novo območje",
                         "delete": "BRISANJE",
-                        "update": "POSODOBITEV"
+                        "update": "POSODOBITEV",
+                        "enabled_label": "Omogoči entiteto",
+                        "enabled_cause": "Onemogočeno zaradi {cause}.",
+                        "enabled_description": "Onemogočeni subjekti ne bodo dodani v Home Assistant-a."
                     }
                 },
                 "person": {
@@ -693,6 +774,36 @@
                         "device_tracker_intro": "Izberite naprave, ki pripadajo tej osebi.",
                         "device_tracker_picked": "Sledi Napravi",
                         "device_tracker_pick": "Izberite napravo za sledenje"
+                    }
+                },
+                "server_control": {
+                    "caption": "Nadzor strežnika",
+                    "description": "Znova zaženite in ustavite strežnik Home Assistant",
+                    "section": {
+                        "validation": {
+                            "heading": "Preverjanje konfiguracije",
+                            "introduction": "Potrdite svojo konfiguracijo, če ste nedavno spremenili svojo konfiguracijo in se prepričajte, da je vse veljavno",
+                            "check_config": "Preverite nastavitve",
+                            "valid": "Konfiguracija veljavna!",
+                            "invalid": "Konfiguracija ni veljavna"
+                        },
+                        "reloading": {
+                            "heading": "Ponovno nalaganje konfiguracije",
+                            "introduction": "Nekateri deli Home Assistanta se lahko znova naložijo brez potrebe po ponovnem zagonu. S pritiskom na \"ponovno naloži\" se bo naložila nova konfiguracija",
+                            "core": "Ponovno naloži jedro",
+                            "group": "Ponovno naloži skupine",
+                            "automation": "Ponovno naloži avtomatizacije",
+                            "script": "Ponovno naloži skripte",
+                            "scene": "Ponovno naloži scene"
+                        },
+                        "server_management": {
+                            "heading": "Upravljanje strežnika",
+                            "introduction": "Nadzirajte strežnik Home Assistant ... iz Home Assistant-a",
+                            "restart": "Ponovni zagon",
+                            "stop": "Ustavi",
+                            "confirm_restart": "Ali ste prepričani, da želite znova zagnati Home Assistant-a?",
+                            "confirm_stop": "Ali ste prepričani, da želite ustaviti Home Assistant-a?"
+                        }
                     }
                 }
             },
@@ -744,7 +855,6 @@
                 },
                 "current_user": "Trenutno ste prijavljeni kot {fullName} .",
                 "is_owner": "Ste lastnik.",
-                "logout": "Odjava",
                 "change_password": {
                     "header": "Spremeni geslo",
                     "current_password": "Trenutno geslo",
@@ -765,6 +875,11 @@
                     "step_done": "Nastavitev je bila opravljena za {step}",
                     "close": "Zapri",
                     "submit": "Pošlji"
+                },
+                "logout": "Odjava",
+                "force_narrow": {
+                    "header": "Vedno skrij stransko vrstico",
+                    "description": "To bo privzeto skrilo stransko vrstico, podobno kot pri mobilnih napravah."
                 }
             },
             "page-authorize": {
@@ -954,6 +1069,10 @@
                         "save": "Shrani",
                         "unsaved_changes": "Neshranjene spremembe",
                         "saved": "Shranjeno"
+                    },
+                    "edit_lovelace": {
+                        "header": "Naslov vašega uporabniškega vmesnika Lovelace",
+                        "explanation": "Ta naslov je prikazan nad vsemi vašimi pogledi v Lovelace-u."
                     }
                 },
                 "menu": {
@@ -1018,13 +1137,13 @@
         },
         "sidebar": {
             "log_out": "Odjava",
-            "developer_tools": "Orodja za razvijalce",
             "external_app_configuration": "Konfiguracija aplikacije"
         },
         "common": {
             "loading": "Nalaganje",
             "cancel": "Prekliči",
-            "save": "Shrani"
+            "save": "Shrani",
+            "successfully_saved": "Shranjeno"
         },
         "duration": {
             "day": "{count} {count, plural,\none {Dan}\nother {Dni}\n}",
@@ -1100,7 +1219,9 @@
             "fan": {
                 "speed": "Hitrost",
                 "oscillate": "Nihanje",
-                "direction": "Smer"
+                "direction": "Smer",
+                "forward": "Naprej",
+                "reverse": "Obratno"
             },
             "light": {
                 "brightness": "Svetlost",
@@ -1122,7 +1243,8 @@
                 "fan_mode": "Način ventilatorja",
                 "swing_mode": "Način Swing",
                 "away_mode": "Način odsotnosti",
-                "aux_heat": "Dodatna toplota"
+                "aux_heat": "Dodatna toplota",
+                "preset_mode": "Prednastavitev"
             },
             "lock": {
                 "code": "Koda",
@@ -1144,6 +1266,14 @@
                 "target_temperature": "Ciljna temperatura",
                 "operation": "Delovanje",
                 "away_mode": "Način odsotnosti"
+            },
+            "timer": {
+                "actions": {
+                    "start": "Zagon",
+                    "pause": "pavza",
+                    "cancel": "Prekliči",
+                    "finish": "Dokončaj"
+                }
             }
         },
         "components": {
@@ -1196,6 +1326,33 @@
                 },
                 "updater": {
                     "title": "Navodila za posodabitev"
+                }
+            },
+            "options_flow": {
+                "form": {
+                    "header": "Možnosti"
+                },
+                "success": {
+                    "description": "Možnosti so uspešno shranjene."
+                }
+            },
+            "config_entry_system_options": {
+                "title": "Sistemske možnosti",
+                "enable_new_entities_label": "Omogočite novo dodane subjekte.",
+                "enable_new_entities_description": "Če je onemogočeno, novo odkrite entitete ne bodo samodejno dodane v Home Assistant."
+            },
+            "zha_device_info": {
+                "manuf": "naredil: {manufacturer}",
+                "no_area": "Brez območja",
+                "services": {
+                    "reconfigure": "Ponovno konfigurirajte napravo ZHA (\"pozdravite\" napravo). To uporabite, če imate z njo težave. Če ta naprava deluje na baterije, se prepričajte, da je budna in sprejema ukaze pri uporabi te storitve.",
+                    "updateDeviceName": "Nastavite ime po meri za to napravo v registru naprav.",
+                    "remove": "Odstranite napravo iz omrežja ZigBee."
+                },
+                "zha_device_card": {
+                    "device_name_placeholder": "Ime, ki ga je dodelil uporabnik",
+                    "area_picker_label": "Območje",
+                    "update_name_button": "Posodobi ime"
                 }
             }
         },
@@ -1267,6 +1424,24 @@
                 "off": "Izključen",
                 "on": "Vklopljen",
                 "auto": "Samodejno"
+            },
+            "preset_mode": {
+                "none": "Noben",
+                "eco": "Eko",
+                "away": "Odsoten",
+                "boost": "Povečanje",
+                "comfort": "Udobje",
+                "home": "Doma",
+                "sleep": "Spanje",
+                "activity": "Dejavnost"
+            },
+            "hvac_action": {
+                "off": "Izključen",
+                "heating": "Ogrevanje",
+                "cooling": "Hlajenje",
+                "drying": "Sušenje",
+                "idle": "V pripravljenosti",
+                "fan": "Ventilator"
             }
         }
     },
@@ -1274,5 +1449,12 @@
         "system-admin": "Skrbniki",
         "system-users": "Uporabniki",
         "system-read-only": "Uporabniki \"samo za branje\""
+    },
+    "config_entry": {
+        "disabled_by": {
+            "user": "Uporabnik",
+            "integration": "Integracija",
+            "config_entry": "Vnos konfiguracije"
+        }
     }
 }

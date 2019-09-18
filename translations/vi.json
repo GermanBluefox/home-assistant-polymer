@@ -7,12 +7,8 @@
         "history": "Lịch sử",
         "mailbox": "Hộp thư",
         "shopping_list": "Danh sách mua sắm",
-        "dev-services": "Dịch vụ",
-        "dev-states": "Trạng thái",
-        "dev-events": "Sự kiện",
-        "dev-templates": "Mẫu sẵn",
-        "dev-mqtt": "MQTT",
         "dev-info": "Thông tin",
+        "developer_tools": "Công cụ Nhà phát triển",
         "calendar": "Lịch",
         "profile": "Hồ sơ"
     },
@@ -145,7 +141,8 @@
             "high_demand": "Nhu cầu cao",
             "heat_pump": "Bơm nhiệt",
             "gas": "Khí",
-            "manual": "Hướng dẫn"
+            "manual": "Hướng dẫn",
+            "heat_cool": "Nóng\/Lạnh"
         },
         "configurator": {
             "configure": "Cấu hình",
@@ -279,7 +276,9 @@
     "state_badge": {
         "default": {
             "unknown": "KB",
-            "unavailable": "KKD"
+            "unavailable": "KKD",
+            "error": "Lỗi",
+            "entity_not_found": "Không tìm thấy thực thể"
         },
         "alarm_control_panel": {
             "armed": "VT",
@@ -309,6 +308,28 @@
                 "add_item": "Thêm mục",
                 "microphone_tip": "Chạm vào micrô ở trên cùng bên phải và nói \"Thêm kẹo vào danh sách mua sắm của tôi\""
             },
+            "developer-tools": {
+                "tabs": {
+                    "services": {
+                        "title": "Dịch vụ"
+                    },
+                    "states": {
+                        "title": "Trạng thái"
+                    },
+                    "events": {
+                        "title": "Sự kiện"
+                    },
+                    "templates": {
+                        "title": "Mẫu sẵn"
+                    },
+                    "mqtt": {
+                        "title": "MQTT"
+                    },
+                    "info": {
+                        "title": "Thông tin"
+                    }
+                }
+            },
             "history": {
                 "showing_entries": "Hiển thị mục cho",
                 "period": "Giai đoạn"
@@ -333,6 +354,23 @@
                         "core": {
                             "header": "Cấu hình và kiểm soát máy chủ",
                             "introduction": "Thay đổi cấu hình của bạn có thể là một quá trình mệt mỏi. Chúng tôi biết. Phần này sẽ cố gắng làm cho việc đó dễ dàng hơn.",
+                            "core_config": {
+                                "edit_requires_storage": "Trình chỉnh sửa bị vô hiệu hóa do cấu hình được lưu trữ trong configure.yaml.",
+                                "location_name": "Tên cài đặt Home Assistant của bạn",
+                                "latitude": "Vĩ độ",
+                                "longitude": "Kinh độ",
+                                "elevation": "Độ cao",
+                                "elevation_meters": "mét",
+                                "time_zone": "Múi giờ",
+                                "unit_system": "Hệ thống đơn vị",
+                                "unit_system_imperial": "Hệ inch",
+                                "unit_system_metric": "Hệ mét",
+                                "imperial_example": "Độ F, pound",
+                                "metric_example": "Độ C, kilôgam",
+                                "save_button": "Lưu"
+                            }
+                        },
+                        "server_control": {
                             "validation": {
                                 "heading": "Xác nhận cấu hình",
                                 "introduction": "Xác thực cấu hình của bạn nếu gần đây bạn đã thực hiện một số thay đổi đối với cấu hình của bạn và muốn đảm bảo rằng nó là hợp lệ",
@@ -422,6 +460,7 @@
                                 },
                                 "sun": {
                                     "label": "Mặt trời",
+                                    "event": "Sự kiện:",
                                     "sunrise": "Bình minh",
                                     "sunset": "Hoàng hôn",
                                     "offset": "Bù đắp (tùy chọn)"
@@ -542,7 +581,9 @@
                                 }
                             },
                             "learn_more": "Tìm hiểu thêm về Hành động"
-                        }
+                        },
+                        "load_error_not_editable": "Chỉ tự động hóa trong automations.yaml là có thể chỉnh sửa.",
+                        "load_error_unknown": "Lỗi tải tự động hóa ({err_no})."
                     }
                 },
                 "script": {
@@ -551,7 +592,23 @@
                 },
                 "zwave": {
                     "caption": "Z-Wave",
-                    "description": "Quản lý mạng Z-Wave"
+                    "description": "Quản lý mạng Z-Wave",
+                    "services": {
+                        "soft_reset": "Khởi động lại",
+                        "save_config": "Lưu cấu hình",
+                        "cancel_command": "Hủy lệnh"
+                    },
+                    "common": {
+                        "value": "Giá trị",
+                        "index": "Mục lục"
+                    },
+                    "node_config": {
+                        "config_parameter": "Cấu hình tham số",
+                        "config_value": "Giá trị cấu hình",
+                        "true": "Đúng",
+                        "false": "Sai",
+                        "set_config_parameter": "Đặt tham số cấu hình"
+                    }
                 },
                 "users": {
                     "caption": "Người dùng",
@@ -599,13 +656,20 @@
                         "device_unavailable": "Thiết bị không khả dụng",
                         "entity_unavailable": "Thiết bị không khả dụng",
                         "no_area": "Không có khu vực"
+                    },
+                    "config_flow": {
+                        "external_step": {
+                            "description": "Bước này yêu cầu bạn truy cập một trang web bên ngoài để hoàn thành.",
+                            "open_site": "Mở trang web"
+                        }
                     }
                 },
                 "zha": {
                     "caption": "ZHA",
                     "description": "Quản lý mạng ZigBee Home Automation",
                     "services": {
-                        "reconfigure": "Cấu hình lại thiết bị ZHA (chữa thiết bị). Sử dụng điều này nếu bạn gặp vấn đề với thiết bị. Nếu thiết bị được đề cập là thiết bị chạy bằng pin, vui lòng đảm bảo thiết bị đã hoạt động và chấp nhận lệnh khi bạn sử dụng dịch vụ này."
+                        "reconfigure": "Cấu hình lại thiết bị ZHA (chữa thiết bị). Sử dụng điều này nếu bạn gặp vấn đề với thiết bị. Nếu thiết bị được đề cập là thiết bị chạy bằng pin, vui lòng đảm bảo thiết bị đã hoạt động và chấp nhận lệnh khi bạn sử dụng dịch vụ này.",
+                        "updateDeviceName": "Đặt tên tùy chỉnh cho thiết bị này trong sổ đăng ký thiết bị."
                     }
                 },
                 "area_registry": {
@@ -615,7 +679,9 @@
                         "header": "Đăng ký Khu vực",
                         "introduction": "Các khu vực được sử dụng để phân loại các thiết bị. Thông tin này sẽ được sử dụng trong toàn bộ Home Assistant để giúp bạn tổ chức giao diện, quyền và tích hợp với các hệ thống khác.",
                         "introduction2": "Để đặt các thiết bị trong một khu vực, hãy sử dụng liên kết bên dưới để điều hướng đến trang tích hợp và sau đó nhấp vào tích hợp được định cấu hình để truy cập vào thẻ thiết bị.",
-                        "integrations_page": "Trang tích hợp"
+                        "integrations_page": "Trang tích hợp",
+                        "no_areas": "Hình như bạn chưa có Khu vực nào!",
+                        "create_area": "TẠO KHU VỰC"
                     },
                     "no_areas": "Hình như bạn chưa có khu vực nào!",
                     "create_area": "TẠO KHU VỰC",
@@ -651,6 +717,33 @@
                         "device_tracker_intro": "Chọn các thiết bị thuộc về người này.",
                         "device_tracker_picked": "Thiết bị theo dõi",
                         "device_tracker_pick": "Chọn thiết bị để theo dõi"
+                    }
+                },
+                "server_control": {
+                    "caption": "Điều khiển máy chủ",
+                    "description": "Khởi động lại và dừng máy chủ Home Assistant",
+                    "section": {
+                        "validation": {
+                            "heading": "Xác nhận cấu hình",
+                            "introduction": "Xác thực cấu hình của bạn nếu gần đây bạn đã thực hiện một số thay đổi đối với cấu hình của bạn và muốn đảm bảo rằng nó là hợp lệ",
+                            "check_config": "Kiểm tra cấu hình",
+                            "valid": "Cấu hình hợp lệ!",
+                            "invalid": "Cấu hình không hợp lệ"
+                        },
+                        "reloading": {
+                            "heading": "Nạp lại Cấu hình ",
+                            "introduction": "Một số phần của Home Assistant có thể tải lại mà không yêu cầu khởi động lại. Nhấn nút tải lại sẽ gỡ bỏ cấu hình hiện tại của nó và tải một cấu hình mới.",
+                            "core": "Tải lại lõi",
+                            "group": "Tải lại nhóm",
+                            "automation": "Tải lại Tự động hóa",
+                            "script": "Tải lại Kịch bản"
+                        },
+                        "server_management": {
+                            "heading": "Quản lý máy chủ",
+                            "introduction": "Kiểm soát máy chủ Home Assistant của bạn từ Home Assistant.",
+                            "restart": "Khởi động lại",
+                            "stop": "Dừng"
+                        }
                     }
                 }
             },
@@ -702,7 +795,6 @@
                 },
                 "current_user": "Bạn hiện đang đăng nhập với tên {fullName} .",
                 "is_owner": "Bạn là chủ sở hữu.",
-                "logout": "Đăng xuất",
                 "change_password": {
                     "header": "Đổi mật khẩu",
                     "current_password": "Mật khẩu hiện tại",
@@ -723,6 +815,11 @@
                     "step_done": "Đã hoàn tất thiết lập cho {step}",
                     "close": "Đóng",
                     "submit": "Gửi đi"
+                },
+                "logout": "Đăng xuất",
+                "force_narrow": {
+                    "header": "Luôn ẩn thanh bên",
+                    "description": "Điều này sẽ ẩn thanh bên theo mặc định, tương tự như trải nghiệm di động."
                 }
             },
             "page-authorize": {
@@ -829,12 +926,27 @@
                     "data": {
                         "name": "Tên",
                         "username": "Tên đăng nhập",
-                        "password": "Mật khẩu"
+                        "password": "Mật khẩu",
+                        "password_confirm": "Xác nhận mật khẩu"
                     },
                     "create_account": "Tạo tài khoản",
                     "error": {
-                        "required_fields": "Điền vào tất cả các trường bắt buộc"
+                        "required_fields": "Điền vào tất cả các trường bắt buộc",
+                        "password_not_match": "Mật khẩu không khớp"
                     }
+                },
+                "integration": {
+                    "intro": "Các thiết bị và dịch vụ được trình bày trong Home Assistant dưới dạng tích hợp. Bạn có thể thiết lập chúng ngay bây giờ hoặc thực hiện sau từ màn hình Cấu hình.",
+                    "more_integrations": "Thêm",
+                    "finish": "Hoàn thành"
+                },
+                "core-config": {
+                    "intro": "Xin chào {name} , chào mừng bạn đến với Home Assistant. Bạn muốn đặt tên nhà của bạn thế nào?",
+                    "intro_location": "Chúng tôi muốn biết nơi bạn sống. Thông tin này sẽ giúp hiển thị thông tin và thiết lập tự động dựa trên mặt trời. Dữ liệu này không bao giờ được chia sẻ bên ngoài mạng của bạn.",
+                    "intro_location_detect": "Chúng tôi có thể giúp bạn điền thông tin này bằng cách yêu cầu một lần cho dịch vụ bên ngoài.",
+                    "location_name_default": "Nhà",
+                    "button_detect": "Phát hiện",
+                    "finish": "Kế tiếp"
                 }
             },
             "lovelace": {
@@ -848,6 +960,14 @@
                         "title": "Chào mừng về nhà",
                         "no_devices": "Trang này cho phép bạn điều khiển các thiết bị của mình, tuy nhiên có vẻ như bạn chưa có thiết bị nào được thiết lập. Đi đến trang tích hợp để bắt đầu.",
                         "go_to_integrations_page": "Chuyển đến trang tích hợp."
+                    },
+                    "picture-elements": {
+                        "hold": "Giữ:",
+                        "tap": "Nhấn:",
+                        "navigate_to": "Điều hướng đến {location}",
+                        "toggle": "Chuyển đổi {name}",
+                        "call_service": "Gọi dịch vụ {name}",
+                        "more_info": "Hiển thị thêm thông tin: {name}"
                     }
                 },
                 "editor": {
@@ -900,12 +1020,38 @@
                 "warning": {
                     "entity_not_found": "Thực thể không có sẵn: {entity}",
                     "entity_non_numeric": "Thực thể không phải là số: {entity}"
+                },
+                "changed_toast": {
+                    "message": "Cấu hình Lovelace đã được cập nhật, bạn có muốn làm mới không?",
+                    "refresh": "Làm tươi"
+                },
+                "reload_lovelace": "Tải lại Lovelace"
+            },
+            "page-demo": {
+                "cards": {
+                    "demo": {
+                        "learn_more": "Tìm hiểu thêm về Home Assistant"
+                    }
+                },
+                "config": {
+                    "arsaboo": {
+                        "names": {
+                            "upstairs": "Tầng trên",
+                            "family_room": "Phòng Gia đình",
+                            "kitchen": "Phòng bếp",
+                            "patio": "Sân trong",
+                            "hallway": "Hành lang"
+                        },
+                        "unit": {
+                            "minutes_abbr": "phút"
+                        }
+                    }
                 }
             }
         },
         "sidebar": {
             "log_out": "Đăng xuất",
-            "developer_tools": "Công cụ Nhà phát triển"
+            "external_app_configuration": "Cấu hình ứng dụng"
         },
         "common": {
             "loading": "Đang tải",
@@ -1008,7 +1154,8 @@
                 "fan_mode": "Chế độ quạt",
                 "swing_mode": "Chế độ swing",
                 "away_mode": "Chế độ đi vắng",
-                "aux_heat": "Nhiệt phụ trợ"
+                "aux_heat": "Nhiệt phụ trợ",
+                "preset_mode": "Đặt trước"
             },
             "lock": {
                 "code": "Mã",
@@ -1153,7 +1300,30 @@
                 "off": "Tắt",
                 "on": "Bật",
                 "auto": "Tự động"
+            },
+            "preset_mode": {
+                "none": "Không",
+                "eco": "Tiết kiệm",
+                "away": "Đi vắng",
+                "boost": "Tăng cường",
+                "comfort": "Thoải mái",
+                "home": "Ở nhà",
+                "sleep": "Ngủ",
+                "activity": "Hoạt động"
+            },
+            "hvac_action": {
+                "off": "Tắt",
+                "heating": "Làm ấm",
+                "cooling": "Làm mát",
+                "drying": "Làm khô",
+                "idle": "Nhàn rỗi",
+                "fan": "Quạt"
             }
         }
+    },
+    "groups": {
+        "system-admin": "Quản trị viên",
+        "system-users": "Người dùng",
+        "system-read-only": "Người dùng chỉ đọc"
     }
 }

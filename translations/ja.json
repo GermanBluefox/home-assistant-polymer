@@ -7,10 +7,7 @@
         "history": "履歴",
         "mailbox": "メールボックス",
         "shopping_list": "買い物リスト",
-        "dev-services": "サービス",
-        "dev-events": "イベント",
-        "dev-templates": "テンプレート",
-        "dev-mqtt": "MQTT",
+        "developer_tools": "開発者ツール",
         "calendar": "カレンダー"
     },
     "state": {
@@ -175,6 +172,22 @@
                 "clear_completed": "削除完了",
                 "add_item": "アイテムを追加"
             },
+            "developer-tools": {
+                "tabs": {
+                    "services": {
+                        "title": "サービス"
+                    },
+                    "events": {
+                        "title": "イベント"
+                    },
+                    "templates": {
+                        "title": "テンプレート"
+                    },
+                    "mqtt": {
+                        "title": "MQTT"
+                    }
+                }
+            },
             "history": {
                 "period": "期間"
             },
@@ -189,7 +202,7 @@
                     "caption": "一般",
                     "description": "設定ファイルの検証とサーバーの操作",
                     "section": {
-                        "core": {
+                        "server_control": {
                             "validation": {
                                 "heading": "設定の検証",
                                 "check_config": "設定を確認",
@@ -309,7 +322,10 @@
                 },
                 "zwave": {
                     "caption": "Z-Wave",
-                    "description": "Z-waveネットワークを管理します"
+                    "description": "Z-waveネットワークを管理します",
+                    "node_config": {
+                        "set_config_parameter": "構成パラメーターの設定"
+                    }
                 },
                 "users": {
                     "caption": "ユーザー",
@@ -331,8 +347,7 @@
             }
         },
         "sidebar": {
-            "log_out": "ログアウト",
-            "developer_tools": "開発者ツール"
+            "log_out": "ログアウト"
         },
         "common": {
             "loading": "読込中",

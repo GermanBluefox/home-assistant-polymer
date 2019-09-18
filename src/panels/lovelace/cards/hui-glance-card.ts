@@ -13,6 +13,7 @@ import { classMap } from "lit-html/directives/class-map";
 import computeStateDisplay from "../../../common/entity/compute_state_display";
 import computeStateName from "../../../common/entity/compute_state_name";
 import applyThemesOnElement from "../../../common/dom/apply_themes_on_element";
+import relativeTime from "../../../common/datetime/relative_time";
 
 import "../../../components/entity/state-badge";
 import "../../../components/ha-card";
@@ -24,12 +25,14 @@ import { LovelaceCard, LovelaceCardEditor } from "../types";
 import { longPress } from "../common/directives/long-press-directive";
 import { processConfigEntities } from "../common/process-config-entities";
 import { handleClick } from "../common/handle-click";
-import { GlanceCardConfig, ConfigEntity } from "./types";
+import { GlanceCardConfig, GlanceConfigEntity } from "./types";
 
 @customElement("hui-glance-card")
 export class HuiGlanceCard extends LitElement implements LovelaceCard {
   public static async getConfigElement(): Promise<LovelaceCardEditor> {
-    await import(/* webpackChunkName: "hui-glance-card-editor" */ "../editor/config-elements/hui-glance-card-editor");
+    await import(
+      /* webpackChunkName: "hui-glance-card-editor" */ "../editor/config-elements/hui-glance-card-editor"
+    );
     return document.createElement("hui-glance-card-editor");
   }
 
@@ -41,7 +44,7 @@ export class HuiGlanceCard extends LitElement implements LovelaceCard {
 
   @property() private _config?: GlanceCardConfig;
 
-  private _configEntities?: ConfigEntity[];
+  private _configEntities?: GlanceConfigEntity[];
 
   public getCardSize(): number {
     return (
@@ -52,7 +55,7 @@ export class HuiGlanceCard extends LitElement implements LovelaceCard {
 
   public setConfig(config: GlanceCardConfig): void {
     this._config = { theme: "default", ...config };
-    const entities = processConfigEntities<ConfigEntity>(config.entities);
+    const entities = processConfigEntities<GlanceConfigEntity>(config.entities);
 
     for (const entity of entities) {
       if (
@@ -198,19 +201,26 @@ export class HuiGlanceCard extends LitElement implements LovelaceCard {
         ${this._config!.show_icon !== false
           ? html`
               <state-badge
-                .stateObj="${stateObj}"
-                .overrideIcon="${entityConf.icon}"
+                .hass=${this.hass}
+                .stateObj=${stateObj}
+                .overrideIcon=${entityConf.icon}
+                .overrideImage=${entityConf.image}
               ></state-badge>
             `
           : ""}
         ${this._config!.show_state !== false
           ? html`
               <div>
-                ${computeStateDisplay(
-                  this.hass!.localize,
-                  stateObj,
-                  this.hass!.language
-                )}
+                ${entityConf.show_last_changed
+                  ? relativeTime(
+                      new Date(stateObj.last_changed),
+                      this.hass!.localize
+                    )
+                  : computeStateDisplay(
+                      this.hass!.localize,
+                      stateObj,
+                      this.hass!.language
+                    )}
               </div>
             `
           : ""}
@@ -219,12 +229,12 @@ export class HuiGlanceCard extends LitElement implements LovelaceCard {
   }
 
   private _handleTap(ev: MouseEvent): void {
-    const config = (ev.currentTarget as any).entityConf as ConfigEntity;
+    const config = (ev.currentTarget as any).entityConf as GlanceConfigEntity;
     handleClick(this, this.hass!, config, false);
   }
 
   private _handleHold(ev: MouseEvent): void {
-    const config = (ev.currentTarget as any).entityConf as ConfigEntity;
+    const config = (ev.currentTarget as any).entityConf as GlanceConfigEntity;
     handleClick(this, this.hass!, config, true);
   }
 }

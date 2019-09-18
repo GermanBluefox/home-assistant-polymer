@@ -7,12 +7,8 @@
         "history": "Hanes",
         "mailbox": "Blwch post",
         "shopping_list": "Rhestr siopa",
-        "dev-services": "Gwasanaethau",
-        "dev-states": "Cyflerau",
-        "dev-events": "Digwyddiadau",
-        "dev-templates": "Templedi",
-        "dev-mqtt": "MQTT",
-        "dev-info": "Gwybodaeth"
+        "dev-info": "Gwybodaeth",
+        "developer_tools": "Offer datblygwr"
     },
     "state": {
         "default": {
@@ -299,6 +295,25 @@
                 "add_item": "Ychwanegu eitem",
                 "microphone_tip": "Tarwch y meicroffon ar dde uchaf a dweud \"Add candy to my shopping list\""
             },
+            "developer-tools": {
+                "tabs": {
+                    "services": {
+                        "title": "Gwasanaethau"
+                    },
+                    "states": {
+                        "title": "Cyflerau"
+                    },
+                    "events": {
+                        "title": "Digwyddiadau"
+                    },
+                    "templates": {
+                        "title": "Templedi"
+                    },
+                    "mqtt": {
+                        "title": "MQTT"
+                    }
+                }
+            },
             "history": {
                 "showing_entries": "Dangos cofnodion ar gyfer",
                 "period": "Cyfnod"
@@ -323,6 +338,23 @@
                         "core": {
                             "header": "Rheoli ffurfweddu a gweinydd",
                             "introduction": "Gellir newid ffurfweddiad eich proses ddiflas. Rydym yn gwybod. Bydd yr adran hon yn ceisio gwneud eich bywyd ychydig yn haws.",
+                            "core_config": {
+                                "edit_requires_storage": "Golygydd wedi'i analluogi oherwydd bod ffurfwedd wedi'i storio mewn 'configuration.yaml'.",
+                                "location_name": "Enw eich gosodiad Home Assistant",
+                                "latitude": "Lledred",
+                                "longitude": "Hydred",
+                                "elevation": "Uchder",
+                                "elevation_meters": "metrau",
+                                "time_zone": "Parth Amser",
+                                "unit_system": "System Uned",
+                                "unit_system_imperial": "Imperial",
+                                "unit_system_metric": "Metrig",
+                                "imperial_example": "Fahrenheit, pwys",
+                                "metric_example": "Celsius, cilogramau",
+                                "save_button": "Arbed"
+                            }
+                        },
+                        "server_control": {
                             "validation": {
                                 "heading": "Dilysu ffurfweddu",
                                 "introduction": "Dilyswch eich ffurfweddiad os gwnaethoch rai newidiadau yn ddiweddar i'ch cyfluniad ac rydych eisiau gwneud yn siŵr ei fod yn hollol ddilys",
@@ -343,21 +375,6 @@
                                 "introduction": "Rheoli gweinydd eich Home Assistant ... o Home Assistant",
                                 "restart": "Ailgychwyn",
                                 "stop": "Stopio"
-                            },
-                            "core_config": {
-                                "edit_requires_storage": "Golygydd wedi'i analluogi oherwydd bod ffurfwedd wedi'i storio mewn 'configuration.yaml'.",
-                                "location_name": "Enw eich gosodiad Home Assistant",
-                                "latitude": "Lledred",
-                                "longitude": "Hydred",
-                                "elevation": "Uchder",
-                                "elevation_meters": "metrau",
-                                "time_zone": "Parth Amser",
-                                "unit_system": "System Uned",
-                                "unit_system_imperial": "Imperial",
-                                "unit_system_metric": "Metrig",
-                                "imperial_example": "Fahrenheit, pwys",
-                                "metric_example": "Celsius, cilogramau",
-                                "save_button": "Arbed"
                             }
                         }
                     }
@@ -558,10 +575,30 @@
                 },
                 "zwave": {
                     "caption": "Z-Wave",
-                    "description": "Rheoli eich rhwydwaith Z-Wave"
+                    "description": "Rheoli eich rhwydwaith Z-Wave",
+                    "node_config": {
+                        "set_config_parameter": "Gosod Paramedr Ffurfweddu"
+                    }
+                },
+                "cloud": {
+                    "description_login": "Wedi mewngofnodi fel {email}",
+                    "description_not_login": "Heb fewngofnodi",
+                    "description_features": "Rheolaeth oddi cartref, integreiddio gyda Alexa a Google Assistant."
                 },
                 "integrations": {
+                    "caption": "Integreiddiadau",
+                    "description": "Rheoli dyfeisiau a gwasanaethau cysylltiedig",
+                    "discovered": "Darganfuwyd",
+                    "configured": "Wedi'i ffurfweddu",
+                    "new": "Sefydlu integreiddiad newydd",
+                    "configure": "Ffurfweddu",
+                    "none": "Dim byd wedi'i ffurfweddu eto.",
                     "config_entry": {
+                        "no_devices": "Tydi'r integreiddad yma ddim efo dyfeisiadau.",
+                        "no_device": "Endidau heb ddyfeisiau",
+                        "delete_confirm": "A ydych yn siŵr bod chi eisiau dileu'r integreiddiad yma?",
+                        "restart_confirm": "Ailgychwyn Home Assistant i ddarfod dileu'r integreiddiad hwn",
+                        "manuf": "gan {manufacturer}",
                         "via": "Cysylltiad drwy",
                         "firmware": "Cadarnwedd: {version}",
                         "device_unavailable": "Dyfais ddim ar gael",
@@ -654,8 +691,29 @@
                         "create": "Creu"
                     }
                 },
-                "cloud": {
-                    "description_features": "Rheolaeth oddi cartref, integreiddio gyda Alexa a Google Assistant."
+                "server_control": {
+                    "section": {
+                        "validation": {
+                            "introduction": "Dilyswch eich ffurfweddiad os gwnaethoch rai newidiadau ffurfweddu yn ddiweddar ac rydych eisiau gwneud yn siŵr fod o'n ddilys",
+                            "check_config": "Gwirio config",
+                            "valid": "Ffurfweddiad dilys!",
+                            "invalid": "Ffurfweddiad annilys"
+                        },
+                        "reloading": {
+                            "heading": "Ffurfweddiad yn ail-lwytho",
+                            "introduction": "Gall rhai rhannau o Home Assistant ail-lwytho heb orfod ailgychwyn. Bydd taro ail-lwytho yn dadlwytho eu cyfluniad cyfredol a llwytho'r un newydd.",
+                            "core": "Ail-lwytho craidd",
+                            "group": "Ail-lwytho grwpiau",
+                            "automation": "Ail-lwytho awtomeiddiadau",
+                            "script": "Ail-lwytho sgriptiau"
+                        },
+                        "server_management": {
+                            "heading": "Rheoli gweinydd",
+                            "introduction": "Rheoli eich gweinydd Home Assistant.. o Home Assistant.",
+                            "restart": "Ailgychwyn",
+                            "stop": "Stopio"
+                        }
+                    }
                 }
             },
             "lovelace": {
@@ -669,6 +727,14 @@
                         "title": "Croeso Gartref",
                         "no_devices": "Mae'r dudalen hon yn eich galluogi i reoli'ch dyfeisiau, ond mae'n edrych fel nad oes gennych ddyfeisiau wedi eu sefydlu eto. Ewch i'r dudalen integreiddio i ddechrau.",
                         "go_to_integrations_page": "Ewch i'r dudalen integreiddio."
+                    },
+                    "picture-elements": {
+                        "hold": "Disgwyl",
+                        "tap": "Tarwch:",
+                        "navigate_to": "Ewch i {location}",
+                        "toggle": "Toglo {enw}",
+                        "call_service": "Galw gwasanaeth {name}",
+                        "more_info": "Dangos mwy o wybodaeth: {name}"
                     }
                 },
                 "editor": {
@@ -783,6 +849,9 @@
             "page-demo": {
                 "cards": {
                     "demo": {
+                        "demo_by": "gan {name}",
+                        "next_demo": "Demo nesaf",
+                        "introduction": "Croeso adre! Rydych wedi cyrraedd demo Home Assistant lle rydym yn arddangos y UIs gorau a grewyd gan ein cymuned.",
                         "learn_more": "Dysgwch fwy am Home Assistant"
                     }
                 },
@@ -823,7 +892,6 @@
         },
         "sidebar": {
             "log_out": "Allgofnodi",
-            "developer_tools": "Offer datblygwr",
             "external_app_configuration": "Ffurfweddu App"
         },
         "common": {
@@ -891,6 +959,9 @@
                 "arm_night": "Larwm nos",
                 "armed_custom_bypass": "Ffordd osgoi personol",
                 "arm_custom_bypass": "Ffordd osgoi personol"
+            },
+            "climate": {
+                "preset_mode": "Rhagosodiad"
             }
         },
         "components": {
@@ -978,6 +1049,16 @@
                 "off": "Off",
                 "on": "Ar",
                 "auto": "Awto"
+            },
+            "preset_mode": {
+                "none": "Dim",
+                "eco": "Eco",
+                "away": "I ffwrdd",
+                "boost": "Cynydd",
+                "comfort": "Cyfforddus",
+                "home": "Cartref",
+                "sleep": "Cysgu",
+                "activity": "Gweithgaredd"
             }
         }
     },

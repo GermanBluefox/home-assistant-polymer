@@ -7,12 +7,8 @@
         "history": "Riwayat",
         "mailbox": "Kotak pesan",
         "shopping_list": "Daftar belanja",
-        "dev-services": "Layanan",
-        "dev-states": "Status",
-        "dev-events": "Event",
-        "dev-templates": "Template",
-        "dev-mqtt": "MQTT",
         "dev-info": "Info",
+        "developer_tools": "Alat pengembang",
         "calendar": "Kalender"
     },
     "state": {
@@ -303,6 +299,25 @@
                 "add_item": "Tambah item",
                 "microphone_tip": "Sentuh mikrofon di kanan atas dan ucapkan \"Tambahkan permen ke daftar belanjaku\""
             },
+            "developer-tools": {
+                "tabs": {
+                    "services": {
+                        "title": "Layanan"
+                    },
+                    "states": {
+                        "title": "Status"
+                    },
+                    "events": {
+                        "title": "Event"
+                    },
+                    "templates": {
+                        "title": "Template"
+                    },
+                    "mqtt": {
+                        "title": "MQTT"
+                    }
+                }
+            },
             "history": {
                 "showing_entries": "Menampilkan daftar dari",
                 "period": "Periode"
@@ -327,6 +342,11 @@
                         "core": {
                             "header": "Konfigurasi dan kontrol server",
                             "introduction": "Merubah konfigurasi bisa menjadi proses yang melelahkan. Kami tahu. Bagian ini akan mencoba membuatnya menjadi sedikit lebih mudah.",
+                            "core_config": {
+                                "save_button": "Simpan"
+                            }
+                        },
+                        "server_control": {
                             "validation": {
                                 "heading": "Validasi konfigurasi",
                                 "introduction": "Validasikan konfigurasi anda jika anda baru saja membuat beberapa perubahan pada konfigurasi anda dan ingin memastikan semuanya valid",
@@ -347,9 +367,6 @@
                                 "introduction": "Kontrol server Home Assistant anda ... dari Home Assistant.",
                                 "restart": "Ulang kembali",
                                 "stop": "Berhenti"
-                            },
-                            "core_config": {
-                                "save_button": "Simpan"
                             }
                         }
                     }
@@ -545,7 +562,10 @@
                 },
                 "zwave": {
                     "caption": "Z-Wave",
-                    "description": "Kelola jaringan Z-Wave anda"
+                    "description": "Kelola jaringan Z-Wave anda",
+                    "node_config": {
+                        "set_config_parameter": "Setel Parameter Konfigurasi"
+                    }
                 },
                 "users": {
                     "caption": "Pengguna",
@@ -805,7 +825,6 @@
         },
         "sidebar": {
             "log_out": "Keluar",
-            "developer_tools": "Alat pengembang",
             "external_app_configuration": "Konfigurasi Aplikasi"
         },
         "common": {

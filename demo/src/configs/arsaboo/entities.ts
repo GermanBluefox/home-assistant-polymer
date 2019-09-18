@@ -94,22 +94,19 @@ export const demoEntitiesArsaboo: DemoConfig["entities"] = (localize) =>
         target_temp_high: 24,
         target_temp_low: 20,
         fan_mode: "auto",
-        fan_list: ["auto", "on"],
-        operation_mode: "auto",
-        operation_list: ["auto", "auxHeatOnly", "cool", "heat", "off"],
-        hold_mode: null,
-        away_mode: "off",
+        fan_modes: ["auto", "on"],
+        hvac_modes: ["auto", "cool", "heat", "off"],
         aux_heat: "off",
         actual_humidity: 30,
         fan: "on",
-        climate_mode: "Day",
         operation: "fan",
-        climate_list: ["Away", "Sleep", "Day", "Home"],
         fan_min_on_time: 10,
         friendly_name: localize(
           "ui.panel.page-demo.config.arsaboo.names.upstairs"
         ),
-        supported_features: 3575,
+        supported_features: 27,
+        preset_mode: "away",
+        preset_modes: ["home", "away", "eco", "sleep"],
       },
     },
     "input_boolean.abodeupdate": {
@@ -118,10 +115,6 @@ export const demoEntitiesArsaboo: DemoConfig["entities"] = (localize) =>
       attributes: {
         friendly_name: "Abode Updates",
         icon: "hademo:security",
-        templates: {
-          icon_color:
-            "if (state === 'on') return 'rgb(251, 210, 41)'; return 'rgb(54, 95, 140)';\n",
-        },
       },
     },
     "input_boolean.tv": {
@@ -130,10 +123,6 @@ export const demoEntitiesArsaboo: DemoConfig["entities"] = (localize) =>
       attributes: {
         friendly_name: "TV",
         icon: "hademo:television",
-        templates: {
-          icon_color:
-            "if (state === 'on') return 'rgb(251, 210, 41)'; return 'rgb(54, 95, 140)';\n",
-        },
       },
     },
     "input_boolean.homeautomation": {
@@ -142,10 +131,6 @@ export const demoEntitiesArsaboo: DemoConfig["entities"] = (localize) =>
       attributes: {
         friendly_name: "Home Automation",
         icon: "hass:home-automation",
-        templates: {
-          icon_color:
-            "if (state === 'on') return 'rgb(251, 210, 41)'; return 'rgb(54, 95, 140)';\n",
-        },
       },
     },
     "input_boolean.tvtime": {
@@ -154,12 +139,6 @@ export const demoEntitiesArsaboo: DemoConfig["entities"] = (localize) =>
       attributes: {
         friendly_name: "TV Time",
         icon: "hademo:television-guide",
-        templates: {
-          icon:
-            "if (state === 'on') return 'hademo:television-classic'; return 'hademo:television-classic-off';\n",
-          icon_color:
-            "if (state === 'on') return 'rgb(251, 210, 41)'; return 'rgb(54, 95, 140)';\n",
-        },
       },
     },
     "input_select.livingroomharmony": {
@@ -248,16 +227,7 @@ export const demoEntitiesArsaboo: DemoConfig["entities"] = (localize) =>
         homebridge_cover_type: "garage_door",
       },
     },
-    "light.master_lights": {
-      entity_id: "light.master_lights",
-      state: "off",
-      attributes: {
-        min_mireds: 153,
-        max_mireds: 500,
-        friendly_name: "Master Lights",
-        supported_features: 63,
-      },
-    },
+
     "light.living_room_lights": {
       entity_id: "light.living_room_lights",
       state: "off",
@@ -283,40 +253,7 @@ export const demoEntitiesArsaboo: DemoConfig["entities"] = (localize) =>
         supported_features: 1,
       },
     },
-    "light.hue_color_lamp_1": {
-      entity_id: "light.hue_color_lamp_1",
-      state: "on",
-      attributes: {
-        min_mireds: 153,
-        max_mireds: 500,
-        friendly_name: localize("ui.panel.page-demo.config.arsaboo.names.left"),
-        supported_features: 63,
-      },
-    },
-    "light.hue_color_lamp_2": {
-      entity_id: "light.hue_color_lamp_2",
-      state: "off",
-      attributes: {
-        min_mireds: 153,
-        max_mireds: 500,
-        friendly_name: localize(
-          "ui.panel.page-demo.config.arsaboo.names.right"
-        ),
-        supported_features: 63,
-      },
-    },
-    "light.hue_color_lamp_3": {
-      entity_id: "light.hue_color_lamp_3",
-      state: "on",
-      attributes: {
-        min_mireds: 153,
-        max_mireds: 500,
-        friendly_name: localize(
-          "ui.panel.page-demo.config.arsaboo.names.mirror"
-        ),
-        supported_features: 63,
-      },
-    },
+
     "sensor.plexspy": {
       entity_id: "sensor.plexspy",
       state: "0",
@@ -408,16 +345,6 @@ export const demoEntitiesArsaboo: DemoConfig["entities"] = (localize) =>
         supported_features: 0,
       },
     },
-    "light.gateway_light_34ce00813670": {
-      entity_id: "light.gateway_light_34ce00813670",
-      state: "off",
-      attributes: {
-        friendly_name: localize(
-          "ui.panel.page-demo.config.arsaboo.names.hallway"
-        ),
-        supported_features: 17,
-      },
-    },
     "alarm_control_panel.abode_alarm": {
       entity_id: "alarm_control_panel.abode_alarm",
       state: "disarmed",
@@ -475,35 +402,7 @@ export const demoEntitiesArsaboo: DemoConfig["entities"] = (localize) =>
         device_class: "motion",
       },
     },
-    "binary_sensor.water_leak_sensor_158d0001d77800": {
-      entity_id: "binary_sensor.water_leak_sensor_158d0001d77800",
-      state: "off",
-      attributes: {
-        battery_level: 41,
-        friendly_name: "Laundry Water Leak",
-        device_class: "moisture",
-      },
-    },
-    "binary_sensor.motion_sensor_158d00016c53bf": {
-      entity_id: "binary_sensor.motion_sensor_158d00016c53bf",
-      state: "off",
-      attributes: {
-        "No motion since": 0,
-        battery_level: 43,
-        friendly_name: "Master Occupancy",
-        device_class: "motion",
-      },
-    },
-    "binary_sensor.motion_sensor_158d00016612af": {
-      entity_id: "binary_sensor.motion_sensor_158d00016612af",
-      state: "off",
-      attributes: {
-        "No motion since": 0,
-        battery_level: 41,
-        friendly_name: "Upstairs Occupancy",
-        device_class: "motion",
-      },
-    },
+
     "binary_sensor.front_door": {
       entity_id: "binary_sensor.front_door",
       state: "off",
@@ -590,16 +489,6 @@ export const demoEntitiesArsaboo: DemoConfig["entities"] = (localize) =>
         icon: "hademo:history",
       },
     },
-    "light.lifxnrkitchen": {
-      entity_id: "light.lifxnrkitchen",
-      state: "off",
-      attributes: {
-        min_mireds: 111,
-        max_mireds: 400,
-        friendly_name: "LifxnrKitchen",
-        supported_features: 55,
-      },
-    },
     "light.lifx5": {
       entity_id: "light.lifx5",
       state: "on",
@@ -608,41 +497,6 @@ export const demoEntitiesArsaboo: DemoConfig["entities"] = (localize) =>
         max_mireds: 400,
         friendly_name: "Garage lights",
         supported_features: 55,
-      },
-    },
-    "light.lifxnrguest": {
-      entity_id: "light.lifxnrguest",
-      state: "off",
-      attributes: {
-        min_mireds: 111,
-        max_mireds: 400,
-        friendly_name: localize(
-          "ui.panel.page-demo.config.arsaboo.names.patio"
-        ),
-        supported_features: 55,
-      },
-    },
-    "light.lifx3": {
-      entity_id: "light.lifx3",
-      state: "off",
-      attributes: {
-        min_mireds: 111,
-        max_mireds: 400,
-        friendly_name: localize(
-          "ui.panel.page-demo.config.arsaboo.names.kitchen"
-        ),
-        supported_features: 55,
-      },
-    },
-    "sensor.illumination_158d00016c53bf": {
-      entity_id: "sensor.illumination_158d00016c53bf",
-      state: "10",
-      attributes: {
-        battery_level: 43,
-        unit_of_measurement: "lx",
-        friendly_name: "Master Brightness",
-        device_class: "illuminance",
-        icon: "hademo:brightness-7",
       },
     },
     "sensor.alok_to_home": {
@@ -683,24 +537,11 @@ export const demoEntitiesArsaboo: DemoConfig["entities"] = (localize) =>
         icon: "hademo:car",
       },
     },
-    "switch.wemoswitch": {
-      entity_id: "switch.wemoswitch",
-      state: "on",
-      attributes: {
-        friendly_name: localize("ui.panel.page-demo.config.arsaboo.labels.air"),
-      },
-    },
     "switch.driveway": {
       entity_id: "switch.driveway",
       state: "off",
       attributes: {
         friendly_name: "Driveway Light",
-        templates: {
-          icon_color:
-            "if (state === 'on') return 'rgb(251, 210, 41)'; return 'rgb(54, 95, 140)';\n",
-          icon:
-            "if (state === 'on') return 'hademo:lightbulb-on'; return 'hademo:lightbulb';\n",
-        },
       },
     },
     "switch.wemoporch": {
@@ -708,12 +549,6 @@ export const demoEntitiesArsaboo: DemoConfig["entities"] = (localize) =>
       state: "off",
       attributes: {
         friendly_name: "Porch Lights",
-        templates: {
-          icon_color:
-            "if (state === 'on') return 'rgb(251, 210, 41)'; return 'rgb(54, 95, 140)';\n",
-          icon:
-            "if (state === 'on') return 'hademo:lightbulb-on'; return 'hademo:lightbulb';\n",
-        },
       },
     },
   });

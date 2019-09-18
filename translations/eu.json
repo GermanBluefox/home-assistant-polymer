@@ -7,12 +7,8 @@
         "history": "Historia",
         "mailbox": "Postontzia",
         "shopping_list": "Erosketa zerrenda",
-        "dev-services": "Zerbitzuak",
-        "dev-states": "Egoerak",
-        "dev-events": "Gertaerak",
-        "dev-templates": "Txantiloiak",
-        "dev-mqtt": "MQTT",
         "dev-info": "Informazioa",
+        "developer_tools": "Garatzaileentzako tresnak",
         "calendar": "Egutegia",
         "profile": "Profila"
     },
@@ -239,6 +235,25 @@
                 "clear_completed": "Osatutakoak ezabatu",
                 "add_item": "Artikulua gehitu"
             },
+            "developer-tools": {
+                "tabs": {
+                    "services": {
+                        "title": "Zerbitzuak"
+                    },
+                    "states": {
+                        "title": "Egoerak"
+                    },
+                    "events": {
+                        "title": "Gertaerak"
+                    },
+                    "templates": {
+                        "title": "Txantiloiak"
+                    },
+                    "mqtt": {
+                        "title": "MQTT"
+                    }
+                }
+            },
             "mailbox": {
                 "empty": "Ez duzu mezurik",
                 "delete_prompt": "Mezu hau ezabatu?",
@@ -248,7 +263,7 @@
                 "core": {
                     "caption": "Orokorra",
                     "section": {
-                        "core": {
+                        "server_control": {
                             "reloading": {
                                 "core": "Nukleoa birkargatu",
                                 "group": "Taldeak birkargatu",
@@ -260,7 +275,9 @@
                                 "introduction": "Zure Home Assistant zerbitzaria... Home Assistantetik kontrolatu",
                                 "restart": "Berrabiarazi",
                                 "stop": "Gelditu"
-                            },
+                            }
+                        },
+                        "core": {
                             "core_config": {
                                 "location_name": "Zure Home Assistant instalazioaren izena",
                                 "latitude": "Latitudea",
@@ -282,7 +299,10 @@
                     "description": "Scriptak sortu eta editatu"
                 },
                 "zwave": {
-                    "caption": "Z-Wave"
+                    "caption": "Z-Wave",
+                    "node_config": {
+                        "set_config_parameter": "Ezarri konfigurazio-parametroa"
+                    }
                 },
                 "automation": {
                     "picker": {
@@ -553,7 +573,6 @@
                 },
                 "current_user": "{fullName} moduan hasi duzu saioa.",
                 "is_owner": "Jabea zara",
-                "logout": "Saioa itxi",
                 "change_password": {
                     "header": "Pasahitza aldatu",
                     "current_password": "Egungo pasahitza",
@@ -726,7 +745,6 @@
         },
         "sidebar": {
             "log_out": "Saioa itxi",
-            "developer_tools": "Garatzaileentzako tresnak",
             "external_app_configuration": "Aplikazioaren Konfigurazioa"
         },
         "common": {

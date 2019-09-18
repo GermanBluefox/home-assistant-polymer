@@ -7,12 +7,8 @@
         "history": "Geçmiş",
         "mailbox": "Posta kutusu",
         "shopping_list": "Alışveriş listesi",
-        "dev-services": "Servisler",
-        "dev-states": "Durumlar",
-        "dev-events": "Olaylar",
-        "dev-templates": "Taslaklar",
-        "dev-mqtt": "MQTT",
         "dev-info": "Bilgi",
+        "developer_tools": "Geliştirici araçları",
         "calendar": "Takvim",
         "profile": "Profil"
     },
@@ -290,6 +286,25 @@
                 "add_item": "Öge Ekle",
                 "microphone_tip": "Sağ üstteki mikrofona dokunun ve \"alışveriş listeme şeker ekle\" deyin"
             },
+            "developer-tools": {
+                "tabs": {
+                    "services": {
+                        "title": "Servisler"
+                    },
+                    "states": {
+                        "title": "Durumlar"
+                    },
+                    "events": {
+                        "title": "Olaylar"
+                    },
+                    "templates": {
+                        "title": "Taslaklar"
+                    },
+                    "mqtt": {
+                        "title": "MQTT"
+                    }
+                }
+            },
             "history": {
                 "showing_entries": "Gösterilen girişler",
                 "period": "Dönem"
@@ -312,7 +327,9 @@
                     "section": {
                         "core": {
                             "header": "Yapılandırma ve sunucu kontrolü",
-                            "introduction": "Yapılandırmanızı değiştirmek, yorucu bir işlem olabilir. Biliyoruz. Bu bölüm hayatınızı biraz daha kolay hale getirmeye çalışacaktır.",
+                            "introduction": "Yapılandırmanızı değiştirmek, yorucu bir işlem olabilir. Biliyoruz. Bu bölüm hayatınızı biraz daha kolay hale getirmeye çalışacaktır."
+                        },
+                        "server_control": {
                             "validation": {
                                 "heading": "Yapılandırma doğrulaması",
                                 "introduction": "Yapılandırmanızda yakın bir zamanda değişiklikler yaptıysanız ve tümünün geçerli olduğundan emin olmak istiyorsanız yapılandırmanızı doğrulayın",
@@ -444,7 +461,16 @@
                 },
                 "zwave": {
                     "caption": "Z-Wave",
-                    "description": "Z-Wave ağınızı yönetin"
+                    "description": "Z-Wave ağınızı yönetin",
+                    "node_config": {
+                        "seconds": "Saniye",
+                        "set_wakeup": "Uyandırma Aralığı Ayarla",
+                        "config_parameter": "Yapılandırma Parametresi",
+                        "config_value": "Yapılandırma Değeri",
+                        "true": "Doğru",
+                        "false": "Yanlış",
+                        "set_config_parameter": "Yapılandırma parametresini belirle"
+                    }
                 },
                 "users": {
                     "caption": "Kullanıcılar",
@@ -487,6 +513,13 @@
                 "zha": {
                     "caption": "ZHA",
                     "description": "Zigbee Ev Otomasyonu ağ yönetimi"
+                },
+                "server_control": {
+                    "section": {
+                        "server_management": {
+                            "restart": "Yeniden başlat"
+                        }
+                    }
                 }
             },
             "profile": {
@@ -529,7 +562,6 @@
                 },
                 "current_user": "{fullName} olarak giriş yaptınız.",
                 "is_owner": "Sahipsiniz.",
-                "logout": "Çıkış yap",
                 "change_password": {
                     "header": "Parolayı Değiştir",
                     "current_password": "Güncel Parola",
@@ -680,8 +712,7 @@
             }
         },
         "sidebar": {
-            "log_out": "Çıkış yap",
-            "developer_tools": "Geliştirici araçları"
+            "log_out": "Çıkış yap"
         },
         "common": {
             "loading": "Yükleniyor",

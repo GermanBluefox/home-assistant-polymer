@@ -29,7 +29,6 @@ import "../../components/ha-start-voice-button";
 import "../../components/ha-paper-icon-button-arrow-next";
 import "../../components/ha-paper-icon-button-arrow-prev";
 import "../../components/ha-icon";
-import { loadModule, loadCSS, loadJS } from "../../common/dom/load_resource";
 import { subscribeNotifications } from "../../data/ws-notifications";
 import { debounce } from "../../common/util/debounce";
 import { HomeAssistant } from "../../types";
@@ -45,17 +44,16 @@ import "./hui-view";
 // Not a duplicate import, this one is for type
 // tslint:disable-next-line
 import { HUIView } from "./hui-view";
-import { createCardElement } from "./common/create-card-element";
+import "./hui-panel-view";
+// tslint:disable-next-line
+import { HUIPanelView } from "./hui-panel-view";
 import { showEditViewDialog } from "./editor/view-editor/show-edit-view-dialog";
 import { showEditLovelaceDialog } from "./editor/lovelace-editor/show-edit-lovelace-dialog";
 import { Lovelace } from "./types";
 import { afterNextRender } from "../../common/util/render-status";
 import { haStyle } from "../../resources/styles";
 import { computeRTLDirection } from "../../common/util/compute_rtl";
-
-// CSS and JS should only be imported once. Modules and HTML are safe.
-const CSS_CACHE = {};
-const JS_CACHE = {};
+import { loadLovelaceResources } from "./common/load-resources";
 
 class HUIRoot extends LitElement {
   @property() public hass?: HomeAssistant;
@@ -152,11 +150,25 @@ class HUIRoot extends LitElement {
                       @iron-select="${this._deselect}"
                       slot="dropdown-content"
                     >
-                      <paper-item @click="${this.lovelace!.enableFullEditMode}"
-                        >${this.hass!.localize(
+                      ${__DEMO__ /* No unused entities available in the demo */
+                        ? ""
+                        : html`
+                            <paper-item
+                              aria-label=${this.hass!.localize(
+                                "ui.panel.lovelace.menu.unused_entities"
+                              )}
+                              @tap="${this._handleUnusedEntities}"
+                            >
+                              ${this.hass!.localize(
+                                "ui.panel.lovelace.menu.unused_entities"
+                              )}
+                            </paper-item>
+                          `}
+                      <paper-item @tap="${this.lovelace!.enableFullEditMode}">
+                        ${this.hass!.localize(
                           "ui.panel.lovelace.editor.menu.raw_editor"
-                        )}</paper-item
-                      >
+                        )}
+                      </paper-item>
                     </paper-listbox>
                   </paper-menu-button>
                 </app-toolbar>
@@ -195,32 +207,50 @@ class HUIRoot extends LitElement {
                     >
                       ${this._yamlMode
                         ? html`
-                            <paper-item @click="${this._handleRefresh}"
-                              >${this.hass!.localize(
+                            <paper-item
+                              aria-label=${this.hass!.localize(
                                 "ui.panel.lovelace.menu.refresh"
-                              )}</paper-item
+                              )}
+                              @tap="${this._handleRefresh}"
                             >
-                          `
-                        : ""}
-                      ${__DEMO__ /* No unused entities available in the demo */
-                        ? ""
-                        : html`
-                            <paper-item @click="${this._handleUnusedEntities}">
+                              ${this.hass!.localize(
+                                "ui.panel.lovelace.menu.refresh"
+                              )}
+                            </paper-item>
+                            <paper-item
+                              aria-label=${this.hass!.localize(
+                                "ui.panel.lovelace.menu.unused_entities"
+                              )}
+                              @tap="${this._handleUnusedEntities}"
+                            >
                               ${this.hass!.localize(
                                 "ui.panel.lovelace.menu.unused_entities"
                               )}
                             </paper-item>
-                          `}
-                      <paper-item @click="${this._editModeEnable}"
-                        >${this.hass!.localize(
-                          "ui.panel.lovelace.menu.configure_ui"
-                        )}</paper-item
-                      >
-                      <paper-item @click="${this._handleHelp}"
-                        >${this.hass!.localize(
+                          `
+                        : ""}
+                      ${this.hass!.user!.is_admin
+                        ? html`
+                            <paper-item
+                              aria-label=${this.hass!.localize(
+                                "ui.panel.lovelace.menu.configure_ui"
+                              )}
+                              @tap="${this._editModeEnable}"
+                            >
+                              ${this.hass!.localize(
+                                "ui.panel.lovelace.menu.configure_ui"
+                              )}
+                            </paper-item>
+                          `
+                        : ""}
+                      <paper-item
+                        aria-label=${this.hass!.localize(
                           "ui.panel.lovelace.menu.help"
-                        )}</paper-item
+                        )}
+                        @tap="${this._handleHelp}"
                       >
+                        ${this.hass!.localize("ui.panel.lovelace.menu.help")}
+                      </paper-item>
                     </paper-listbox>
                   </paper-menu-button>
                 </app-toolbar>
@@ -372,6 +402,11 @@ class HUIRoot extends LitElement {
          * https://www.w3.org/TR/CSS2/visudet.html#the-height-property
          */
           position: relative;
+          display: flex;
+        }
+        #view > * {
+          flex: 1;
+          width: 100%;
         }
         #view.tabs-hidden {
           min-height: calc(100vh - 64px);
@@ -387,9 +422,13 @@ class HUIRoot extends LitElement {
     super.updated(changedProperties);
 
     const view = this._viewRoot;
-    const huiView = view.lastChild as HUIView;
+    const huiView = view.lastChild as HUIView | HUIPanelView;
 
-    if (changedProperties.has("columns") && huiView) {
+    if (
+      changedProperties.has("columns") &&
+      huiView &&
+      huiView instanceof HUIView
+    ) {
       huiView.columns = this.columns;
     }
 
@@ -431,7 +470,12 @@ class HUIRoot extends LitElement {
         | undefined;
 
       if (!oldLovelace || oldLovelace.config !== this.lovelace!.config) {
-        this._loadResources(this.lovelace!.config.resources || []);
+        if (this.lovelace!.config.resources) {
+          loadLovelaceResources(
+            this.lovelace!.config.resources,
+            this.hass!.auth.data.hassUrl
+          );
+        }
         // On config change, recreate the current view from scratch.
         force = true;
         // Recalculate to see if we need to adjust content area for tab bar
@@ -439,6 +483,15 @@ class HUIRoot extends LitElement {
       }
 
       if (!oldLovelace || oldLovelace.editMode !== this.lovelace!.editMode) {
+        // Leave unused entities when leaving edit mode
+        if (
+          this.lovelace!.mode === "storage" &&
+          this._routeData!.view === "hass-unused-entities"
+        ) {
+          const views = this.config && this.config.views;
+          navigate(this, `/lovelace/${views[0].path || 0}`);
+          newSelectView = 0;
+        }
         // On edit mode change, recreate the current view from scratch
         force = true;
         // Recalculate to see if we need to adjust content area for tab bar
@@ -612,12 +665,18 @@ class HUIRoot extends LitElement {
       const unusedEntities = document.createElement("hui-unused-entities");
       // Wait for promise to resolve so that the element has been upgraded.
       import(
-        /* webpackChunkName: "hui-unused-entities" */ "./hui-unused-entities"
+        /* webpackChunkName: "hui-unused-entities" */ "./editor/unused-entities/hui-unused-entities"
       ).then(() => {
-        unusedEntities.setConfig(this.config);
         unusedEntities.hass = this.hass!;
+        unusedEntities.lovelace = this.lovelace!;
+        unusedEntities.narrow = this.narrow;
       });
-      root.style.background = this.config.background || "";
+      if (this.config.background) {
+        unusedEntities.style.setProperty(
+          "--lovelace-background",
+          this.config.background
+        );
+      }
       root.append(unusedEntities);
       return;
     }
@@ -634,8 +693,8 @@ class HUIRoot extends LitElement {
       view = this._viewCache![viewIndex];
     } else {
       if (viewConfig.panel && viewConfig.cards && viewConfig.cards.length > 0) {
-        view = createCardElement(viewConfig.cards[0]);
-        view.isPanel = true;
+        view = document.createElement("hui-panel-view");
+        view.config = viewConfig;
       } else {
         view = document.createElement("hui-view");
         view.lovelace = this.lovelace;
@@ -646,43 +705,14 @@ class HUIRoot extends LitElement {
     }
 
     view.hass = this.hass;
-    root.style.background =
-      viewConfig.background || this.config.background || "";
+
+    const configBackground = viewConfig.background || this.config.background;
+
+    if (configBackground) {
+      view.style.setProperty("--lovelace-background", configBackground);
+    }
+
     root.append(view);
-  }
-
-  private _loadResources(resources) {
-    resources.forEach((resource) => {
-      switch (resource.type) {
-        case "css":
-          if (resource.url in CSS_CACHE) {
-            break;
-          }
-          CSS_CACHE[resource.url] = loadCSS(resource.url);
-          break;
-
-        case "js":
-          if (resource.url in JS_CACHE) {
-            break;
-          }
-          JS_CACHE[resource.url] = loadJS(resource.url);
-          break;
-
-        case "module":
-          loadModule(resource.url);
-          break;
-
-        case "html":
-          import(
-            /* webpackChunkName: "import-href-polyfill" */ "../../resources/html-import/import-href"
-          ).then(({ importHref }) => importHref(resource.url));
-          break;
-
-        default:
-          // tslint:disable-next-line
-          console.warn(`Unknown resource type specified: ${resource.type}`);
-      }
-    });
   }
 }
 

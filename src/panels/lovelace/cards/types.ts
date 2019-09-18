@@ -30,6 +30,7 @@ export interface EntitiesCardEntityConfig extends EntityConfig {
 }
 
 export interface EntitiesCardConfig extends LovelaceCardConfig {
+  type: "entities";
   show_header_toggle?: boolean;
   title?: string;
   entities: EntitiesCardEntityConfig[];
@@ -81,6 +82,11 @@ export interface ConfigEntity extends EntityConfig {
   hold_action?: ActionConfig;
 }
 
+export interface GlanceConfigEntity extends ConfigEntity {
+  show_last_changed?: boolean;
+  image?: string;
+}
+
 export interface GlanceCardConfig extends LovelaceCardConfig {
   show_name?: boolean;
   show_state?: boolean;
@@ -104,6 +110,7 @@ export interface LightCardConfig extends LovelaceCardConfig {
 }
 
 export interface MapCardConfig extends LovelaceCardConfig {
+  type: "map";
   title: string;
   aspect_ratio: string;
   default_zoom?: number;
@@ -113,8 +120,11 @@ export interface MapCardConfig extends LovelaceCardConfig {
 }
 
 export interface MarkdownCardConfig extends LovelaceCardConfig {
+  type: "markdown";
   content: string;
   title?: string;
+  card_size?: number;
+  entity_ids?: string | string[];
 }
 
 export interface MediaControlCardConfig extends LovelaceCardConfig {

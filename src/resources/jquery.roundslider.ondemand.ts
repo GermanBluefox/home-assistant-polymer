@@ -1,15 +1,17 @@
 import { TemplateResult } from "lit-element";
 
-type LoadedRoundSlider = Promise<{
+interface LoadedRoundSlider {
   roundSliderStyle: TemplateResult;
   jQuery: any;
-}>;
+}
 
-let loaded: LoadedRoundSlider;
+let loaded: Promise<LoadedRoundSlider>;
 
-export const loadRoundslider = async (): LoadedRoundSlider => {
+export const loadRoundslider = async (): Promise<LoadedRoundSlider> => {
   if (!loaded) {
-    loaded = import(/* webpackChunkName: "jquery-roundslider" */ "./jquery.roundslider");
+    loaded = import(
+      /* webpackChunkName: "jquery-roundslider" */ "./jquery.roundslider"
+    );
   }
   return loaded;
 };

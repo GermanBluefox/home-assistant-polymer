@@ -7,12 +7,8 @@
         "history": "Historie",
         "mailbox": "Schránka",
         "shopping_list": "Nákupní seznam",
-        "dev-services": "Služby",
-        "dev-states": "Stavy",
-        "dev-events": "Události",
-        "dev-templates": "Šablony",
-        "dev-mqtt": "MQTT",
         "dev-info": "Informace",
+        "developer_tools": "Vývojářské nástroje",
         "calendar": "Kalendář",
         "profile": "Profil"
     },
@@ -311,6 +307,28 @@
                 "add_item": "Přidat položku",
                 "microphone_tip": "Klepněte na mikrofon vpravo nahoře a řekněte \"Add candy to my shopping list\""
             },
+            "developer-tools": {
+                "tabs": {
+                    "services": {
+                        "title": "Služby"
+                    },
+                    "states": {
+                        "title": "Stavy"
+                    },
+                    "events": {
+                        "title": "Události"
+                    },
+                    "templates": {
+                        "title": "Šablony"
+                    },
+                    "mqtt": {
+                        "title": "MQTT"
+                    },
+                    "info": {
+                        "title": "Informace"
+                    }
+                }
+            },
             "history": {
                 "showing_entries": "Zobrazeny údaje pro",
                 "period": "Období"
@@ -335,6 +353,23 @@
                         "core": {
                             "header": "Konfigurace a správa serveru",
                             "introduction": "Moc dobře víme, že změna konfigurace může být velmi únavným procesem. Tato sekce se proto pokusí udělat váš život alespoň trochu jednodušší.",
+                            "core_config": {
+                                "edit_requires_storage": "Editor je zakázán, protože konfigurace je uložena v configuration.yaml.",
+                                "location_name": "Název instalace Home Assistant",
+                                "latitude": "Zeměpisná šířka",
+                                "longitude": "Zeměpisná délka",
+                                "elevation": "Nadmořská výška",
+                                "elevation_meters": "metrů",
+                                "time_zone": "Časové pásmo",
+                                "unit_system": "Systém jednotek",
+                                "unit_system_imperial": "Imperiální",
+                                "unit_system_metric": "Metrický",
+                                "imperial_example": "Stupně Fahrenheita, libry",
+                                "metric_example": "Stupně Celsia, kilogramy",
+                                "save_button": "Uložit"
+                            }
+                        },
+                        "server_control": {
                             "validation": {
                                 "heading": "Ověření konfigurace",
                                 "introduction": "Pokud jste nedávno provedli změny konfigurace a chcete se ujistit, že je vše v pořádku, můžete ji zde ověřit",
@@ -355,20 +390,6 @@
                                 "introduction": "Ovládejte svůj Home Assistant server... z Home Assistant.",
                                 "restart": "Restartovat",
                                 "stop": "Zastavit"
-                            },
-                            "core_config": {
-                                "location_name": "Název instalace Home Assistant",
-                                "latitude": "Zeměpisná šířka",
-                                "longitude": "Zeměpisná délka",
-                                "elevation": "Nadmořská výška",
-                                "elevation_meters": "metrů",
-                                "time_zone": "Časové pásmo",
-                                "unit_system": "Systém jednotek",
-                                "unit_system_imperial": "Imperiální",
-                                "unit_system_metric": "Metrický",
-                                "imperial_example": "Stupně Fahrenheita, libry",
-                                "metric_example": "Stupně Celsia, kilogramy",
-                                "save_button": "Uložit"
                             }
                         }
                     }
@@ -570,7 +591,20 @@
                 },
                 "zwave": {
                     "caption": "Z-Wave",
-                    "description": "Spravujte svou síť Z-Wave"
+                    "description": "Spravujte svou síť Z-Wave",
+                    "services": {
+                        "test_network": "Testovat síť",
+                        "save_config": "Uložit konfiguraci",
+                        "cancel_command": "Zrušit příkaz"
+                    },
+                    "common": {
+                        "value": "Hodnota",
+                        "unknown": "neznámý"
+                    },
+                    "node_config": {
+                        "seconds": "sekund",
+                        "set_config_parameter": "Nastavte konfigurační parametr"
+                    }
                 },
                 "users": {
                     "caption": "Uživatelé",
@@ -693,6 +727,36 @@
                         "device_tracker_picked": "Sledovat zařízení",
                         "device_tracker_pick": "Vyberte zařízení, které chcete sledovat"
                     }
+                },
+                "server_control": {
+                    "caption": "Ovládání serveru",
+                    "description": "Restart a zastavení serveru Home Asistent",
+                    "section": {
+                        "validation": {
+                            "heading": "Ověření konfigurace",
+                            "introduction": "Pokud jste nedávno provedli změny konfigurace a chcete se ujistit, že je vše v pořádku, můžete ji zde ověřit",
+                            "check_config": "Zkontrolujte konfiguraci",
+                            "valid": "Konfigurace je v pořádku!",
+                            "invalid": "Konfigurace není v pořádku!"
+                        },
+                        "reloading": {
+                            "heading": "Konfigurace se načítá",
+                            "introduction": "Některé části Home Assistant lze načíst bez nutnosti restartování. Volba načtení zahodí jejich aktuální konfiguraci a načte novou.",
+                            "core": "Znovu načíst jádro",
+                            "group": "Znovu načíst skupiny",
+                            "automation": "Znovu načíst automatizace",
+                            "script": "Znovu načíst skripty",
+                            "scene": "Znovu načíst scény"
+                        },
+                        "server_management": {
+                            "heading": "Správa serveru",
+                            "introduction": "Ovládejte svůj Home Assistant server... z Home Assistant.",
+                            "restart": "Restartovat",
+                            "stop": "Zastavit",
+                            "confirm_restart": "Opravdu chcete restartovat Home Assistant?",
+                            "confirm_stop": "Opravdu chcete zastavit službu Home Assistant?"
+                        }
+                    }
                 }
             },
             "profile": {
@@ -743,7 +807,6 @@
                 },
                 "current_user": "Nyní jste přihlášeni jako {fullName}.",
                 "is_owner": "Jste vlastník.",
-                "logout": "Odhlásit se",
                 "change_password": {
                     "header": "Změnit heslo",
                     "current_password": "Současné heslo",
@@ -764,6 +827,11 @@
                     "step_done": "Dokončen krok {step}",
                     "close": "Zavřít",
                     "submit": "Odeslat"
+                },
+                "logout": "Odhlásit",
+                "force_narrow": {
+                    "header": "Vždy skrýt postranní panel",
+                    "description": "Tato volba skryje postranním panelu jako výchozí nastavení, podobně jako na mobilním zažízení."
                 }
             },
             "page-authorize": {
@@ -996,6 +1064,8 @@
                         "labels": {
                             "lights": "Světla",
                             "information": "Informace",
+                            "morning_commute": "Työmatka aamulla",
+                            "commute_home": "Matka kotiin",
                             "entertainment": "Zábava",
                             "activity": "Aktivita",
                             "hdmi_input": "Vstup HDMI",
@@ -1006,6 +1076,7 @@
                             "air": "Vzduch"
                         },
                         "unit": {
+                            "watching": "tarkkaillaan",
                             "minutes_abbr": "min"
                         }
                     }
@@ -1014,7 +1085,6 @@
         },
         "sidebar": {
             "log_out": "Odhlásit se",
-            "developer_tools": "Vývojářské nástroje",
             "external_app_configuration": "Konfigurace aplikace"
         },
         "common": {
@@ -1193,6 +1263,11 @@
                 "updater": {
                     "title": "Pokyny pro aktualizaci"
                 }
+            },
+            "options_flow": {
+                "form": {
+                    "header": "Nastavení"
+                }
             }
         },
         "auth_store": {
@@ -1263,6 +1338,14 @@
                 "off": "Vypnuto",
                 "on": "Zapnuto",
                 "auto": "Automaticky"
+            },
+            "hvac_action": {
+                "off": "Vypnuto",
+                "heating": "Topení",
+                "cooling": "Chlazení",
+                "drying": "Sušení",
+                "idle": "Nečinný",
+                "fan": "Ventilátor"
             }
         }
     },
@@ -1270,5 +1353,11 @@
         "system-admin": "Správci",
         "system-users": "Uživatelé",
         "system-read-only": "Uživatelé jen pro čtení"
+    },
+    "config_entry": {
+        "disabled_by": {
+            "user": "Uživatel",
+            "integration": "Integrace"
+        }
     }
 }

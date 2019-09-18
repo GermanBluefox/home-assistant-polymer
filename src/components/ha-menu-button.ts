@@ -21,6 +21,7 @@ class HaMenuButton extends LitElement {
   @property() public narrow!: boolean;
   @property() public hass!: HomeAssistant;
   @property() private _hasNotifications = false;
+  private _alwaysVisible = false;
   private _attachNotifOnConnect = false;
   private _unsubNotifications?: UnsubscribeFunc;
 
@@ -43,7 +44,7 @@ class HaMenuButton extends LitElement {
 
   protected render(): TemplateResult | void {
     const hasNotifications =
-      this.narrow &&
+      (this.narrow || this.hass.dockedSidebar === "always_hidden") &&
       (this._hasNotifications ||
         Object.keys(this.hass.states).some(
           (entityId) => computeDomain(entityId) === "configurator"
@@ -62,16 +63,40 @@ class HaMenuButton extends LitElement {
     `;
   }
 
+  protected firstUpdated(changedProps) {
+    super.firstUpdated(changedProps);
+    if (!this.hassio) {
+      return;
+    }
+    // This component is used on Hass.io too, but Hass.io might run the UI
+    // on older frontends too, that don't have an always visible menu button
+    // in the sidebar.
+    this._alwaysVisible =
+      (Number((window.parent as any).frontendVersion) || 0) < 20190710;
+  }
+
   protected updated(changedProps) {
     super.updated(changedProps);
 
-    if (!changedProps.has("narrow")) {
+    if (!changedProps.has("narrow") && !changedProps.has("hass")) {
       return;
     }
 
-    this.style.visibility = this.narrow ? "initial" : "hidden";
+    const oldHass = changedProps.get("hass") as HomeAssistant | undefined;
+    const oldNarrow =
+      changedProps.get("narrow") ||
+      (oldHass && oldHass.dockedSidebar === "always_hidden");
+    const newNarrow =
+      this.narrow || this.hass.dockedSidebar === "always_hidden";
 
-    if (!this.narrow) {
+    if (oldNarrow === newNarrow) {
+      return;
+    }
+
+    this.style.visibility =
+      newNarrow || this._alwaysVisible ? "initial" : "hidden";
+
+    if (!newNarrow) {
       this._hasNotifications = false;
       if (this._unsubNotifications) {
         this._unsubNotifications();
@@ -102,13 +127,15 @@ class HaMenuButton extends LitElement {
         position: relative;
       }
       .dot {
+        pointer-events: none;
         position: absolute;
         background-color: var(--accent-color);
         width: 12px;
         height: 12px;
-        top: 8px;
-        right: 5px;
+        top: 5px;
+        right: 2px;
         border-radius: 50%;
+        border: 2px solid var(--primary-color);
       }
     `;
   }

@@ -52,6 +52,7 @@ export class HaPanelCustom extends UpdatingElement {
       return;
     }
     const props = {};
+    // @ts-ignore
     for (const key of changedProps.keys()) {
       props[key] = this[key];
     }
@@ -77,9 +78,7 @@ export class HaPanelCustom extends UpdatingElement {
       !["localhost", "127.0.0.1", location.hostname].includes(tempA.hostname)
     ) {
       if (
-        !confirm(`Do you trust the external panel "${config.name}" at "${
-          tempA.href
-        }"?
+        !confirm(`Do you trust the external panel "${config.name}" at "${tempA.href}"?
 
 It will have access to all data in Home Assistant.
 

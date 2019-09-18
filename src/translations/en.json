@@ -52,12 +52,7 @@
     "history": "History",
     "mailbox": "Mailbox",
     "shopping_list": "Shopping list",
-    "dev-services": "Services",
-    "dev-states": "States",
-    "dev-events": "Events",
-    "dev-templates": "Templates",
-    "dev-mqtt": "MQTT",
-    "dev-info": "Info",
+    "developer_tools": "Developer Tools",
     "profile": "Profile"
   },
   "state": {
@@ -176,20 +171,12 @@
     },
     "climate": {
       "off": "[%key:state::default::off%]",
-      "on": "[%key:state::default::on%]",
       "heat": "Heat",
       "cool": "Cool",
-      "idle": "Idle",
+      "heat_cool": "Heat/Cool",
       "auto": "Auto",
       "dry": "Dry",
-      "fan_only": "Fan only",
-      "eco": "Eco",
-      "electric": "Electric",
-      "performance": "Performance",
-      "high_demand": "High demand",
-      "heat_pump": "Heat pump",
-      "gas": "Gas",
-      "manual": "Manual"
+      "fan_only": "Fan only"
     },
     "configurator": {
       "configure": "Configure",
@@ -294,6 +281,7 @@
     "weather": {
       "clear-night": "Clear, night",
       "cloudy": "Cloudy",
+      "exceptional": "Exceptional",
       "fog": "Fog",
       "hail": "Hail",
       "lightning": "Lightning",
@@ -326,6 +314,24 @@
         "off": "[%key:state::default::off%]",
         "on": "[%key:state::default::on%]",
         "auto": "[%key:state::climate::auto%]"
+      },
+      "preset_mode": {
+        "none": "None",
+        "eco": "Eco",
+        "away": "Away",
+        "boost": "Boost",
+        "comfort": "Comfort",
+        "home": "Home",
+        "sleep": "Sleep",
+        "activity": "Activity"
+      },
+      "hvac_action": {
+        "off": "Off",
+        "heating": "Heating",
+        "cooling": "Cooling",
+        "drying": "Drying",
+        "idle": "Idle",
+        "fan": "Fan"
       }
     }
   },
@@ -362,6 +368,13 @@
     "system-users": "Users",
     "system-read-only": "Read-Only Users"
   },
+  "config_entry": {
+    "disabled_by": {
+      "user": "User",
+      "integration": "Integration",
+      "config_entry": "Config Entry"
+    }
+  },
   "ui": {
     "auth_store": {
       "ask": "Do you want to save this login?",
@@ -393,6 +406,7 @@
         "operation": "Operation",
         "fan_mode": "Fan mode",
         "swing_mode": "Swing mode",
+        "preset_mode": "Preset",
         "away_mode": "Away mode",
         "aux_heat": "Aux heat"
       },
@@ -403,7 +417,9 @@
       "fan": {
         "speed": "Speed",
         "oscillate": "Oscillate",
-        "direction": "Direction"
+        "direction": "Direction",
+        "forward": "Forward",
+        "reverse": "Reverse"
       },
       "light": {
         "brightness": "Brightness",
@@ -429,6 +445,14 @@
       },
       "script": {
         "execute": "Execute"
+      },
+      "timer": {
+        "actions": {
+          "start": "start",
+          "pause": "pause",
+          "cancel": "cancel",
+          "finish": "finish"
+        }
       },
       "vacuum": {
         "actions": {
@@ -478,7 +502,8 @@
     "common": {
       "loading": "Loading",
       "cancel": "Cancel",
-      "save": "Save"
+      "save": "Save",
+      "successfully_saved": "Successfully saved"
     },
     "components": {
       "entity": {
@@ -524,6 +549,33 @@
         "save": "Save",
         "name": "Name Override",
         "entity_id": "Entity ID"
+      },
+      "options_flow": {
+        "form": {
+          "header": "Options"
+        },
+        "success": {
+          "description": "Options successfully saved."
+        }
+      },
+      "config_entry_system_options": {
+        "title": "System Options",
+        "enable_new_entities_label": "Enable newly added entities.",
+        "enable_new_entities_description": "If disabled, newly discovered entities will not be automatically added to Home Assistant."
+      },
+      "zha_device_info": {
+        "manuf": "by {manufacturer}",
+        "no_area": "No Area",
+        "services": {
+          "reconfigure": "Reconfigure ZHA device (heal device). Use this if you are having issues with the device. If the device in question is a battery powered device please ensure it is awake and accepting commands when you use this service.",
+          "updateDeviceName": "Set a custom name for this device in the device registry.",
+          "remove": "Remove a device from the ZigBee network."
+        },
+        "zha_device_card": {
+          "device_name_placeholder": "User given name",
+          "area_picker_label": "Area",
+          "update_name_button": "Update Name"
+        }
       }
     },
     "duration": {
@@ -548,9 +600,7 @@
       "connection_lost": "Connection lost. Reconnecting…"
     },
     "sidebar": {
-      "developer_tools": "Developer tools",
-      "external_app_configuration": "App Configuration",
-      "log_out": "Log out"
+      "external_app_configuration": "App Configuration"
     },
     "panel": {
       "config": {
@@ -576,10 +626,10 @@
         },
         "core": {
           "caption": "General",
-          "description": "Validate your configuration file and control the server",
+          "description": "Change your general Home Assistant configuration",
           "section": {
             "core": {
-              "header": "Configuration and Server Control",
+              "header": "General Configuration",
               "introduction": "Changing your configuration can be a tiresome process. We know. This section will try to make your life a little bit easier.",
               "core_config": {
                 "edit_requires_storage": "Editor disabled because config stored in configuration.yaml.",
@@ -595,28 +645,37 @@
                 "imperial_example": "Fahrenheit, pounds",
                 "metric_example": "Celsius, kilograms",
                 "save_button": "Save"
-              },
-              "validation": {
-                "heading": "Configuration validation",
-                "introduction": "Validate your configuration if you recently made some changes to your configuration and want to make sure that it is all valid",
-                "check_config": "Check config",
-                "valid": "Configuration valid!",
-                "invalid": "Configuration invalid"
-              },
-              "reloading": {
-                "heading": "Configuration reloading",
-                "introduction": "Some parts of Home Assistant can reload without requiring a restart. Hitting reload will unload their current configuration and load the new one.",
-                "core": "Reload core",
-                "group": "Reload groups",
-                "automation": "Reload automations",
-                "script": "Reload scripts"
-              },
-              "server_management": {
-                "heading": "Server management",
-                "introduction": "Control your Home Assistant server… from Home Assistant.",
-                "restart": "Restart",
-                "stop": "Stop"
               }
+            }
+          }
+        },
+        "server_control": {
+          "caption": "Server Control",
+          "description": "Restart and stop the Home Assistant server",
+          "section": {
+            "validation": {
+              "heading": "Configuration validation",
+              "introduction": "Validate your configuration if you recently made some changes to your configuration and want to make sure that it is all valid",
+              "check_config": "Check config",
+              "valid": "Configuration valid!",
+              "invalid": "Configuration invalid"
+            },
+            "reloading": {
+              "heading": "Configuration reloading",
+              "introduction": "Some parts of Home Assistant can reload without requiring a restart. Hitting reload will unload their current configuration and load the new one.",
+              "core": "Reload core",
+              "group": "Reload groups",
+              "automation": "Reload automations",
+              "script": "Reload scripts",
+              "scene": "Reload scenes"
+            },
+            "server_management": {
+              "heading": "Server management",
+              "introduction": "Control your Home Assistant server… from Home Assistant.",
+              "restart": "Restart",
+              "confirm_restart": "Are you sure you want to restart Home Assistant?",
+              "stop": "Stop",
+              "confirm_stop": "Are you sure you want to stop Home Assistant?"
             }
           }
         },
@@ -658,6 +717,9 @@
               "unsupported_platform": "Unsupported platform: {platform}",
               "type_select": "Trigger type",
               "type": {
+                "device": {
+                  "label": "Device"
+                },
                 "event": {
                   "label": "Event",
                   "event_type": "Event type",
@@ -740,6 +802,9 @@
               "unsupported_condition": "Unsupported condition: {condition}",
               "type_select": "Condition type",
               "type": {
+                "device": {
+                  "label": "Device"
+                },
                 "state": {
                   "label": "[%key:ui::panel::config::automation::editor::triggers::type::state::label%]",
                   "state": "[%key:ui::panel::config::automation::editor::triggers::type::state::label%]"
@@ -806,6 +871,9 @@
                   "label": "Fire event",
                   "event": "[%key:ui::panel::config::automation::editor::triggers::type::homeassistant::event%]",
                   "service_data": "[%key:ui::panel::config::automation::editor::actions::type::service::service_data%]"
+                },
+                "device_id": {
+                  "label": "Device"
                 }
               }
             }
@@ -821,6 +889,10 @@
           "description_not_login": "Not logged in",
           "description_features": "Control away from home, integrate with Alexa and Google Assistant."
         },
+        "devices": {
+          "caption": "Devices",
+          "description": "Manage connected devices"
+        },
         "entity_registry": {
           "caption": "Entity Registry",
           "description": "Overview of all known entities.",
@@ -828,12 +900,14 @@
             "header": "Entity Registry",
             "introduction": "Home Assistant keeps a registry of every entity it has ever seen that can be uniquely identified. Each of these entities will have an entity ID assigned which will be reserved for just this entity.",
             "introduction2": "Use the entity registry to override the name, change the entity ID or remove the entry from Home Assistant. Note, removing the entity registry entry won't remove the entity. To do that, follow the link below and remove it from the integrations page.",
-            "integrations_page": "Integrations page",
-            "unavailable": "(unavailable)"
+            "integrations_page": "Integrations page"
           },
           "editor": {
             "unavailable": "This entity is not currently available.",
             "default_name": "New Area",
+            "enabled_label": "Enable entity",
+            "enabled_cause": "Disabled by {cause}.",
+            "enabled_description": "Disabled entities will not be added to Home Assistant.",
             "delete": "DELETE",
             "update": "UPDATE"
           }
@@ -850,7 +924,7 @@
         },
         "integrations": {
           "caption": "Integrations",
-          "description": "Manage connected devices and services",
+          "description": "Manage and setup integrations",
           "discovered": "Discovered",
           "configured": "Configured",
           "new": "Set up a new integration",
@@ -900,16 +974,6 @@
         "zha": {
           "caption": "ZHA",
           "description": "Zigbee Home Automation network management",
-          "services": {
-            "reconfigure": "Reconfigure ZHA device (heal device). Use this if you are having issues with the device. If the device in question is a battery powered device please ensure it is awake and accepting commands when you use this service.",
-            "updateDeviceName": "Set a custom name for this device in the device registry.",
-            "remove": "Remove a device from the ZigBee network."
-          },
-          "device_card": {
-            "device_name_placeholder": "User given name",
-            "area_picker_label": "Area",
-            "update_name_button": "Update Name"
-          },
           "add_device_page": {
             "header": "Zigbee Home Automation - Add Devices",
             "spinner": "Searching for ZHA Zigbee devices...",
@@ -918,7 +982,51 @@
         },
         "zwave": {
           "caption": "Z-Wave",
-          "description": "Manage your Z-Wave network"
+          "description": "Manage your Z-Wave network",
+          "common": {
+            "value": "Value",
+            "instance": "Instance",
+            "index": "Index",
+            "unknown": "unknown",
+            "wakeup_interval": "Wakeup Interval"
+          },
+          "network_management": {
+            "header": "Z-Wave Network Management",
+            "introduction": "Run commands that affect the Z-Wave network. You won't get feedback on whether most commands succeeded, but you can check the OZW Log to try to find out."
+          },
+          "network_status": {
+            "network_stopped": "Z-Wave Network Stopped",
+            "network_starting": "Starting Z-Wave Network...",
+            "network_starting_note": "This may take a while depending on the size of your network.",
+            "network_started": "Z-Wave Network Started",
+            "network_started_note_some_queried": "Awake nodes have been queried. Sleeping nodes will be queried when they wake.",
+            "network_started_note_all_queried": "All nodes have been queried."
+          },
+          "node_config": {
+            "header": "Node Config Options",
+            "seconds": "seconds",
+            "set_wakeup": "Set Wakeup Interval",
+            "config_parameter": "Config Parameter",
+            "config_value": "Config Value",
+            "true": "True",
+            "false": "False",
+            "set_config_parameter": "Set Config Parameter"
+          },
+          "values": {
+            "header": "Node Values"
+          },
+          "services": {
+            "start_network": "Start Network",
+            "stop_network": "Stop Network",
+            "heal_network": "Heal Network",
+            "test_network": "Test Network",
+            "soft_reset": "Soft Reset",
+            "save_config": "Save Config",
+            "add_node_secure": "Add Node Secure",
+            "add_node": "Add Node",
+            "remove_node": "Remove Node",
+            "cancel_command": "Cancel Command"
+          }
         }
       },
       "history": {
@@ -966,6 +1074,10 @@
             "save": "Save",
             "unsaved_changes": "Unsaved changes",
             "saved": "Saved"
+          },
+          "edit_lovelace": {
+            "header": "Title of your Lovelace UI",
+            "explanation": "This title is shown above all your views in Lovelace."
           },
           "edit_view": {
             "header": "View Configuration",
@@ -1016,6 +1128,10 @@
         "current_user": "You are currently logged in as {fullName}.",
         "is_owner": "You are an owner.",
         "logout": "Log out",
+        "force_narrow": {
+          "header": "Always hide the sidebar",
+          "description": "This will hide the sidebar by default, similar to the mobile experience."
+        },
         "push_notifications": {
           "header": "Push Notifications",
           "description": "Send notifications to this device.",
@@ -1224,6 +1340,31 @@
               "watching": "watching",
               "minutes_abbr": "min"
             }
+          }
+        }
+      },
+      "developer-tools": {
+        "tabs": {
+          "info": {
+            "title": "Info"
+          },
+          "logs": {
+            "title": "Logs"
+          },
+          "events": {
+            "title": "Events"
+          },
+          "mqtt": {
+            "title": "MQTT"
+          },
+          "services": {
+            "title": "Services"
+          },
+          "states": {
+            "title": "States"
+          },
+          "templates": {
+            "title": "Template"
           }
         }
       },

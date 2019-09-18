@@ -7,12 +7,8 @@
         "history": "",
         "mailbox": "",
         "shopping_list": "Lista de compras",
-        "dev-services": "Servicios",
-        "dev-states": "Estados",
-        "dev-events": "Eventos",
-        "dev-templates": "Plantillas",
-        "dev-mqtt": "",
         "dev-info": "Información",
+        "developer_tools": "Herramientas para desarrolladores",
         "calendar": "Calendario",
         "profile": "Perfil"
     },
@@ -145,7 +141,8 @@
             "high_demand": "Alta Demanda",
             "heat_pump": "Bomba de Calor",
             "gas": "Gas",
-            "manual": "Manual"
+            "manual": "Manual",
+            "heat_cool": "Calentar\/Enfriar"
         },
         "configurator": {
             "configure": "Configurar",
@@ -311,6 +308,28 @@
                 "add_item": "Agregar elemento",
                 "microphone_tip": "Toque el micrófono en la esquina superior derecha y diga \"Agregar dulces a mi lista de compras\""
             },
+            "developer-tools": {
+                "tabs": {
+                    "services": {
+                        "title": "Servicios"
+                    },
+                    "states": {
+                        "title": "Estados"
+                    },
+                    "events": {
+                        "title": "Eventos"
+                    },
+                    "templates": {
+                        "title": "Plantillas"
+                    },
+                    "mqtt": {
+                        "title": ""
+                    },
+                    "info": {
+                        "title": "Información"
+                    }
+                }
+            },
             "history": {
                 "showing_entries": "Mostrando registros del",
                 "period": "Período"
@@ -335,6 +354,23 @@
                         "core": {
                             "header": "Configuración y control del servidor",
                             "introduction": "Cambiar su configuración puede ser un proceso tedioso. Lo sabemos. Esta sección tratará de hacer su vida un poco más fácil.",
+                            "core_config": {
+                                "edit_requires_storage": "Editor desactivado porque config está almacenado en configuration.yaml.",
+                                "location_name": "Nombre de la instalación de tu Home Assistant",
+                                "latitude": "Latitud",
+                                "longitude": "Longitud",
+                                "elevation": "Elevación",
+                                "elevation_meters": "metros",
+                                "time_zone": "Zona horaria",
+                                "unit_system": "Sistema de unidades",
+                                "unit_system_imperial": "Imperial",
+                                "unit_system_metric": "Métrico",
+                                "imperial_example": "Fahrenheit, libras",
+                                "metric_example": "Centígrados, kilogramos",
+                                "save_button": "Guardar"
+                            }
+                        },
+                        "server_control": {
                             "validation": {
                                 "heading": "Validación de la configuración",
                                 "introduction": "Valide su configuración si recientemente realizó algunos cambios en su configuración y quiere asegurarse de que sea válida",
@@ -355,21 +391,6 @@
                                 "introduction": "Controle su servidor Home Assistant ... desde Home Assistant.",
                                 "restart": "Reiniciar",
                                 "stop": "Detener"
-                            },
-                            "core_config": {
-                                "edit_requires_storage": "Editor desactivado porque config está almacenado en configuration.yaml.",
-                                "location_name": "Nombre de la instalación de tu Home Assistant",
-                                "latitude": "Latitud",
-                                "longitude": "Longitud",
-                                "elevation": "Elevación",
-                                "elevation_meters": "metros",
-                                "time_zone": "Zona horaria",
-                                "unit_system": "Sistema de unidades",
-                                "unit_system_imperial": "Imperial",
-                                "unit_system_metric": "Métrico",
-                                "imperial_example": "Fahrenheit, libras",
-                                "metric_example": "Centígrados, kilogramos",
-                                "save_button": "Guardar"
                             }
                         }
                     }
@@ -571,7 +592,49 @@
                 },
                 "zwave": {
                     "caption": "",
-                    "description": "Administrar su red Z-Wave"
+                    "description": "Administrar su red Z-Wave",
+                    "network_management": {
+                        "header": "Gestión de la red Z-Wave",
+                        "introduction": "Ejecute comandos que afectan a la red Z-Wave. No recibirá comentarios sobre si la mayoría de los comandos tuvieron éxito, pero puede consultar el registro OZW para intentar averiguarlo."
+                    },
+                    "network_status": {
+                        "network_stopped": "Red Z-Wave detenida",
+                        "network_starting": "Iniciando la Red Z-Wave...",
+                        "network_starting_note": "Esto puede llevar un tiempo dependiendo del tamaño de su red.",
+                        "network_started": "Red Z-Wave iniciada",
+                        "network_started_note_some_queried": "Los nodos despiertos han sido consultados. Los nodos dormidos serán consultados cuando se despierten.",
+                        "network_started_note_all_queried": "Todos los nodos han sido consultados."
+                    },
+                    "services": {
+                        "start_network": "Iniciar red",
+                        "stop_network": "Detener red",
+                        "test_network": "Red de prueba",
+                        "save_config": "Guardar configuración",
+                        "add_node_secure": "Agregar nodo seguro",
+                        "add_node": "Agregar nodo",
+                        "remove_node": "Eliminar nodo",
+                        "cancel_command": "Cancelar comando"
+                    },
+                    "common": {
+                        "value": "Valor",
+                        "instance": "Instancia",
+                        "index": "Índice",
+                        "unknown": "desconocido",
+                        "wakeup_interval": "Intervalo de activación"
+                    },
+                    "values": {
+                        "header": "Valores del nodo"
+                    },
+                    "node_config": {
+                        "header": "Opciones de configuración del nodo",
+                        "seconds": "segundos",
+                        "set_wakeup": "Establecer intervalo de activación",
+                        "config_parameter": "Parámetro de configuración",
+                        "config_value": "Valor de configuración",
+                        "true": "Verdadero",
+                        "false": "Falso",
+                        "set_config_parameter": "Establecer parámetro de configuración"
+                    }
                 },
                 "users": {
                     "caption": "Usuarios",
@@ -619,7 +682,8 @@
                         "firmware": "Firmware: {version}",
                         "device_unavailable": "dispositivo no disponible",
                         "entity_unavailable": "entidad no disponible",
-                        "no_area": "Ninguna área"
+                        "no_area": "Ninguna área",
+                        "hub": "Conectado a través de"
                     },
                     "config_flow": {
                         "external_step": {
@@ -681,7 +745,10 @@
                         "unavailable": "Esta entidad no está disponible actualmente.",
                         "default_name": "Nueva Área",
                         "delete": "ELIMINAR",
-                        "update": "ACTUALIZAR"
+                        "update": "ACTUALIZAR",
+                        "enabled_label": "Habilitar entidad",
+                        "enabled_cause": "Deshabilitado por {cause}.",
+                        "enabled_description": "Las entidades deshabilitadas no serán agregadas a Home Assistant."
                     }
                 },
                 "person": {
@@ -692,6 +759,34 @@
                         "device_tracker_intro": "Selecciona los dispositivos que pertenecen a esta persona.",
                         "device_tracker_picked": "Dispositivo de seguimiento",
                         "device_tracker_pick": "Elegir dispositivo para rastrear"
+                    }
+                },
+                "server_control": {
+                    "caption": "Control del servidor",
+                    "description": "Reinicie y detenga el servidor de Home Assistant",
+                    "section": {
+                        "validation": {
+                            "heading": "Validación de la configuración",
+                            "introduction": "Valide su configuración si recientemente realizó algunos cambios en su configuración y quiere asegurarse de que sea válida",
+                            "check_config": "Verificar configuración",
+                            "valid": "¡Configuración valida!",
+                            "invalid": "Configuración inválida"
+                        },
+                        "reloading": {
+                            "heading": "Recarga de configuración",
+                            "introduction": "Algunas partes de Home Assistant pueden volver a cargarse sin necesidad de reiniciar. Al pulsar recargar descargará su configuración actual y cargará la nueva.",
+                            "core": "Recargar núcleo",
+                            "group": "Recargar grupos",
+                            "automation": "Recargar automatizaciones",
+                            "script": "Recargar scripts",
+                            "scene": "Recargar escenas"
+                        },
+                        "server_management": {
+                            "heading": "Administración del servidor",
+                            "introduction": "Controle su servidor Home Assistant ... desde Home Assistant.",
+                            "restart": "Reiniciar",
+                            "stop": "Detener"
+                        }
                     }
                 }
             },
@@ -743,7 +838,6 @@
                 },
                 "current_user": "Actualmente estás conectado como {fullName} .",
                 "is_owner": "Eres propietario.",
-                "logout": "Cerrar sesión",
                 "change_password": {
                     "header": "Cambiar contraseña",
                     "current_password": "Contraseña actual",
@@ -764,6 +858,11 @@
                     "step_done": "Configuración realizada para {step}",
                     "close": "Cerrar",
                     "submit": "Enviar"
+                },
+                "logout": "Cerrar sesión",
+                "force_narrow": {
+                    "header": "Ocultar siempre la barra lateral",
+                    "description": "Esto ocultará la barra lateral de forma predeterminada, similar a la experiencia móvil."
                 }
             },
             "page-authorize": {
@@ -970,11 +1069,53 @@
                     "refresh": "Actualizar"
                 },
                 "reload_lovelace": "Recargar Lovelace"
+            },
+            "page-demo": {
+                "cards": {
+                    "demo": {
+                        "demo_by": "por {name}",
+                        "next_demo": "Siguiente demostración",
+                        "introduction": "¡Bienvenido a casa! Ha llegado a la demostración de Home Assistant donde mostramos las mejores interfaces de usuario creadas por nuestra comunidad.",
+                        "learn_more": "Aprenda más sobre Home Assistant"
+                    }
+                },
+                "config": {
+                    "arsaboo": {
+                        "names": {
+                            "upstairs": "Piso de arriba",
+                            "family_room": "Habitación familiar",
+                            "kitchen": "Cocina",
+                            "patio": "Patio",
+                            "hallway": "Pasillo",
+                            "master_bedroom": "Recamara principal",
+                            "left": "Izquierda",
+                            "right": "Derecha",
+                            "mirror": "Espejo"
+                        },
+                        "labels": {
+                            "lights": "Luces",
+                            "information": "Información",
+                            "morning_commute": "Viaje de mañana",
+                            "commute_home": "Viaje a casa",
+                            "entertainment": "Entretenimiento",
+                            "activity": "Actividad",
+                            "hdmi_input": "Entrada HDMI",
+                            "hdmi_switcher": "Conmutador HDMI",
+                            "volume": "Volumen",
+                            "total_tv_time": "Tiempo total de TV",
+                            "turn_tv_off": "Apagar la televisión",
+                            "air": "Aire"
+                        },
+                        "unit": {
+                            "watching": "viendo",
+                            "minutes_abbr": "mín."
+                        }
+                    }
+                }
             }
         },
         "sidebar": {
             "log_out": "Cerrar sesión",
-            "developer_tools": "Herramientas para desarrolladores",
             "external_app_configuration": "Configuración de la aplicación"
         },
         "common": {
@@ -1078,7 +1219,8 @@
                 "fan_mode": "Modo del ventilador",
                 "swing_mode": "Modo de oscilación",
                 "away_mode": "Fuera de Casa",
-                "aux_heat": "Calor auxiliar"
+                "aux_heat": "Calor auxiliar",
+                "preset_mode": "Preestablecido"
             },
             "lock": {
                 "code": "Código",
@@ -1153,6 +1295,19 @@
                 "updater": {
                     "title": "Instrucciones de actualización"
                 }
+            },
+            "options_flow": {
+                "form": {
+                    "header": "Opciones"
+                },
+                "success": {
+                    "description": "Opciones guardadas con éxito."
+                }
+            },
+            "config_entry_system_options": {
+                "title": "Opciones del sistema",
+                "enable_new_entities_label": "Habilitar entidades recién agregadas.",
+                "enable_new_entities_description": "Si está deshabilitado, las entidades recién descubiertas no se agregarán automáticamente a Home Assistant."
             }
         },
         "auth_store": {
@@ -1223,6 +1378,24 @@
                 "off": "Apagado",
                 "on": "Encendido",
                 "auto": "Auto"
+            },
+            "preset_mode": {
+                "none": "Ninguno",
+                "eco": "Eco",
+                "away": "Fuera de casa",
+                "boost": "Aumentar",
+                "comfort": "Comodidad",
+                "home": "En Casa",
+                "sleep": "Dormir",
+                "activity": "Actividad"
+            },
+            "hvac_action": {
+                "off": "Desactivado",
+                "heating": "Calentando",
+                "cooling": "Enfriando",
+                "drying": "Secando",
+                "idle": "Inactivo",
+                "fan": "Ventilador"
             }
         }
     },
@@ -1230,5 +1403,12 @@
         "system-admin": "Administradores",
         "system-users": "Usuarios",
         "system-read-only": "Usuarios de solo lectura"
+    },
+    "config_entry": {
+        "disabled_by": {
+            "user": "Usuario",
+            "integration": "Integración",
+            "config_entry": "Entrada de configuración"
+        }
     }
 }

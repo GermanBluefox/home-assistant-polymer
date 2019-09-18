@@ -12,9 +12,7 @@ import "@polymer/paper-dropdown-menu/paper-dropdown-menu-light";
 import "@polymer/paper-item/paper-item";
 import "@polymer/paper-listbox/paper-listbox";
 
-import { ConfigFlowStepCreateEntry } from "../../data/config_entries";
 import { HomeAssistant } from "../../types";
-import { localizeKey } from "../../common/translations/localize";
 import { fireEvent } from "../../common/dom/fire_event";
 import { configFlowContentStyles } from "./styles";
 import {
@@ -25,14 +23,18 @@ import {
   AreaRegistryEntry,
   createAreaRegistryEntry,
 } from "../../data/area_registry";
+import { DataEntryFlowStepCreateEntry } from "../../data/data_entry_flow";
+import { FlowConfig } from "./show-dialog-data-entry-flow";
 
 @customElement("step-flow-create-entry")
 class StepFlowCreateEntry extends LitElement {
+  public flowConfig!: FlowConfig;
+
   @property()
   public hass!: HomeAssistant;
 
   @property()
-  public step!: ConfigFlowStepCreateEntry;
+  public step!: DataEntryFlowStepCreateEntry;
 
   @property()
   public devices!: DeviceRegistryEntry[];
@@ -42,24 +44,11 @@ class StepFlowCreateEntry extends LitElement {
 
   protected render(): TemplateResult | void {
     const localize = this.hass.localize;
-    const step = this.step;
-
-    const description = localizeKey(
-      localize,
-      `component.${step.handler}.config.create_entry.${step.description ||
-        "default"}`,
-      step.description_placeholders
-    );
 
     return html`
       <h2>Success!</h2>
       <div class="content">
-        ${description
-          ? html`
-              <ha-markdown .content=${description} allow-svg></ha-markdown>
-            `
-          : ""}
-        <p>Created config for ${step.title}.</p>
+        ${this.flowConfig.renderCreateEntryDescription(this.hass, this.step)}
         ${this.devices.length === 0
           ? ""
           : html`
@@ -69,9 +58,10 @@ class StepFlowCreateEntry extends LitElement {
                   (device) =>
                     html`
                       <div class="device">
-                        <b>${device.name}</b><br />
-                        ${device.model} (${device.manufacturer})
-
+                        <div>
+                          <b>${device.name}</b><br />
+                          ${device.model} (${device.manufacturer})
+                        </div>
                         <paper-dropdown-menu-light
                           label="Area"
                           .device=${device.id}
@@ -157,6 +147,8 @@ class StepFlowCreateEntry extends LitElement {
           display: flex;
           flex-wrap: wrap;
           margin: -4px;
+          max-height: 600px;
+          overflow-y: auto;
         }
         .device {
           border: 1px solid var(--divider-color);
@@ -178,7 +170,7 @@ class StepFlowCreateEntry extends LitElement {
         }
         @media all and (max-width: 450px), all and (max-height: 500px) {
           .device {
-            width: auto;
+            width: 100%;
           }
         }
       `,
