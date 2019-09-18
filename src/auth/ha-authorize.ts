@@ -12,7 +12,9 @@ import "./ha-auth-flow";
 import { AuthProvider, fetchAuthProviders } from "../data/auth";
 import { registerServiceWorker } from "../util/register-service-worker";
 
-import(/* webpackChunkName: "pick-auth-provider" */ "../auth/ha-pick-auth-provider");
+import(
+  /* webpackChunkName: "pick-auth-provider" */ "../auth/ha-pick-auth-provider"
+);
 
 interface QueryParams {
   client_id?: string;
@@ -22,13 +24,9 @@ interface QueryParams {
 
 class HaAuthorize extends litLocalizeLiteMixin(LitElement) {
   @property() public clientId?: string;
-
   @property() public redirectUri?: string;
-
   @property() public oauth2State?: string;
-
   @property() private _authProvider?: AuthProvider;
-
   @property() private _authProviders?: AuthProvider[];
 
   constructor() {

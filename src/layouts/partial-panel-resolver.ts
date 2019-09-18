@@ -18,21 +18,7 @@ const COMPONENTS = {
   //  custom: () =>
   //    import(/* webpackChunkName: "panel-custom" */ "../panels/custom/ha-panel-custom"),
   // "developer-tools": () =>
-  //   import(
-  //     /* webpackChunkName: "panel-developer-tools" */ "../panels/developer-tools/ha-panel-developer-tools"
-  //   ),
-  //  "dev-event": () =>
-  //    import(/* webpackChunkName: "panel-dev-event" */ "../panels/dev-event/ha-panel-dev-event"),
-  //  "dev-info": () =>
-  //    import(/* webpackChunkName: "panel-dev-info" */ "../panels/dev-info/ha-panel-dev-info"),
-  //  "dev-mqtt": () =>
-  //    import(/* webpackChunkName: "panel-dev-mqtt" */ "../panels/dev-mqtt/ha-panel-dev-mqtt"),
-  //  "dev-service": () =>
-  //    import(/* webpackChunkName: "panel-dev-service" */ "../panels/dev-service/ha-panel-dev-service"),
-  //  "dev-state": () =>
-  //    import(/* webpackChunkName: "panel-dev-state" */ "../panels/dev-state/ha-panel-dev-state"),
-  //  "dev-template": () =>
-  //    import(/* webpackChunkName: "panel-dev-template" */ "../panels/dev-template/ha-panel-dev-template"),
+  //   import(/* webpackChunkName: "panel-developer-tools" */ "../panels/developer-tools/ha-panel-developer-tools"),
   lovelace: () =>
     import(
       /* webpackChunkName: "panel-lovelace" */ "../panels/lovelace/ha-panel-lovelace"

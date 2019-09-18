@@ -20,7 +20,7 @@ import "@polymer/paper-listbox/paper-listbox";
 import "@polymer/paper-menu-button/paper-menu-button";
 import "@polymer/paper-tabs/paper-tab";
 import "@polymer/paper-tabs/paper-tabs";
-import { HassEntities } from "home-assistant-js-websocket";
+import { HassEntities } from "home-assistant-js-websocket"; // IoB
 
 import scrollToTarget from "../../common/dom/scroll-to-target";
 
@@ -29,17 +29,17 @@ import "../../components/ha-start-voice-button";
 import "../../components/ha-paper-icon-button-arrow-next";
 import "../../components/ha-paper-icon-button-arrow-prev";
 import "../../components/ha-icon";
-import { subscribeNotifications } from "../../data/ws-notifications";
+import { subscribeNotifications } from "../../data/ws-notifications"; // IoB
 import { debounce } from "../../common/util/debounce";
 import { HomeAssistant } from "../../types";
 import { LovelaceConfig } from "../../data/lovelace";
 import { navigate } from "../../common/navigate";
 import { fireEvent } from "../../common/dom/fire_event";
-import { computeNotifications } from "./common/compute-notifications";
+import { computeNotifications } from "./common/compute-notifications"; // IoB
 import { swapView } from "./editor/config-util";
 
-import "./components/notifications/hui-notification-drawer";
-import "./components/notifications/hui-notifications-button";
+import "./components/notifications/hui-notification-drawer"; // IoB
+import "./components/notifications/hui-notifications-button"; // IoB
 import "./hui-view";
 // Not a duplicate import, this one is for type
 // tslint:disable-next-line
@@ -63,12 +63,12 @@ class HUIRoot extends LitElement {
   @property() public route?: { path: string; prefix: string };
   @property() private _routeData?: { view: string };
   @property() private _curView?: number | "hass-unused-entities";
-  @property() private _notificationsOpen = false;
-  @property() private _persistentNotifications?: Notification[];
+  @property() private _notificationsOpen = false; // IoB
+  @property() private _persistentNotifications?: Notification[]; // IoB
   private _viewCache?: { [viewId: string]: HUIView };
 
   private _debouncedConfigChanged: () => void;
-  private _unsubNotifications?: () => void;
+  private _unsubNotifications?: () => void; // IoB
 
   constructor() {
     super();
@@ -81,6 +81,7 @@ class HUIRoot extends LitElement {
     );
   }
 
+  // IoB
   public connectedCallback(): void {
     super.connectedCallback();
     this._unsubNotifications = subscribeNotifications(
@@ -97,12 +98,14 @@ class HUIRoot extends LitElement {
       this._unsubNotifications();
     }
   }
+  // IoB end
 
   protected render(): TemplateResult | void {
     return html`
     <app-route .route="${this.route}" pattern="/:view" data="${
       this._routeData
     }" @data-changed="${this._routeDataChanged}"></app-route>
+    <!-- Inserted for IoB -->
     <hui-notification-drawer
       .hass="${this.hass}"
       .notifications="${this._notifications}"
@@ -507,7 +510,7 @@ class HUIRoot extends LitElement {
       afterNextRender(() => this._selectView(newSelectView, force));
     }
   }
-
+  // for IoB
   private get _notifications() {
     return this._updateNotifications(
       this.hass!.states,
@@ -546,11 +549,11 @@ class HUIRoot extends LitElement {
   private _routeDataChanged(ev): void {
     this._routeData = ev.detail.value;
   }
-
+  // for IoB
   private _handleNotificationsOpenChanged(ev): void {
     this._notificationsOpen = ev.detail.value;
   }
-
+  // for IoB
   private _updateNotifications(
     states: HassEntities,
     persistent: unknown[]
@@ -572,8 +575,8 @@ class HUIRoot extends LitElement {
   }
 
   private _handleHelp(): void {
-    // window.open("https://www.home-assistant.io/lovelace/", "_blank");
     // IoB
+    // window.open("https://www.home-assistant.io/lovelace/", "_blank");
     window.open(
       "https://www.iobroker.net/#en/adapters/adapterref/iobroker.lovelace/README.md",
       "_blank"

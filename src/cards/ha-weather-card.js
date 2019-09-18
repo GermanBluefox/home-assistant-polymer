@@ -25,8 +25,7 @@ class HaWeatherCard extends LocalizeMixin(EventsMixin(PolymerElement)) {
           padding: 0 20px 20px;
         }
 
-        ha-icon,
-        .ha-img {
+        ha-icon {
           color: var(--paper-item-icon-color);
         }
 
@@ -76,18 +75,13 @@ class HaWeatherCard extends LocalizeMixin(EventsMixin(PolymerElement)) {
           margin-right: 0px;
         }
 
-        .main ha-icon,
-        .main .ha-img {
+        .main ha-icon {
           --iron-icon-height: 72px;
           --iron-icon-width: 72px;
           margin-right: 8px;
         }
 
         :host([rtl]) .main ha-icon {
-          margin-right: 0px;
-        }
-
-        :host([rtl]) .main .ha-img {
           margin-right: 0px;
         }
 
@@ -128,14 +122,9 @@ class HaWeatherCard extends LocalizeMixin(EventsMixin(PolymerElement)) {
           text-align: center;
         }
 
-        .forecast .icon,
-        .forecast .icon-image {
+        .forecast .icon {
           margin: 4px 0;
           text-align: center;
-        }
-
-        .forecast .icon-image {
-          width: 32px;
         }
 
         :host([rtl]) .forecast .temp {
@@ -166,9 +155,6 @@ class HaWeatherCard extends LocalizeMixin(EventsMixin(PolymerElement)) {
             <div class="main">
               <template is="dom-if" if="[[showWeatherIcon(stateObj.state)]]">
                 <ha-icon icon="[[getWeatherIcon(stateObj.state)]]"></ha-icon>
-              </template>
-              <template is="dom-if" if="[[showWeatherImg(stateObj.state)]]">
-                <img class="ha-img" src="[[stateObj.state]]" alt="state" />
               </template>
               <div class="temp">
                 [[stateObj.attributes.temperature]]<span
@@ -223,23 +209,11 @@ class HaWeatherCard extends LocalizeMixin(EventsMixin(PolymerElement)) {
                       [[computeTime(item.datetime)]]
                     </template>
                   </div>
-                  <template
-                    is="dom-if"
-                    if="[[showWeatherAsCondition(item.condition)]]"
-                  >
+                  <template is="dom-if" if="[[_showValue(item.condition)]]">
                     <div class="icon">
                       <ha-icon
                         icon="[[getWeatherIcon(item.condition)]]"
                       ></ha-icon>
-                    </div>
-                  </template>
-                  <template is="dom-if" if="[[showWeatherImg(item.condition)]]">
-                    <div class="icon">
-                      <img
-                        class="icon-image"
-                        src="[[item.condition]]"
-                        alt="state"
-                      />
                     </div>
                   </template>
                   <template is="dom-if" if="[[_showValue(item.temperature)]]">
@@ -351,10 +325,7 @@ class HaWeatherCard extends LocalizeMixin(EventsMixin(PolymerElement)) {
   }
 
   computeState(state, localize) {
-    return (
-      localize(`state.weather.${state}`) ||
-      ((state || "").toString().match(/\.png|\.svg|\.jpg|\.jpeg/i) ? "" : state)
-    );
+    return localize(`state.weather.${state}`) || state;
   }
 
   computeName(stateObj) {
@@ -363,16 +334,6 @@ class HaWeatherCard extends LocalizeMixin(EventsMixin(PolymerElement)) {
 
   showWeatherIcon(condition) {
     return condition in this.weatherIcons;
-  }
-
-  showWeatherImg(iconURL) {
-    return (iconURL || "").toString().match(/\.png|\.svg|\.jpg|\.jpeg/i);
-  }
-
-  showWeatherAsCondition(condition) {
-    return condition
-      ? !(condition || "").toString().match(/\.png|\.svg|\.jpg|\.jpeg/i)
-      : false;
   }
 
   getWeatherIcon(condition) {
