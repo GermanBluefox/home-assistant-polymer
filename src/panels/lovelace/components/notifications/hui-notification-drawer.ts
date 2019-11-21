@@ -11,6 +11,7 @@ import "../../../../components/ha-paper-icon-button-next";
 import { EventsMixin } from "../../../../mixins/events-mixin";
 import LocalizeMixin from "../../../../mixins/localize-mixin";
 import { computeRTL } from "../../../../common/util/compute_rtl";
+import { property } from "lit-element";
 
 /*
  * @appliesMixin EventsMixin
@@ -19,6 +20,11 @@ import { computeRTL } from "../../../../common/util/compute_rtl";
 export class HuiNotificationDrawer extends EventsMixin(
   LocalizeMixin(PolymerElement)
 ) {
+  // @property() public open: boolean = false;
+  @property() public hidden: boolean = false;
+  @property() public classList: any;
+  @property() private _openTimer: number = 0;
+
   static get template() {
     return html`
     <style include="paper-material-styles">
@@ -185,13 +191,13 @@ export class HuiNotificationDrawer extends EventsMixin(
     if (open) {
       // Render closed then animate open
       this.hidden = false;
-      this._openTimer = setTimeout(() => {
+      this._openTimer = window.setTimeout(() => {
         this.classList.add("open");
       }, 50);
     } else {
       // Animate closed then hide
       this.classList.remove("open");
-      this._openTimer = setTimeout(() => {
+      this._openTimer = window.setTimeout(() => {
         this.hidden = true;
       }, 250);
     }
