@@ -10,7 +10,6 @@ import "../../../../components/ha-paper-icon-button-next";
 
 import { EventsMixin } from "../../../../mixins/events-mixin";
 import LocalizeMixin from "../../../../mixins/localize-mixin";
-import { property } from "lit-element";
 
 /*
  * @appliesMixin EventsMixin
