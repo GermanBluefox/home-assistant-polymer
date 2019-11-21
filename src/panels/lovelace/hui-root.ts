@@ -20,7 +20,6 @@ import "@polymer/paper-listbox/paper-listbox";
 import "@polymer/paper-menu-button/paper-menu-button";
 import "@polymer/paper-tabs/paper-tab";
 import "@polymer/paper-tabs/paper-tabs";
-import { HassEntities } from "home-assistant-js-websocket"; // IoB
 
 import scrollToTarget from "../../common/dom/scroll-to-target";
 
@@ -29,17 +28,19 @@ import "../../components/ha-start-voice-button";
 import "../../components/ha-paper-icon-button-arrow-next";
 import "../../components/ha-paper-icon-button-arrow-prev";
 import "../../components/ha-icon";
-import { subscribeNotifications } from "../../data/ws-notifications"; // IoB
 import { debounce } from "../../common/util/debounce";
 import { HomeAssistant } from "../../types";
 import { LovelaceConfig } from "../../data/lovelace";
 import { navigate } from "../../common/navigate";
 import { fireEvent } from "../../common/dom/fire_event";
-import { computeNotifications } from "./common/compute-notifications"; // IoB
 import { swapView } from "./editor/config-util";
 
+import { HassEntities } from "home-assistant-js-websocket"; // IoB
+import { subscribeNotifications } from "../../data/ws-notifications"; // IoB
+import { computeNotifications } from "./common/compute-notifications"; // IoB
 import "./components/notifications/hui-notification-drawer"; // IoB
 import "./components/notifications/hui-notifications-button"; // IoB
+
 import "./hui-view";
 // Not a duplicate import, this one is for type
 // tslint:disable-next-line
@@ -105,6 +106,7 @@ class HUIRoot extends LitElement {
     <app-route .route="${this.route}" pattern="/:view" data="${
       this._routeData
     }" @data-changed="${this._routeDataChanged}"></app-route>
+    
     <!-- Inserted for IoB -->
     <hui-notification-drawer
       .hass="${this.hass}"
@@ -113,6 +115,7 @@ class HUIRoot extends LitElement {
       @open-changed="${this._handleNotificationsOpenChanged}"
       .narrow="${this.narrow}"
     ></hui-notification-drawer>
+    
     <ha-app-layout id="layout">
       <app-header slot="header" effects="waterfall" class="${classMap({
         "edit-mode": this._editMode,
@@ -186,12 +189,15 @@ class HUIRoot extends LitElement {
                     .narrow=${this.narrow}
                   ></ha-menu-button-->
                   <div main-title>${this.config.title || "Home Assistant"}</div>
+
+                  <!-- Enabled for IoB -->
                   <hui-notifications-button
                     .hass="${this.hass}"
                     .opened="${this._notificationsOpen}"
                     @opened-changed="${this._handleNotificationsOpenChanged}"
                     .notifications="${this._notifications}"
                   ></hui-notifications-button>
+
                   <ha-start-voice-button
                     .hass="${this.hass}"
                   ></ha-start-voice-button>
@@ -322,6 +328,17 @@ class HUIRoot extends LitElement {
                             )}"
                             icon="hass:plus"
                           ></paper-icon-button>
+                        `
+                      : ""}
+                    ${this._hideToolbar // IoB
+                      ? html`
+                          <hui-notifications-button
+                            .hass="${this.hass}"
+                            .opened="${this._notificationsOpen}"
+                            @opened-changed="${this
+                              ._handleNotificationsOpenChanged}"
+                            .notifications="${this._notifications}"
+                          ></hui-notifications-button>
                         `
                       : ""}
                   </paper-tabs>

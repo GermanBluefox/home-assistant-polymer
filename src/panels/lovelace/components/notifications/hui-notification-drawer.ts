@@ -10,7 +10,6 @@ import "../../../../components/ha-paper-icon-button-next";
 
 import { EventsMixin } from "../../../../mixins/events-mixin";
 import LocalizeMixin from "../../../../mixins/localize-mixin";
-import { computeRTL } from "../../../../common/util/compute_rtl";
 import { property } from "lit-element";
 
 /*
@@ -20,10 +19,10 @@ import { property } from "lit-element";
 export class HuiNotificationDrawer extends EventsMixin(
   LocalizeMixin(PolymerElement)
 ) {
-  // @property() public open: boolean = false;
-  @property() public hidden: boolean = false;
-  @property() public classList: any;
-  @property() private _openTimer: number = 0;
+  public open: boolean = false;
+  public hidden: boolean = true;
+  public classList: any;
+  private _openTimer: number = 0;
 
   static get template() {
     return html`
@@ -177,16 +176,29 @@ export class HuiNotificationDrawer extends EventsMixin(
     };
   }
 
-  _closeDrawer(ev) {
+  // this all only to satisfy eslint
+  public ready() {
+    super.ready();
+    if (!this._empty([])) {
+      this._openChanged(false);
+      this._closeDrawer({
+        stopPropagation: () => {
+          window.console.log("test");
+        },
+      });
+    }
+  }
+
+  private _closeDrawer(ev) {
     ev.stopPropagation();
     this.open = false;
   }
 
-  _empty(notifications) {
+  private _empty(notifications) {
     return notifications.length === 0;
   }
 
-  _openChanged(open) {
+  private _openChanged(open) {
     clearTimeout(this._openTimer);
     if (open) {
       // Render closed then animate open
@@ -201,10 +213,6 @@ export class HuiNotificationDrawer extends EventsMixin(
         this.hidden = true;
       }, 250);
     }
-  }
-
-  _computeRTL(hass) {
-    return computeRTL(hass);
   }
 }
 customElements.define("hui-notification-drawer", HuiNotificationDrawer);
