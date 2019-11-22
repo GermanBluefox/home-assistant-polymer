@@ -34,13 +34,9 @@ import { navigate } from "../../common/navigate";
 import { fireEvent } from "../../common/dom/fire_event";
 import { swapView } from "./editor/config-util";
 
-import "../../components/ha-start-voice-button"; // IoB
-import { HassEntities } from "home-assistant-js-websocket"; // IoB
-import { subscribeNotifications } from "../../data/ws-notifications"; // IoB
-import { computeNotifications } from "./common/compute-notifications"; // IoB
-// import "./components/notifications/hui-notification-drawer"; // IoB
-import "./components/notifications/hui-notifications-button"; // IoB
+import { subscribeNotifications } from "../../data/persistent_notification"; // IoB
 import "../../dialogs/notifications/notification-drawer"; // IoB
+import { showNotificationDrawer } from "../../dialogs/notifications/show-notification-drawer"; // IoB
 
 import "./views/hui-view";
 // Not a duplicate import, this one is for type
@@ -68,16 +64,20 @@ class HUIRoot extends LitElement {
   @property() public route?: { path: string; prefix: string };
   @property() private _routeData?: { view: string };
   @property() private _curView?: number | "hass-unused-entities";
-  @property() private _notificationsOpen = false; // IoB
-  @property() private _persistentNotifications?: Notification[]; // IoB
-  private _viewCache?: { [viewId: string]: HUIView };
+  @property() private _persistentNotifications?: number; // IoB
 
-  private _debouncedConfigChanged: () => void;
   private _unsubNotifications?: () => void; // IoB
 
-  private _conversation = memoizeOne((_components) =>
-    isComponentLoaded(this.hass, "conversation")
+  private _viewCache?: { [viewId: string]: HUIView };
+  private _debouncedConfigChanged: () => void;
+
+  // IoB
+  private _conversation = memoizeOne(
+    (_components) =>
+      "webkitSpeechRecognition" in window && // IoB
+      isComponentLoaded(this.hass, "conversation")
   );
+  // endIoB
 
   constructor() {
     super();
@@ -96,7 +96,9 @@ class HUIRoot extends LitElement {
     this._unsubNotifications = subscribeNotifications(
       this.hass!.connection,
       (notifications) => {
-        this._persistentNotifications = notifications;
+        this._persistentNotifications = !!notifications
+          ? notifications.length
+          : 0;
       }
     );
   }
@@ -118,10 +120,6 @@ class HUIRoot extends LitElement {
     <!-- Inserted for IoB -->
     <notification-drawer
       .hass="${this.hass}"
-      .notifications="${this._notifications}"
-      .open="${this._notificationsOpen}"
-      @open-changed="${this._handleNotificationsOpenChanged}"
-      .narrow="${this.narrow}"
     ></notification-drawer>
     
     <ha-app-layout id="layout">
@@ -212,16 +210,7 @@ class HUIRoot extends LitElement {
                   <div main-title>${this.config.title || "Home Assistant"}</div>
 
                   <!-- Enabled for IoB -->
-                  <hui-notifications-button
-                    .hass="${this.hass}"
-                    .opened="${this._notificationsOpen}"
-                    @opened-changed="${this._handleNotificationsOpenChanged}"
-                    .notifications="${this._notifications}"
-                  ></hui-notifications-button>
-
-                  <ha-start-voice-button
-                    .hass="${this.hass}"
-                  ></ha-start-voice-button>
+                  ${this.renderNotificationButton()}
                   ${this._conversation(this.hass.config.components)
                     ? html`
                         <paper-icon-button
@@ -380,15 +369,7 @@ class HUIRoot extends LitElement {
                         `
                       : ""}
                     ${this._hideToolbar // IoB
-                      ? html`
-                          <hui-notifications-button
-                            .hass="${this.hass}"
-                            .opened="${this._notificationsOpen}"
-                            @opened-changed="${this
-                              ._handleNotificationsOpenChanged}"
-                            .notifications="${this._notifications}"
-                          ></hui-notifications-button>
-                        `
+                      ? this.renderNotificationButton(true)
                       : ""}
                   </paper-tabs>
                 </div>
@@ -587,21 +568,64 @@ class HUIRoot extends LitElement {
       afterNextRender(() => this._selectView(newSelectView, force));
     }
   }
+
   // for IoB
-  private get _notifications() {
-    return this._updateNotifications(
-      this.hass!.states,
-      this._persistentNotifications! || []
-    );
+  private renderNotificationButton(withVoice?: boolean): TemplateResult | void {
+    return html`
+      <paper-icon-button
+        aria-label="Show Notifications"
+        icon="hass:bell"
+        @click=${this._handleShowNotificationDrawer}
+      ></paper-icon-button>
+      ${this._notificationsCount > 0
+        ? html`
+            <span
+              style="position: absolute;top: 0;right: -3px;width: 20px;height: 20px;border-radius: 50%;background: var(--accent-color);pointer-events: none;z-index: 1;"
+            >
+              <div
+                style="right: 8px;top: 5px;position: absolute;font-size: 0.6em;"
+              >
+                ${this._notificationsCount}
+              </div>
+            </span>
+          `
+        : ""}
+      ${withVoice && this._conversation(this.hass.config.components)
+        ? html`
+            <paper-icon-button
+              aria-label="Start conversation"
+              icon="hass:microphone"
+              @click=${this._showVoiceCommandDialog}
+            ></paper-icon-button>
+          `
+        : ""}
+    `;
   }
 
-  // IoB
+  private get _notificationsCount() {
+    const states = this.hass!.states;
+
+    const len = Object.keys(states)
+      .filter(
+        (entityId) =>
+          entityId.substr(0, entityId.indexOf(".")) === "configurator"
+      )
+      .map((entityId) => states[entityId]).length;
+
+    return (this._persistentNotifications || 0) + len;
+  }
+
   private get _hideToolbar(): boolean {
     return (
       this.config.hideToolbar === true &&
       window.location.search.indexOf("toolbar") === -1
     );
   }
+
+  private _handleShowNotificationDrawer() {
+    showNotificationDrawer(this, { narrow: false });
+  }
+  // end of IoB
 
   private get config(): LovelaceConfig {
     return this.lovelace!.config;
@@ -625,20 +649,6 @@ class HUIRoot extends LitElement {
 
   private _routeDataChanged(ev): void {
     this._routeData = ev.detail.value;
-  }
-  // for IoB
-  private _handleNotificationsOpenChanged(ev): void {
-    window.console.log("Old state: " + this._notificationsOpen);
-    this._notificationsOpen = ev.detail.value;
-    window.console.log("New state: " + this._notificationsOpen);
-  }
-  // for IoB
-  private _updateNotifications(
-    states: HassEntities,
-    persistent: unknown[]
-  ): unknown[] {
-    const configurator = computeNotifications(states);
-    return persistent.concat(configurator);
   }
 
   private _handleRefresh(): void {

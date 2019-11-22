@@ -6,6 +6,7 @@ export interface LovelaceConfig {
   title?: string;
   views: LovelaceViewConfig[];
   background?: string;
+  hideToolbar?: boolean; // IoB
   resources?: Array<{ type: "css" | "js" | "module" | "html"; url: string }>;
 }
 
