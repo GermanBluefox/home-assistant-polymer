@@ -10,13 +10,13 @@ import {
   HassConfig,
 } from "home-assistant-js-websocket";
 
-import extractViews from "../../../common/entity/extract_views";
-import getViewEntities from "../../../common/entity/get_view_entities";
-import computeStateName from "../../../common/entity/compute_state_name";
-import splitByGroups from "../../../common/entity/split_by_groups";
-import computeObjectId from "../../../common/entity/compute_object_id";
-import computeStateDomain from "../../../common/entity/compute_state_domain";
-import computeDomain from "../../../common/entity/compute_domain";
+import { extractViews } from "../../../common/entity/extract_views";
+import { getViewEntities } from "../../../common/entity/get_view_entities";
+import { computeStateName } from "../../../common/entity/compute_state_name";
+import { splitByGroups } from "../../../common/entity/split_by_groups";
+import { computeObjectId } from "../../../common/entity/compute_object_id";
+import { computeStateDomain } from "../../../common/entity/compute_state_domain";
+import { computeDomain } from "../../../common/entity/compute_domain";
 
 import { EntityRowConfig, WeblinkConfig } from "../entity-rows/types";
 import { LocalizeFunc } from "../../../common/translations/localize";
@@ -34,6 +34,7 @@ import {
   subscribeEntityRegistry,
   EntityRegistryEntry,
 } from "../../../data/entity_registry";
+import { processEditorEntities } from "../editor/process-editor-entities";
 
 const DEFAULT_VIEW_ENTITY_ID = "group.default_view";
 const DOMAINS_BADGES = [
@@ -317,7 +318,7 @@ const generateViewConfig = (
   const view: LovelaceViewConfig = {
     path,
     title,
-    badges,
+    badges: processEditorEntities(badges),
     cards,
   };
 

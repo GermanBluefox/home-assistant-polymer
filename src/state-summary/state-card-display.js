@@ -3,10 +3,11 @@ import { html } from "@polymer/polymer/lib/utils/html-tag";
 import { PolymerElement } from "@polymer/polymer/polymer-element";
 
 import "../components/entity/state-info";
+
 import LocalizeMixin from "../mixins/localize-mixin";
 
-import computeStateDisplay from "../common/entity/compute_state_display";
-import attributeClassNames from "../common/entity/attribute_class_names";
+import { attributeClassNames } from "../common/entity/attribute_class_names";
+import { computeStateDisplay } from "../common/entity/compute_state_display";
 import { computeRTL } from "../common/util/compute_rtl";
 
 /*
@@ -38,6 +39,7 @@ class StateCardDisplay extends LocalizeMixin(PolymerElement) {
           text-align: right;
           max-width: 40%;
           flex: 0 0 auto;
+          overflow-wrap: break-word;
         }
         :host([rtl]) .state {
           margin-right: 16px;

@@ -27,7 +27,7 @@ import {
   PersistentNotification,
   subscribeNotifications,
 } from "../data/persistent_notification";
-import computeDomain from "../common/entity/compute_domain";
+import { computeDomain } from "../common/entity/compute_domain";
 import { classMap } from "lit-html/directives/class-map";
 // tslint:disable-next-line: no-duplicate-imports
 import { PaperIconItemElement } from "@polymer/paper-item/paper-icon-item";
@@ -138,7 +138,7 @@ class HaSidebar extends LitElement {
         ${!this.narrow
           ? html`
               <paper-icon-button
-                aria-label="Sidebar Toggle"
+                aria-label=${hass.localize("ui.sidebar.sidebar_toggle")}
                 .icon=${hass.dockedSidebar === "docked"
                   ? "hass:menu-open"
                   : "hass:menu"}
@@ -181,7 +181,9 @@ class HaSidebar extends LitElement {
           ? html`
               <a
                 aria-role="option"
-                aria-label="App Configuration"
+                aria-label=${hass.localize(
+                  "ui.sidebar.external_app_configuration"
+                )}
                 href="#external-app-configuration"
                 tabindex="-1"
                 @click=${this._handleExternalAppConfiguration}

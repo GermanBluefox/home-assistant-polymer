@@ -1,4 +1,4 @@
-import applyThemesOnElement from "../common/dom/apply_themes_on_element";
+import { applyThemesOnElement } from "../common/dom/apply_themes_on_element";
 
 import { demoConfig } from "./demo_config";
 import { demoServices } from "./demo_services";
@@ -174,7 +174,9 @@ export const provideHass = (
 
     translationMetadata: translationMetadata as any,
     dockedSidebar: "auto",
+    vibrate: true,
     moreInfoEntityId: null as any,
+    // @ts-ignore
     async callService(domain, service, data) {
       if (data && "entity_id" in data) {
         await Promise.all(

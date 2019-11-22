@@ -7,7 +7,7 @@ import {
   css,
 } from "lit-element";
 import "@material/mwc-button";
-import "../components/ha-form";
+import "../components/ha-form/ha-form";
 import "../components/ha-markdown";
 import { litLocalizeLiteMixin } from "../mixins/lit-localize-lite-mixin";
 import { AuthProvider } from "../data/auth";
@@ -117,6 +117,7 @@ class HaAuthFlow extends litLocalizeLiteMixin(LitElement) {
             .error=${step.errors}
             .computeLabel=${this._computeLabelCallback(step)}
             .computeError=${this._computeErrorCallback(step)}
+            @value-changed=${this._stepDataChanged}
           ></ha-form>
         `;
       default:
@@ -219,6 +220,10 @@ class HaAuthFlow extends litLocalizeLiteMixin(LitElement) {
         (form as any).focus();
       }
     }, 100);
+  }
+
+  private _stepDataChanged(ev: CustomEvent) {
+    this._stepData = ev.detail.value;
   }
 
   private _computeStepDescription(step: DataEntryFlowStepForm) {

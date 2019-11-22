@@ -1,6 +1,5 @@
-import { Constructor, LitElement } from "lit-element";
-
 import { HassBaseEl } from "./hass-base-mixin";
+import { Constructor } from "../types";
 
 declare global {
   // for fire event
@@ -11,7 +10,7 @@ declare global {
   }
 }
 
-export default (superClass: Constructor<LitElement & HassBaseEl>) =>
+export default <T extends Constructor<HassBaseEl>>(superClass: T) =>
   class extends superClass {
     private _moreInfoEl?: any;
 
@@ -20,7 +19,9 @@ export default (superClass: Constructor<LitElement & HassBaseEl>) =>
       this.addEventListener("hass-more-info", (e) => this._handleMoreInfo(e));
 
       // Load it once we are having the initial rendering done.
-      import(/* webpackChunkName: "more-info-dialog" */ "../dialogs/ha-more-info-dialog");
+      import(
+        /* webpackChunkName: "more-info-dialog" */ "../dialogs/ha-more-info-dialog"
+      );
     }
 
     private async _handleMoreInfo(ev) {

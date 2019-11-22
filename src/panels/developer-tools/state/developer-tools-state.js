@@ -1,18 +1,23 @@
 import "@material/mwc-button";
 import "@polymer/paper-checkbox/paper-checkbox";
 import "@polymer/paper-input/paper-input";
-import "@polymer/paper-input/paper-textarea";
 import { html } from "@polymer/polymer/lib/utils/html-tag";
 import { PolymerElement } from "@polymer/polymer/polymer-element";
 
+import { safeDump, safeLoad } from "js-yaml";
+
 import "../../../components/entity/ha-entity-picker";
+import "../../../components/ha-code-editor";
 import "../../../resources/ha-style";
 import { EventsMixin } from "../../../mixins/events-mixin";
+import LocalizeMixin from "../../../mixins/localize-mixin";
 
+const ERROR_SENTINEL = {};
 /*
  * @appliesMixin EventsMixin
+ * @appliesMixin LocalizeMixin
  */
-class HaPanelDevState extends EventsMixin(PolymerElement) {
+class HaPanelDevState extends EventsMixin(LocalizeMixin(PolymerElement)) {
   static get template() {
     return html`
       <style include="ha-style">
@@ -25,11 +30,12 @@ class HaPanelDevState extends EventsMixin(PolymerElement) {
           direction: ltr;
         }
 
-        ha-entity-picker,
-        .state-input,
-        paper-textarea {
-          display: block;
+        .inputs {
           max-width: 400px;
+        }
+
+        mwc-button {
+          margin-top: 8px;
         }
 
         .entities th {
@@ -64,10 +70,10 @@ class HaPanelDevState extends EventsMixin(PolymerElement) {
         }
       </style>
 
-      <div>
+      <div class="inputs">
         <p>
-          Set the representation of a device within Home Assistant.<br />
-          This will not communicate with the actual device.
+          [[localize('ui.panel.developer-tools.tabs.states.description1')]]<br />
+          [[localize('ui.panel.developer-tools.tabs.states.description2')]]
         </p>
 
         <ha-entity-picker
@@ -78,7 +84,7 @@ class HaPanelDevState extends EventsMixin(PolymerElement) {
           allow-custom-entity
         ></ha-entity-picker>
         <paper-input
-          label="State"
+          label="[[localize('ui.panel.developer-tools.tabs.states.state')]]"
           required
           autocapitalize="none"
           autocomplete="off"
@@ -87,60 +93,68 @@ class HaPanelDevState extends EventsMixin(PolymerElement) {
           value="{{_state}}"
           class="state-input"
         ></paper-input>
-        <paper-textarea
-          label="State attributes (JSON, optional)"
-          autocapitalize="none"
-          autocomplete="off"
-          spellcheck="false"
-          value="{{_stateAttributes}}"
-        ></paper-textarea>
-        <mwc-button on-click="handleSetState" raised>Set State</mwc-button>
+        <p>
+          [[localize('ui.panel.developer-tools.tabs.states.state_attributes')]]
+        </p>
+        <ha-code-editor
+          mode="yaml"
+          value="[[_stateAttributes]]"
+          error="[[!validJSON]]"
+          on-value-changed="_yamlChanged"
+        ></ha-code-editor>
+        <mwc-button on-click="handleSetState" disabled="[[!validJSON]]" raised
+          >[[localize('ui.panel.developer-tools.tabs.states.set_state')]]</mwc-button
+        >
       </div>
 
-      <h1>Current entities</h1>
+      <h1>
+        [[localize('ui.panel.developer-tools.tabs.states.current_entities')]]
+      </h1>
       <table class="entities">
         <tr>
-          <th>Entity</th>
-          <th>State</th>
+          <th>[[localize('ui.panel.developer-tools.tabs.states.entity')]]</th>
+          <th>[[localize('ui.panel.developer-tools.tabs.states.state')]]</th>
           <th hidden$="[[narrow]]">
-            Attributes
+            [[localize('ui.panel.developer-tools.tabs.states.attributes')]]
             <paper-checkbox checked="{{_showAttributes}}"></paper-checkbox>
           </th>
         </tr>
         <tr>
           <th>
             <paper-input
-              label="Filter entities"
+              label="[[localize('ui.panel.developer-tools.tabs.states.filter_entities')]]"
               type="search"
               value="{{_entityFilter}}"
             ></paper-input>
           </th>
           <th>
             <paper-input
-              label="Filter states"
+              label="[[localize('ui.panel.developer-tools.tabs.states.filter_states')]]"
               type="search"
               value="{{_stateFilter}}"
             ></paper-input>
           </th>
           <th hidden$="[[!computeShowAttributes(narrow, _showAttributes)]]">
             <paper-input
-              label="Filter attributes"
+              label="[[localize('ui.panel.developer-tools.tabs.states.filter_attributes')]]"
               type="search"
               value="{{_attributeFilter}}"
             ></paper-input>
           </th>
         </tr>
         <tr hidden$="[[!computeShowEntitiesPlaceholder(_entities)]]">
-          <td colspan="3">No entities</td>
+          <td colspan="3">
+            [[localize('ui.panel.developer-tools.tabs.states.no_entities')]]
+          </td>
         </tr>
         <template is="dom-repeat" items="[[_entities]]" as="entity">
           <tr>
             <td>
               <paper-icon-button
                 on-click="entityMoreInfo"
-                icon="hass:open-in-new"
-                alt="More Info"
-                title="More Info"
+                icon="hass:information-outline"
+                alt="[[localize('ui.panel.developer-tools.tabs.states.more_info')]]"
+                title="[[localize('ui.panel.developer-tools.tabs.states.more_info')]]"
               >
               </paper-icon-button>
               <a href="#" on-click="entitySelected">[[entity.entity_id]]</a>
@@ -162,6 +176,16 @@ class HaPanelDevState extends EventsMixin(PolymerElement) {
     return {
       hass: {
         type: Object,
+      },
+
+      parsedJSON: {
+        type: Object,
+        computed: "_computeParsedStateAttributes(_stateAttributes)",
+      },
+
+      validJSON: {
+        type: Boolean,
+        computed: "_computeValidJSON(parsedJSON)",
       },
 
       _entityId: {
@@ -211,14 +235,19 @@ class HaPanelDevState extends EventsMixin(PolymerElement) {
     var state = ev.model.entity;
     this._entityId = state.entity_id;
     this._state = state.state;
-    this._stateAttributes = JSON.stringify(state.attributes, null, "  ");
+    this._stateAttributes = safeDump(state.attributes);
     ev.preventDefault();
   }
 
   entityIdChanged() {
+    if (this._entityId === "") {
+      this._state = "";
+      this._stateAttributes = "";
+      return;
+    }
     var state = this.hass.states[this._entityId];
     this._state = state.state;
-    this._stateAttributes = JSON.stringify(state.attributes, null, "  ");
+    this._stateAttributes = safeDump(state.attributes);
   }
 
   entityMoreInfo(ev) {
@@ -227,20 +256,17 @@ class HaPanelDevState extends EventsMixin(PolymerElement) {
   }
 
   handleSetState() {
-    var attr;
-    var attrRaw = this._stateAttributes.replace(/^\s+|\s+$/g, "");
-    try {
-      attr = attrRaw ? JSON.parse(attrRaw) : {};
-    } catch (err) {
-      /* eslint-disable no-alert */
-      alert("Error parsing JSON: " + err);
-      /* eslint-enable no-alert */
+    if (!this._entityId) {
+      alert(
+        this.hass.localize(
+          "ui.panel.developer-tools.tabs.states.alert_entity_field"
+        )
+      );
       return;
     }
-
     this.hass.callApi("POST", "states/" + this._entityId, {
       state: this._state,
-      attributes: attr,
+      attributes: this.parsedJSON,
     });
   }
 
@@ -338,6 +364,22 @@ class HaPanelDevState extends EventsMixin(PolymerElement) {
     }
 
     return output;
+  }
+
+  _computeParsedStateAttributes(stateAttributes) {
+    try {
+      return stateAttributes.trim() ? safeLoad(stateAttributes) : {};
+    } catch (err) {
+      return ERROR_SENTINEL;
+    }
+  }
+
+  _computeValidJSON(parsedJSON) {
+    return parsedJSON !== ERROR_SENTINEL;
+  }
+
+  _yamlChanged(ev) {
+    this._stateAttributes = ev.detail.value;
   }
 }
 

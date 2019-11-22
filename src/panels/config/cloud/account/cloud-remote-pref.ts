@@ -1,20 +1,20 @@
 import {
   html,
   LitElement,
-  PropertyDeclarations,
   TemplateResult,
   customElement,
   CSSResult,
   css,
+  property,
 } from "lit-element";
 import "@material/mwc-button";
-import "@polymer/paper-toggle-button/paper-toggle-button";
 import "@polymer/paper-item/paper-item-body";
-// tslint:disable-next-line
-import { PaperToggleButtonElement } from "@polymer/paper-toggle-button/paper-toggle-button";
 
 import "../../../../components/ha-card";
+import "../../../../components/ha-switch";
 
+// tslint:disable-next-line
+import { HaSwitch } from "../../../../components/ha-switch";
 import { fireEvent } from "../../../../common/dom/fire_event";
 import { HomeAssistant } from "../../../../types";
 import {
@@ -26,15 +26,8 @@ import { showCloudCertificateDialog } from "../dialog-cloud-certificate/show-dia
 
 @customElement("cloud-remote-pref")
 export class CloudRemotePref extends LitElement {
-  public hass?: HomeAssistant;
-  public cloudStatus?: CloudStatusLoggedIn;
-
-  static get properties(): PropertyDeclarations {
-    return {
-      hass: {},
-      cloudStatus: {},
-    };
-  }
+  @property() public hass?: HomeAssistant;
+  @property() public cloudStatus?: CloudStatusLoggedIn;
 
   protected render(): TemplateResult | void {
     if (!this.cloudStatus) {
@@ -49,37 +42,60 @@ export class CloudRemotePref extends LitElement {
 
     if (!remote_certificate) {
       return html`
-        <ha-card header="Remote Control">
+        <ha-card
+          header=${this.hass!.localize(
+            "ui.panel.config.cloud.account.remote.title"
+          )}
+        >
           <div class="preparing">
-            Remote access is being prepared. We will notify you when it's ready.
+            ${this.hass!.localize(
+              "ui.panel.config.cloud.account.remote.access_is_being_prepared"
+            )}
           </div>
         </ha-card>
       `;
     }
 
     return html`
-      <ha-card header="Remote Control">
-        <paper-toggle-button
-          .checked="${remote_connected}"
-          @change="${this._toggleChanged}"
-        ></paper-toggle-button>
+      <ha-card
+        header=${this.hass!.localize(
+          "ui.panel.config.cloud.account.remote.title"
+        )}
+      >
+        <div class="switch">
+          <ha-switch
+            .checked="${remote_connected}"
+            @change="${this._toggleChanged}"
+          ></ha-switch>
+        </div>
         <div class="card-content">
-          Home Assistant Cloud provides a secure remote connection to your
-          instance while away from home. Your instance
-          ${remote_connected ? "is" : "will be"} available at
-          <a href="https://${remote_domain}" target="_blank">
+          ${this.hass!.localize("ui.panel.config.cloud.account.remote.info")}
+          ${remote_connected
+            ? this.hass!.localize(
+                "ui.panel.config.cloud.account.remote.instance_is_available"
+              )
+            : this.hass!.localize(
+                "ui.panel.config.cloud.account.remote.instance_will_be_available"
+              )}
+          <a href="https://${remote_domain}" target="_blank" class="break-word">
             https://${remote_domain}</a
           >.
         </div>
         <div class="card-actions">
           <a href="https://www.nabucasa.com/config/remote/" target="_blank">
-            <mwc-button>Learn how it works</mwc-button>
+            <mwc-button
+              >${this.hass!.localize(
+                "ui.panel.config.cloud.account.remote.link_learn_how_it_works"
+              )}</mwc-button
+            >
           </a>
           ${remote_certificate
             ? html`
                 <div class="spacer"></div>
                 <mwc-button @click=${this._openCertInfo}>
-                  Certificate Info
+                  ${this.hass!.localize(
+                    "ui.panel.config.cloud.account.remote.certificate_info"
+                  )}
                 </mwc-button>
               `
             : ""}
@@ -95,7 +111,7 @@ export class CloudRemotePref extends LitElement {
   }
 
   private async _toggleChanged(ev) {
-    const toggle = ev.target as PaperToggleButtonElement;
+    const toggle = ev.target as HaSwitch;
 
     try {
       if (toggle.checked) {
@@ -118,10 +134,12 @@ export class CloudRemotePref extends LitElement {
       a {
         color: var(--primary-color);
       }
-      ha-card > paper-toggle-button {
-        margin: -4px 0;
+      .break-word {
+        overflow-wrap: break-word;
+      }
+      .switch {
         position: absolute;
-        right: 8px;
+        right: 24px;
         top: 32px;
       }
       .card-actions {

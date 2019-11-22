@@ -11,9 +11,9 @@ import {
   CSSResult,
   html,
   LitElement,
-  PropertyDeclarations,
   PropertyValues,
   TemplateResult,
+  property,
 } from "lit-element";
 
 import { fireEvent } from "../../../common/dom/fire_event";
@@ -39,30 +39,12 @@ const computeClusterKey = (cluster: Cluster): string => {
 };
 
 export class ZHAClusters extends LitElement {
-  public hass?: HomeAssistant;
-  public isWide?: boolean;
-  public showHelp: boolean;
-  public selectedDevice?: ZHADevice;
-  private _selectedClusterIndex: number;
-  private _clusters: Cluster[];
-
-  constructor() {
-    super();
-    this.showHelp = false;
-    this._selectedClusterIndex = -1;
-    this._clusters = [];
-  }
-
-  static get properties(): PropertyDeclarations {
-    return {
-      hass: {},
-      isWide: {},
-      showHelp: {},
-      selectedDevice: {},
-      _selectedClusterIndex: {},
-      _clusters: {},
-    };
-  }
+  @property() public hass?: HomeAssistant;
+  @property() public isWide?: boolean;
+  @property() public showHelp = false;
+  @property() public selectedDevice?: ZHADevice;
+  @property() private _selectedClusterIndex = -1;
+  @property() private _clusters: Cluster[] = [];
 
   protected updated(changedProperties: PropertyValues): void {
     if (changedProperties.has("selectedDevice")) {
@@ -79,7 +61,10 @@ export class ZHAClusters extends LitElement {
   protected render(): TemplateResult | void {
     return html`
       <div class="node-picker">
-        <paper-dropdown-menu label="Clusters" class="flex">
+        <paper-dropdown-menu
+          label="${this.hass!.localize("ui.panel.config.zha.common.clusters")}"
+          class="flex"
+        >
           <paper-listbox
             slot="dropdown-content"
             .selected="${this._selectedClusterIndex}"
@@ -96,7 +81,9 @@ export class ZHAClusters extends LitElement {
       ${this.showHelp
         ? html`
             <div class="help-text">
-              Select cluster to view attributes and commands
+              ${this.hass!.localize(
+                "ui.panel.config.zha.clusters.help_cluster_dropdown"
+              )}
             </div>
           `
         : ""}

@@ -149,9 +149,7 @@ export const createHassioSession = async (hass: HomeAssistant) => {
     "POST",
     "hassio/ingress/session"
   );
-  document.cookie = `ingress_session=${
-    response.data.session
-  };path=/api/hassio_ingress/`;
+  document.cookie = `ingress_session=${response.data.session};path=/api/hassio_ingress/`;
 };
 
 export const reloadHassioAddons = (hass: HomeAssistant) =>
@@ -181,6 +179,11 @@ export const fetchHassioSupervisorInfo = (hass: HomeAssistant) =>
 export const fetchHassioHostInfo = (hass: HomeAssistant) =>
   hass
     .callApi<HassioResponse<HassioHostInfo>>("GET", "hassio/host/info")
+    .then(hassioApiResultExtractor);
+
+export const fetchHassioHassOsInfo = (hass: HomeAssistant) =>
+  hass
+    .callApi<HassioResponse<HassioHassOSInfo>>("GET", "hassio/hassos/info")
     .then(hassioApiResultExtractor);
 
 export const fetchHassioHomeAssistantInfo = (hass: HomeAssistant) =>

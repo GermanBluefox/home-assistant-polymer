@@ -5,21 +5,24 @@ import {
   TemplateResult,
   customElement,
   property,
+  css,
+  CSSResult,
+  svg,
 } from "lit-element";
 import { classMap } from "lit-html/directives/class-map";
 import "@polymer/paper-icon-button/paper-icon-button";
+import "@thomasloven/round-slider";
 
 import "../../../components/ha-card";
-import "../../../components/ha-icon";
 import "../components/hui-warning";
+import "../components/hui-unavailable";
 
-import applyThemesOnElement from "../../../common/dom/apply_themes_on_element";
-import computeStateName from "../../../common/entity/compute_state_name";
+import { applyThemesOnElement } from "../../../common/dom/apply_themes_on_element";
+import { computeStateName } from "../../../common/entity/compute_state_name";
 
 import { hasConfigOrEntityChanged } from "../common/has-changed";
 import { HomeAssistant } from "../../../types";
 import { LovelaceCard, LovelaceCardEditor } from "../types";
-import { loadRoundslider } from "../../../resources/jquery.roundslider.ondemand";
 import { UNIT_F } from "../../../common/const";
 import { fireEvent } from "../../../common/dom/fire_event";
 import { ThermostatCardConfig } from "./types";
@@ -29,17 +32,7 @@ import {
   compareClimateHvacModes,
   CLIMATE_PRESET_NONE,
 } from "../../../data/climate";
-
-const thermostatConfig = {
-  radius: 150,
-  circleShape: "pie",
-  startAngle: 315,
-  width: 5,
-  lineCap: "round",
-  handleSize: "+10",
-  showTooltip: false,
-  animation: false,
-};
+import { HassEntity } from "home-assistant-js-websocket";
 
 const modeIcons: { [mode in HvacMode]: string } = {
   auto: "hass:calendar-repeat",
@@ -65,18 +58,8 @@ export class HuiThermostatCard extends LitElement implements LovelaceCard {
   }
 
   @property() public hass?: HomeAssistant;
-
   @property() private _config?: ThermostatCardConfig;
-
-  @property() private _roundSliderStyle?: TemplateResult;
-
-  @property() private _jQuery?: any;
-
-  private _broadCard?: boolean;
-
-  private _loaded?: boolean;
-
-  private _updated?: boolean;
+  @property() private _setTemp?: number | number[];
 
   public getCardSize(): number {
     return 4;
@@ -92,9 +75,11 @@ export class HuiThermostatCard extends LitElement implements LovelaceCard {
 
   public connectedCallback(): void {
     super.connectedCallback();
-    if (this._updated && !this._loaded) {
-      this._initialLoad();
-    }
+    this.rescale_svg();
+  }
+
+  protected firstUpdated(): void {
+    this.rescale_svg();
   }
 
   protected render(): TemplateResult | void {
@@ -116,64 +101,134 @@ export class HuiThermostatCard extends LitElement implements LovelaceCard {
     }
 
     const mode = stateObj.state in modeIcons ? stateObj.state : "unknown-mode";
+    const name =
+      this._config!.name ||
+      computeStateName(this.hass!.states[this._config!.entity]);
+    const targetTemp =
+      stateObj.attributes.temperature !== null &&
+      Number.isFinite(Number(stateObj.attributes.temperature))
+        ? stateObj.attributes.temperature
+        : stateObj.attributes.min_temp;
+
+    const slider =
+      stateObj.state === "unavailable"
+        ? html`
+            <round-slider disabled="true"></round-slider>
+          `
+        : html`
+            <round-slider
+              .value=${targetTemp}
+              .low=${stateObj.attributes.target_temp_low}
+              .high=${stateObj.attributes.target_temp_high}
+              .min=${stateObj.attributes.min_temp}
+              .max=${stateObj.attributes.max_temp}
+              .step=${this._stepSize}
+              @value-changing=${this._dragEvent}
+              @value-changed=${this._setTemperature}
+            ></round-slider>
+          `;
+
+    const currentTemperature = stateObj.attributes.current_temperature
+      ? svg`
+          <svg viewBox="0 0 40 20">
+            <text
+              x="50%"
+              dx="1"
+              y="60%"
+              text-anchor="middle"
+              style="font-size: 13px;"
+            >
+              ${stateObj.attributes.current_temperature}
+              <tspan dx="-3" dy="-6.5" style="font-size: 4px;">
+                ${this.hass.config.unit_system.temperature}
+              </tspan>
+            </text>
+          </svg>
+        `
+      : "";
+
+    const setValues = svg`
+      <svg id="set-values">
+        <g>
+          <text text-anchor="middle" class="set-value">
+            ${
+              !this._setTemp
+                ? ""
+                : Array.isArray(this._setTemp)
+                ? svg`
+                  ${this._setTemp[0].toFixed(1)} -
+                  ${this._setTemp[1].toFixed(1)}
+                  `
+                : svg`
+                  ${this._setTemp.toFixed(1)}
+              `
+            }
+          </text>
+          <text
+            dy="22"
+            text-anchor="middle"
+            id="set-mode"
+          >
+            ${
+              stateObj.attributes.hvac_action
+                ? this.hass!.localize(
+                    `state_attributes.climate.hvac_action.${stateObj.attributes.hvac_action}`
+                  )
+                : this.hass!.localize(`state.climate.${stateObj.state}`)
+            }
+            ${
+              stateObj.attributes.preset_mode &&
+              stateObj.attributes.preset_mode !== CLIMATE_PRESET_NONE
+                ? html`
+                    -
+                    ${this.hass!.localize(
+                      `state_attributes.climate.preset_mode.${stateObj.attributes.preset_mode}`
+                    ) || stateObj.attributes.preset_mode}
+                  `
+                : ""
+            }
+          </text>
+        </g>
+      </svg>
+    `;
+
     return html`
-      ${this.renderStyle()}
       <ha-card
-        class="${classMap({
+        class=${classMap({
           [mode]: true,
-          large: this._broadCard!,
-          small: !this._broadCard,
-        })}"
+        })}
       >
-        <div id="root">
-          <paper-icon-button
-            icon="hass:dots-vertical"
-            class="more-info"
-            @click="${this._handleMoreInfo}"
-          ></paper-icon-button>
-          <div id="thermostat"></div>
-          <div id="tooltip">
-            <div class="title">
-              ${this._config.name || computeStateName(stateObj)}
-            </div>
-            <div class="current-temperature">
-              <span class="current-temperature-text">
-                ${stateObj.attributes.current_temperature}
-                ${stateObj.attributes.current_temperature
-                  ? html`
-                      <span class="uom"
-                        >${this.hass.config.unit_system.temperature}</span
-                      >
-                    `
-                  : ""}
-              </span>
-            </div>
-            <div class="climate-info">
-              <div id="set-temperature"></div>
-              <div class="current-mode">
-                ${stateObj.attributes.hvac_action
-                  ? this.hass!.localize(
-                      `state_attributes.climate.hvac_action.${stateObj.attributes.hvac_action}`
-                    )
-                  : this.hass!.localize(`state.climate.${stateObj.state}`)}
-                ${stateObj.attributes.preset_mode &&
-                stateObj.attributes.preset_mode !== CLIMATE_PRESET_NONE
-                  ? html`
-                      -
-                      ${this.hass!.localize(
-                        `state_attributes.climate.preset_mode.${stateObj.attributes.preset_mode}`
-                      ) || stateObj.attributes.preset_mode}
-                    `
-                  : ""}
-              </div>
-              <div class="modes">
-                ${(stateObj.attributes.hvac_modes || [])
-                  .concat()
-                  .sort(compareClimateHvacModes)
-                  .map((modeItem) => this._renderIcon(modeItem, mode))}
+        ${stateObj.state === "unavailable"
+          ? html`
+              <hui-unavailable
+                .text="${this.hass.localize("state.default.unavailable")}"
+              ></hui-unavailable>
+            `
+          : ""}
+        <paper-icon-button
+          icon="hass:dots-vertical"
+          class="more-info"
+          @click=${this._handleMoreInfo}
+        ></paper-icon-button>
+
+        <div id="controls">
+          <div id="slider">
+            ${slider}
+            <div id="slider-center">
+              <div id="temperature">
+                ${currentTemperature} ${setValues}
               </div>
             </div>
           </div>
+        </div>
+        <div id="info">
+          <div id="modes">
+            ${(stateObj.attributes.hvac_modes || [])
+              .concat()
+              .sort(compareClimateHvacModes)
+              .map((modeItem) => this._renderIcon(modeItem, mode))}
+          </div>
+          ${name}
         </div>
       </ha-card>
     `;
@@ -183,13 +238,6 @@ export class HuiThermostatCard extends LitElement implements LovelaceCard {
     return hasConfigOrEntityChanged(this, changedProps);
   }
 
-  protected firstUpdated(): void {
-    this._updated = true;
-    if (this.isConnected && !this._loaded) {
-      this._initialLoad();
-    }
-  }
-
   protected updated(changedProps: PropertyValues): void {
     super.updated(changedProps);
     if (!this._config || !this.hass || !changedProps.has("hass")) {
@@ -197,33 +245,42 @@ export class HuiThermostatCard extends LitElement implements LovelaceCard {
     }
 
     const oldHass = changedProps.get("hass") as HomeAssistant | undefined;
+    const oldConfig = changedProps.get("_config") as
+      | ThermostatCardConfig
+      | undefined;
 
-    if (!oldHass || oldHass.themes !== this.hass.themes) {
+    if (
+      !oldHass ||
+      !oldConfig ||
+      oldHass.themes !== this.hass.themes ||
+      oldConfig.theme !== this._config.theme
+    ) {
       applyThemesOnElement(this, this.hass.themes, this._config.theme);
     }
 
-    const stateObj = this.hass.states[this._config.entity] as ClimateEntity;
+    this._setTemp = this._getSetTemp(this.hass!.states[this._config!.entity]);
+    this.rescale_svg();
+  }
 
-    if (!stateObj) {
-      return;
-    }
-
-    if (
-      this._jQuery &&
-      // If jQuery changed, we just rendered in firstUpdated
-      !changedProps.has("_jQuery") &&
-      (!oldHass || oldHass.states[this._config.entity] !== stateObj)
-    ) {
-      const [sliderValue, uiValue, sliderType] = this._genSliderValue(stateObj);
-
-      this._jQuery("#thermostat", this.shadowRoot).roundSlider({
-        sliderType,
-        value: sliderValue,
-        disabled: sliderValue === null,
-        min: stateObj.attributes.min_temp,
-        max: stateObj.attributes.max_temp,
+  private rescale_svg() {
+    // Set the viewbox of the SVG containing the set temperature to perfectly
+    // fit the text
+    // That way it will auto-scale correctly
+    // This is not done to the SVG containing the current temperature, because
+    // it should not be centered on the text, but only on the value
+    if (this.shadowRoot && this.shadowRoot.querySelector("ha-card")) {
+      (this.shadowRoot.querySelector(
+        "ha-card"
+      ) as LitElement).updateComplete.then(() => {
+        const svgRoot = this.shadowRoot!.querySelector("#set-values");
+        const box = svgRoot!.querySelector("g")!.getBBox();
+        svgRoot!.setAttribute(
+          "viewBox",
+          `${box!.x} ${box!.y} ${box!.width} ${box!.height}`
+        );
+        svgRoot!.setAttribute("width", `${box!.width}`);
+        svgRoot!.setAttribute("height", `${box!.height}`);
       });
-      this._updateSetTemp(uiValue);
     }
   }
 
@@ -236,117 +293,55 @@ export class HuiThermostatCard extends LitElement implements LovelaceCard {
     return this.hass!.config.unit_system.temperature === UNIT_F ? 1 : 0.5;
   }
 
-  private async _initialLoad(): Promise<void> {
-    const stateObj = this.hass!.states[this._config!.entity] as ClimateEntity;
-
-    if (!stateObj) {
-      // Card will require refresh to work again
-      return;
-    }
-
-    this._loaded = true;
-
-    await this.updateComplete;
-
-    let radius = this.clientWidth / 3.2;
-    this._broadCard = this.clientWidth > 390;
-
-    if (radius === 0) {
-      radius = 100;
-    }
-
-    (this.shadowRoot!.querySelector(
-      "#thermostat"
-    ) as HTMLElement)!.style.height = radius * 2 + "px";
-
-    const loaded = await loadRoundslider();
-
-    this._roundSliderStyle = loaded.roundSliderStyle;
-    this._jQuery = loaded.jQuery;
-
-    const [sliderValue, uiValue, sliderType] = this._genSliderValue(stateObj);
-
-    this._jQuery("#thermostat", this.shadowRoot).roundSlider({
-      ...thermostatConfig,
-      radius,
-      min: stateObj.attributes.min_temp,
-      max: stateObj.attributes.max_temp,
-      sliderType,
-      change: (value) => this._setTemperature(value),
-      drag: (value) => this._dragEvent(value),
-      value: sliderValue,
-      disabled: sliderValue === null,
-      step: this._stepSize,
-    });
-    this._updateSetTemp(uiValue);
-  }
-
-  private _genSliderValue(
-    stateObj: ClimateEntity
-  ): [string | number | null, string, string] {
-    let sliderType: string;
-    let sliderValue: string | number | null;
-    let uiValue: string;
-
+  private _getSetTemp(stateObj: HassEntity) {
     if (stateObj.state === "unavailable") {
-      sliderType = "min-range";
-      sliderValue = null;
-      uiValue = this.hass!.localize("state.default.unavailable");
-    } else if (
-      stateObj.attributes.target_temp_low &&
-      stateObj.attributes.target_temp_high
-    ) {
-      sliderType = "range";
-      sliderValue = `${stateObj.attributes.target_temp_low}, ${stateObj.attributes.target_temp_high}`;
-      uiValue = this.formatTemp(
-        [
-          String(stateObj.attributes.target_temp_low),
-          String(stateObj.attributes.target_temp_high),
-        ],
-        false
-      );
-    } else {
-      sliderType = "min-range";
-      sliderValue = Number.isFinite(Number(stateObj.attributes.temperature))
-        ? stateObj.attributes.temperature
-        : null;
-      uiValue = sliderValue !== null ? String(sliderValue) : "";
+      return this.hass!.localize("state.default.unavailable");
     }
 
-    return [sliderValue, uiValue, sliderType];
-  }
-
-  private _updateSetTemp(value: string): void {
-    this.shadowRoot!.querySelector("#set-temperature")!.innerHTML = value;
-  }
-
-  private _dragEvent(e): void {
-    this._updateSetTemp(this.formatTemp(String(e.value).split(","), true));
-  }
-
-  private _setTemperature(e): void {
-    const stateObj = this.hass!.states[this._config!.entity] as ClimateEntity;
     if (
       stateObj.attributes.target_temp_low &&
       stateObj.attributes.target_temp_high
     ) {
-      if (e.handle.index === 1) {
-        this.hass!.callService("climate", "set_temperature", {
-          entity_id: this._config!.entity,
-          target_temp_low: e.handle.value,
-          target_temp_high: stateObj.attributes.target_temp_high,
-        });
-      } else {
-        this.hass!.callService("climate", "set_temperature", {
-          entity_id: this._config!.entity,
-          target_temp_low: stateObj.attributes.target_temp_low,
-          target_temp_high: e.handle.value,
-        });
-      }
+      return [
+        stateObj.attributes.target_temp_low,
+        stateObj.attributes.target_temp_high,
+      ];
+    }
+
+    return stateObj.attributes.temperature;
+  }
+
+  private _dragEvent(e): void {
+    const stateObj = this.hass!.states[this._config!.entity] as ClimateEntity;
+
+    if (e.detail.low) {
+      this._setTemp = [e.detail.low, stateObj.attributes.target_temp_high];
+    } else if (e.detail.high) {
+      this._setTemp = [stateObj.attributes.target_temp_low, e.detail.high];
+    } else {
+      this._setTemp = e.detail.value;
+    }
+  }
+
+  private _setTemperature(e): void {
+    const stateObj = this.hass!.states[this._config!.entity] as ClimateEntity;
+
+    if (e.detail.low) {
+      this.hass!.callService("climate", "set_temperature", {
+        entity_id: this._config!.entity,
+        target_temp_low: e.detail.low,
+        target_temp_high: stateObj.attributes.target_temp_high,
+      });
+    } else if (e.detail.high) {
+      this.hass!.callService("climate", "set_temperature", {
+        entity_id: this._config!.entity,
+        target_temp_low: stateObj.attributes.target_temp_low,
+        target_temp_high: e.detail.high,
+      });
     } else {
       this.hass!.callService("climate", "set_temperature", {
         entity_id: this._config!.entity,
-        temperature: e.value,
+        temperature: e.detail.value,
       });
     }
   }
@@ -356,12 +351,13 @@ export class HuiThermostatCard extends LitElement implements LovelaceCard {
       return html``;
     }
     return html`
-      <ha-icon
+      <paper-icon-button
         class="${classMap({ "selected-icon": currentMode === mode })}"
         .mode="${mode}"
         .icon="${modeIcons[mode]}"
         @click="${this._handleModeClick}"
-      ></ha-icon>
+        tabindex="0"
+      ></paper-icon-button>
     `;
   }
 
@@ -378,217 +374,147 @@ export class HuiThermostatCard extends LitElement implements LovelaceCard {
     });
   }
 
-  private formatTemp(temps: string[], spaceStepSize: boolean): string {
-    temps = temps.filter(Boolean);
+  static get styles(): CSSResult {
+    return css`
+      :host {
+        display: block;
+      }
 
-    // If we are sliding the slider, append 0 to the temperatures if we're
-    // having a 0.5 step size, so that the text doesn't jump while sliding
-    if (spaceStepSize) {
-      const stepSize = this._stepSize;
-      temps = temps.map((val) =>
-        val.includes(".") || stepSize === 1 ? val : `${val}.0`
-      );
-    }
+      ha-card {
+        position: relative;
+        overflow: hidden;
+        --name-font-size: 1.2rem;
+        --brightness-font-size: 1.2rem;
+        --rail-border-color: transparent;
+        --auto-color: green;
+        --eco-color: springgreen;
+        --cool-color: #2b9af9;
+        --heat-color: #ff8100;
+        --manual-color: #44739e;
+        --off-color: #8a8a8a;
+        --fan_only-color: #8a8a8a;
+        --dry-color: #efbd07;
+        --idle-color: #8a8a8a;
+        --unknown-color: #bac;
+      }
+      .auto,
+      .heat_cool {
+        --mode-color: var(--auto-color);
+      }
+      .cool {
+        --mode-color: var(--cool-color);
+      }
+      .heat {
+        --mode-color: var(--heat-color);
+      }
+      .manual {
+        --mode-color: var(--manual-color);
+      }
+      .off {
+        --mode-color: var(--off-color);
+      }
+      .fan_only {
+        --mode-color: var(--fan_only-color);
+      }
+      .eco {
+        --mode-color: var(--eco-color);
+      }
+      .dry {
+        --mode-color: var(--dry-color);
+      }
+      .idle {
+        --mode-color: var(--idle-color);
+      }
+      .unknown-mode {
+        --mode-color: var(--unknown-color);
+      }
 
-    return temps.join("-");
-  }
+      .more-info {
+        position: absolute;
+        cursor: pointer;
+        top: 0;
+        right: 0;
+        border-radius: 100%;
+        color: var(--secondary-text-color);
+        z-index: 25;
+      }
 
-  private renderStyle(): TemplateResult {
-    return html`
-      ${this._roundSliderStyle}
-      <style>
-        :host {
-          display: block;
-        }
-        ha-card {
-          overflow: hidden;
-          --rail-border-color: transparent;
-          --auto-color: green;
-          --eco-color: springgreen;
-          --cool-color: #2b9af9;
-          --heat-color: #ff8100;
-          --manual-color: #44739e;
-          --off-color: #8a8a8a;
-          --fan_only-color: #8a8a8a;
-          --dry-color: #efbd07;
-          --idle-color: #8a8a8a;
-          --unknown-color: #bac;
-        }
-        #root {
-          position: relative;
-          overflow: hidden;
-        }
-        .auto,
-        .heat_cool {
-          --mode-color: var(--auto-color);
-        }
-        .cool {
-          --mode-color: var(--cool-color);
-        }
-        .heat {
-          --mode-color: var(--heat-color);
-        }
-        .manual {
-          --mode-color: var(--manual-color);
-        }
-        .off {
-          --mode-color: var(--off-color);
-        }
-        .fan_only {
-          --mode-color: var(--fan_only-color);
-        }
-        .eco {
-          --mode-color: var(--eco-color);
-        }
-        .dry {
-          --mode-color: var(--dry-color);
-        }
-        .idle {
-          --mode-color: var(--idle-color);
-        }
-        .unknown-mode {
-          --mode-color: var(--unknown-color);
-        }
-        .no-title {
-          --title-position-top: 33% !important;
-        }
-        .large {
-          --thermostat-padding-top: 25px;
-          --thermostat-margin-bottom: 25px;
-          --title-font-size: 28px;
-          --title-position-top: 27%;
-          --climate-info-position-top: 81%;
-          --set-temperature-font-size: 25px;
-          --current-temperature-font-size: 71px;
-          --current-temperature-position-top: 10%;
-          --current-temperature-text-padding-left: 15px;
-          --uom-font-size: 20px;
-          --uom-margin-left: -18px;
-          --current-mode-font-size: 18px;
-          --set-temperature-margin-bottom: -5px;
-        }
-        .small {
-          --thermostat-padding-top: 15px;
-          --thermostat-margin-bottom: 15px;
-          --title-font-size: 18px;
-          --title-position-top: 28%;
-          --climate-info-position-top: 79%;
-          --set-temperature-font-size: 16px;
-          --current-temperature-font-size: 25px;
-          --current-temperature-position-top: 5%;
-          --current-temperature-text-padding-left: 7px;
-          --uom-font-size: 12px;
-          --uom-margin-left: -5px;
-          --current-mode-font-size: 14px;
-          --set-temperature-margin-bottom: 0px;
-        }
-        #thermostat {
-          margin: 0 auto var(--thermostat-margin-bottom);
-          padding-top: var(--thermostat-padding-top);
-        }
-        #thermostat .rs-range-color {
-          background-color: var(--mode-color, var(--disabled-text-color));
-        }
-        #thermostat .rs-path-color {
-          background-color: var(--disabled-text-color);
-        }
-        #thermostat .rs-handle {
-          background-color: var(--paper-card-background-color, white);
-          padding: 10px;
-          margin: -10px 0 0 -8px !important;
-          border: 2px solid var(--disabled-text-color);
-        }
-        #thermostat .rs-handle.rs-focus {
-          border-color: var(--mode-color, var(--disabled-text-color));
-        }
-        #thermostat .rs-handle:after {
-          border-color: var(--mode-color, var(--disabled-text-color));
-          background-color: var(--mode-color, var(--disabled-text-color));
-        }
-        #thermostat .rs-border {
-          border-color: var(--rail-border-color);
-        }
-        #thermostat .rs-bar.rs-transition.rs-first,
-        .rs-bar.rs-transition.rs-second {
-          z-index: 20 !important;
-        }
-        #thermostat .rs-readonly {
-          z-index: 10;
-          top: auto;
-        }
-        #thermostat .rs-inner.rs-bg-color.rs-border,
-        #thermostat .rs-overlay.rs-transition.rs-bg-color {
-          background-color: var(--paper-card-background-color, white);
-        }
-        #tooltip {
-          position: absolute;
-          top: 0;
-          left: 0;
-          right: 0;
-          height: 100%;
-          text-align: center;
-          z-index: 15;
-          color: var(--primary-text-color);
-        }
-        #set-temperature {
-          font-size: var(--set-temperature-font-size);
-          margin-bottom: var(--set-temperature-margin-bottom);
-          min-height: 1.2em;
-        }
-        .title {
-          font-size: var(--title-font-size);
-          position: absolute;
-          top: var(--title-position-top);
-          left: 50%;
-          transform: translate(-50%, -50%);
-        }
-        .climate-info {
-          position: absolute;
-          top: var(--climate-info-position-top);
-          left: 50%;
-          transform: translate(-50%, -50%);
-          width: 100%;
-        }
-        .current-mode {
-          font-size: var(--current-mode-font-size);
-          color: var(--secondary-text-color);
-        }
-        .modes {
-          margin-top: 16px;
-        }
-        .modes ha-icon {
-          color: var(--disabled-text-color);
-          cursor: pointer;
-          display: inline-block;
-          margin: 0 10px;
-        }
-        .modes ha-icon.selected-icon {
-          color: var(--mode-color);
-        }
-        .current-temperature {
-          position: absolute;
-          top: 50%;
-          left: 50%;
-          transform: translate(-50%, -50%);
-          font-size: var(--current-temperature-font-size);
-        }
-        .current-temperature-text {
-          padding-left: var(--current-temperature-text-padding-left);
-        }
-        .uom {
-          font-size: var(--uom-font-size);
-          vertical-align: top;
-          margin-left: var(--uom-margin-left);
-        }
-        .more-info {
-          position: absolute;
-          cursor: pointer;
-          top: 0;
-          right: 0;
-          z-index: 25;
-          color: var(--secondary-text-color);
-        }
-      </style>
+      #controls {
+        display: flex;
+        justify-content: center;
+        padding: 16px;
+        position: relative;
+      }
+
+      #slider {
+        height: 100%;
+        width: 100%;
+        position: relative;
+        max-width: 250px;
+        min-width: 100px;
+      }
+
+      round-slider {
+        --round-slider-path-color: var(--disabled-text-color);
+        --round-slider-bar-color: var(--mode-color);
+        padding-bottom: 10%;
+      }
+
+      #slider-center {
+        position: absolute;
+        width: calc(100% - 40px);
+        height: calc(100% - 40px);
+        box-sizing: border-box;
+        border-radius: 100%;
+        left: 20px;
+        top: 20px;
+        text-align: center;
+        overflow-wrap: break-word;
+        pointer-events: none;
+      }
+
+      #temperature {
+        position: absolute;
+        transform: translate(-50%, -50%);
+        width: 100%;
+        height: 50%;
+        top: 45%;
+        left: 50%;
+      }
+
+      #set-values {
+        max-width: 80%;
+        transform: translate(0, -50%);
+        font-size: 20px;
+      }
+
+      #set-mode {
+        fill: var(--secondary-text-color);
+        font-size: 16px;
+      }
+
+      #info {
+        display: flex-vertical;
+        justify-content: center;
+        text-align: center;
+        padding: 16px;
+        margin-top: -60px;
+        font-size: var(--name-font-size);
+      }
+
+      #modes > * {
+        color: var(--disabled-text-color);
+        cursor: pointer;
+        display: inline-block;
+      }
+
+      #modes .selected-icon {
+        color: var(--mode-color);
+      }
+
+      text {
+        fill: var(--primary-text-color);
+      }
     `;
   }
 }

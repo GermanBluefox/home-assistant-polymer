@@ -4,8 +4,6 @@ const gulp = require("gulp");
 const path = require("path");
 const cpx = require("cpx");
 const fs = require("fs-extra");
-const zopfli = require("gulp-zopfli-green");
-const merge = require("merge-stream");
 const paths = require("../paths");
 
 const npmPath = (...parts) =>
@@ -67,20 +65,6 @@ function copyMapPanel(staticDir) {
   );
 }
 
-function compressStatic(staticDir) {
-  const staticPath = genStaticPath(staticDir);
-  const polyfills = gulp
-    .src(staticPath("polyfills/*.js"))
-    .pipe(zopfli())
-    .pipe(gulp.dest(staticPath("polyfills")));
-  const translations = gulp
-    .src(staticPath("translations/*.json"))
-    .pipe(zopfli())
-    .pipe(gulp.dest(staticPath("translations")));
-
-  return merge(polyfills, translations);
-}
-
 gulp.task("copy-static", (done) => {
   const staticDir = paths.static;
   const staticPath = genStaticPath(paths.static);
@@ -100,11 +84,12 @@ gulp.task("copy-static", (done) => {
   done();
 });
 
-gulp.task("compress-static", () => compressStatic(paths.static));
-
 gulp.task("copy-static-demo", (done) => {
   // Copy app static files
-  fs.copySync(polyPath("public"), paths.demo_root);
+  fs.copySync(
+    polyPath("public/static"),
+    path.resolve(paths.demo_root, "static")
+  );
   // Copy demo static files
   fs.copySync(path.resolve(paths.demo_dir, "public"), paths.demo_root);
 
@@ -124,5 +109,17 @@ gulp.task("copy-static-cast", (done) => {
   copyMapPanel(paths.cast_static);
   copyFonts(paths.cast_static);
   copyTranslations(paths.cast_static);
+  done();
+});
+
+gulp.task("copy-static-gallery", (done) => {
+  // Copy app static files
+  fs.copySync(polyPath("public/static"), paths.gallery_static);
+  // Copy gallery static files
+  fs.copySync(path.resolve(paths.gallery_dir, "public"), paths.gallery_root);
+
+  copyMapPanel(paths.gallery_static);
+  copyFonts(paths.gallery_static);
+  copyTranslations(paths.gallery_static);
   done();
 });

@@ -1,13 +1,14 @@
-import "@polymer/paper-input/paper-textarea";
 import "@polymer/paper-spinner/paper-spinner";
 import { timeOut } from "@polymer/polymer/lib/utils/async";
 import { Debouncer } from "@polymer/polymer/lib/utils/debounce";
 import { html } from "@polymer/polymer/lib/utils/html-tag";
 import { PolymerElement } from "@polymer/polymer/polymer-element";
+import LocalizeMixin from "../../../mixins/localize-mixin";
+import "../../../components/ha-code-editor";
 
 import "../../../resources/ha-style";
 
-class HaPanelDevTemplate extends PolymerElement {
+class HaPanelDevTemplate extends LocalizeMixin(PolymerElement) {
   static get template() {
     return html`
       <style include="ha-style iron-flex iron-positioning"></style>
@@ -46,12 +47,6 @@ class HaPanelDevTemplate extends PolymerElement {
           right: 8px;
         }
 
-        paper-textarea {
-          --paper-input-container-input: {
-            @apply --paper-font-code1;
-          }
-        }
-
         .rendered {
           @apply --paper-font-code1;
           clear: both;
@@ -66,30 +61,32 @@ class HaPanelDevTemplate extends PolymerElement {
       <div class$="[[computeFormClasses(narrow)]]">
         <div class="edit-pane">
           <p>
-            Templates are rendered using the Jinja2 template engine with some
-            Home Assistant specific extensions.
+            [[localize('ui.panel.developer-tools.tabs.templates.description')]]
           </p>
           <ul>
             <li>
               <a
                 href="http://jinja.pocoo.org/docs/dev/templates/"
                 target="_blank"
-                >Jinja2 template documentation</a
+                >[[localize('ui.panel.developer-tools.tabs.templates.jinja_documentation')]]</a
               >
             </li>
             <li>
               <a
                 href="https://home-assistant.io/docs/configuration/templating/"
                 target="_blank"
-                >Home Assistant template extensions</a
+                >[[localize('ui.panel.developer-tools.tabs.templates.template_extensions')]]</a
               >
             </li>
           </ul>
-          <paper-textarea
-            label="Template editor"
-            value="{{template}}"
+          <p>[[localize('ui.panel.developer-tools.tabs.templates.editor')]]</p>
+          <ha-code-editor
+            mode="jinja2"
+            value="[[template]]"
+            error="[[error]]"
             autofocus
-          ></paper-textarea>
+            on-value-changed="templateChanged"
+          ></ha-code-editor>
         </div>
 
         <div class="render-pane">
@@ -144,7 +141,6 @@ For loop example:
   {{ state.name | lower }} is {{state.state_with_unit}}
 {%- endfor %}.`,
         /* eslint-enable max-len */
-        observer: "templateChanged",
       },
 
       processed: {
@@ -152,6 +148,11 @@ For loop example:
         value: "",
       },
     };
+  }
+
+  ready() {
+    super.ready();
+    this.renderTemplate();
   }
 
   computeFormClasses(narrow) {
@@ -162,7 +163,8 @@ For loop example:
     return error ? "error rendered" : "rendered";
   }
 
-  templateChanged() {
+  templateChanged(ev) {
+    this.template = ev.detail.value;
     if (this.error) {
       this.error = false;
     }
@@ -186,7 +188,9 @@ For loop example:
       function(error) {
         this.processed =
           (error && error.body && error.body.message) ||
-          "Unknown error rendering template";
+          this.hass.localize(
+            "ui.panel.developer-tools.tabs.templates.unknown_error_template"
+          );
         this.error = true;
         this.rendering = false;
       }.bind(this)

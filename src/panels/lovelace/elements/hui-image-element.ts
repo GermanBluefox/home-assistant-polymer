@@ -11,10 +11,12 @@ import {
 import "../components/hui-image";
 
 import { computeTooltip } from "../common/compute-tooltip";
-import { handleClick } from "../common/handle-click";
-import { longPress } from "../common/directives/long-press-directive";
 import { LovelaceElement, ImageElementConfig } from "./types";
 import { HomeAssistant } from "../../../types";
+import { actionHandler } from "../common/directives/action-handler-directive";
+import { hasAction } from "../common/has-action";
+import { ActionHandlerEvent } from "../../../data/lovelace";
+import { handleAction } from "../common/handle-action";
 
 @customElement("hui-image-element")
 export class HuiImageElement extends LitElement implements LovelaceElement {
@@ -49,9 +51,11 @@ export class HuiImageElement extends LitElement implements LovelaceElement {
         .stateFilter="${this._config.state_filter}"
         .title="${computeTooltip(this.hass, this._config)}"
         .aspectRatio="${this._config.aspect_ratio}"
-        @ha-click="${this._handleTap}"
-        @ha-hold="${this._handleHold}"
-        .longPress="${longPress()}"
+        @action=${this._handleAction}
+        .actionHandler=${actionHandler({
+          hasHold: hasAction(this._config!.hold_action),
+          hasDoubleClick: hasAction(this._config!.double_tap_action),
+        })}
       ></hui-image>
     `;
   }
@@ -69,12 +73,8 @@ export class HuiImageElement extends LitElement implements LovelaceElement {
     `;
   }
 
-  private _handleTap(): void {
-    handleClick(this, this.hass!, this._config!, false);
-  }
-
-  private _handleHold(): void {
-    handleClick(this, this.hass!, this._config!, true);
+  private _handleAction(ev: ActionHandlerEvent) {
+    handleAction(this, this.hass!, this._config!, ev.detail.action!);
   }
 }
 

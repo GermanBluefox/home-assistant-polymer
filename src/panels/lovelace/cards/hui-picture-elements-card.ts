@@ -6,6 +6,7 @@ import {
   customElement,
   css,
   CSSResult,
+  PropertyValues,
 } from "lit-element";
 
 import { createStyledHuiElement } from "./picture-elements/create-styled-hui-element";
@@ -13,6 +14,7 @@ import { LovelaceCard } from "../types";
 import { HomeAssistant } from "../../../types";
 import { LovelaceElementConfig, LovelaceElement } from "../elements/types";
 import { PictureElementsCardConfig } from "./types";
+import { applyThemesOnElement } from "../../../common/dom/apply_themes_on_element";
 
 @customElement("hui-picture-elements-card")
 class HuiPictureElementsCard extends LitElement implements LovelaceCard {
@@ -49,6 +51,26 @@ class HuiPictureElementsCard extends LitElement implements LovelaceCard {
     this._config = config;
   }
 
+  protected updated(changedProps: PropertyValues): void {
+    super.updated(changedProps);
+    if (!this._config || !this._hass) {
+      return;
+    }
+    const oldHass = changedProps.get("hass") as HomeAssistant | undefined;
+    const oldConfig = changedProps.get("_config") as
+      | PictureElementsCardConfig
+      | undefined;
+
+    if (
+      !oldHass ||
+      !oldConfig ||
+      oldHass.themes !== this.hass.themes ||
+      oldConfig.theme !== this._config.theme
+    ) {
+      applyThemesOnElement(this, this._hass.themes, this._config.theme);
+    }
+  }
+
   protected render(): TemplateResult | void {
     if (!this._config) {
       return html``;
@@ -58,13 +80,14 @@ class HuiPictureElementsCard extends LitElement implements LovelaceCard {
       <ha-card .header="${this._config.title}">
         <div id="root">
           <hui-image
-            .hass="${this._hass}"
-            .image="${this._config.image}"
-            .stateImage="${this._config.state_image}"
-            .cameraImage="${this._config.camera_image}"
-            .cameraView="${this._config.camera_view}"
-            .entity="${this._config.entity}"
-            .aspectRatio="${this._config.aspect_ratio}"
+            .hass=${this._hass}
+            .image=${this._config.image}
+            .stateImage=${this._config.state_image}
+            .stateFilter=${this._config.state_filter}
+            .cameraImage=${this._config.camera_image}
+            .cameraView=${this._config.camera_view}
+            .entity=${this._config.entity}
+            .aspectRatio=${this._config.aspect_ratio}
           ></hui-image>
           ${this._config.elements.map(
             (elementConfig: LovelaceElementConfig) => {

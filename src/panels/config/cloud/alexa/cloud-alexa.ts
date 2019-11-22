@@ -7,12 +7,15 @@ import {
   customElement,
   property,
 } from "lit-element";
-import "@polymer/paper-toggle-button";
 import "@polymer/paper-icon-button";
+import memoizeOne from "memoize-one";
+
 import "../../../../layouts/hass-subpage";
 import "../../../../layouts/hass-loading-screen";
 import "../../../../components/ha-card";
+import "../../../../components/ha-switch";
 import "../../../../components/entity/state-info";
+
 import { HomeAssistant } from "../../../../types";
 import {
   CloudStatusLoggedIn,
@@ -20,19 +23,20 @@ import {
   updateCloudAlexaEntityConfig,
   AlexaEntityConfig,
 } from "../../../../data/cloud";
-import memoizeOne from "memoize-one";
 import {
   generateFilter,
   isEmptyFilter,
   EntityFilter,
 } from "../../../../common/entity/entity_filter";
 import { compare } from "../../../../common/string/compare";
-import computeStateName from "../../../../common/entity/compute_state_name";
 import { fireEvent } from "../../../../common/dom/fire_event";
-import { PolymerChangedEvent } from "../../../../polymer-types";
 import { showDomainTogglerDialog } from "../../../../dialogs/domain-toggler/show-dialog-domain-toggler";
-import computeDomain from "../../../../common/entity/compute_domain";
 import { AlexaEntity, fetchCloudAlexaEntities } from "../../../../data/alexa";
+// tslint:disable-next-line: no-duplicate-imports
+import { HaSwitch } from "../../../../components/ha-switch";
+
+import { computeStateName } from "../../../../common/entity/compute_state_name";
+import { computeDomain } from "../../../../common/entity/compute_domain";
 
 const DEFAULT_CONFIG_EXPOSE = true;
 const IGNORE_INTERFACES = ["Alexa.EndpointHealth"];
@@ -126,14 +130,14 @@ class CloudAlexa extends LitElement {
                 )
                 .join(", ")}
             </state-info>
-            <paper-toggle-button
+            <ha-switch
               .entityId=${entity.entity_id}
               .disabled=${!emptyFilter}
               .checked=${isExposed}
-              @checked-changed=${this._exposeChanged}
+              @change=${this._exposeChanged}
             >
-              Expose to Alexa
-            </paper-toggle-button>
+              ${this.hass!.localize("ui.panel.config.cloud.alexa.expose")}
+            </ha-switch>
           </div>
         </ha-card>
       `);
@@ -144,7 +148,9 @@ class CloudAlexa extends LitElement {
     }
 
     return html`
-      <hass-subpage header="Alexa">
+      <hass-subpage header="${this.hass!.localize(
+        "ui.panel.config.cloud.alexa.title"
+      )}">
         <span slot="toolbar-icon">
           ${selected}${
       !this.narrow
@@ -169,9 +175,7 @@ class CloudAlexa extends LitElement {
           !emptyFilter
             ? html`
                 <div class="banner">
-                  Editing which entities are exposed via this UI is disabled
-                  because you have configured entity filters in
-                  configuration.yaml.
+                  ${this.hass!.localize("ui.panel.config.cloud.alexa.banner")}
                 </div>
               `
             : ""
@@ -179,7 +183,11 @@ class CloudAlexa extends LitElement {
           ${
             exposedCards.length > 0
               ? html`
-                  <h1>Exposed entities</h1>
+                  <h1>
+                    ${this.hass!.localize(
+                      "ui.panel.config.cloud.alexa.exposed_entities"
+                    )}
+                  </h1>
                   <div class="content">${exposedCards}</div>
                 `
               : ""
@@ -187,7 +195,11 @@ class CloudAlexa extends LitElement {
           ${
             notExposedCards.length > 0
               ? html`
-                  <h1>Not Exposed entities</h1>
+                  <h1>
+                    ${this.hass!.localize(
+                      "ui.panel.config.cloud.alexa.not_exposed_entities"
+                    )}
+                  </h1>
                   <div class="content">${notExposedCards}</div>
                 `
               : ""
@@ -227,9 +239,9 @@ class CloudAlexa extends LitElement {
     fireEvent(this, "hass-more-info", { entityId });
   }
 
-  private async _exposeChanged(ev: PolymerChangedEvent<boolean>) {
+  private async _exposeChanged(ev: Event) {
     const entityId = (ev.currentTarget as any).entityId;
-    const newExposed = ev.detail.value;
+    const newExposed = (ev.target as HaSwitch).checked;
     await this._updateExposed(entityId, newExposed);
   }
 
@@ -328,9 +340,8 @@ class CloudAlexa extends LitElement {
         display: flex;
         flex-wrap: wrap;
         padding: 4px;
-        --paper-toggle-button-label-spacing: 16px;
       }
-      paper-toggle-button {
+      ha-switch {
         clear: both;
       }
       ha-card {
@@ -344,7 +355,7 @@ class CloudAlexa extends LitElement {
       state-info {
         cursor: pointer;
       }
-      paper-toggle-button {
+      ha-switch {
         padding: 8px 0;
       }
 

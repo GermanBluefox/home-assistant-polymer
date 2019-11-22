@@ -18,7 +18,7 @@ import "../../../components/ha-icon";
 import { computeRTL } from "../../../common/util/compute_rtl";
 import "../ha-config-section";
 
-import computeStateName from "../../../common/entity/compute_state_name";
+import { computeStateName } from "../../../common/entity/compute_state_name";
 import {
   loadConfigFlowDialog,
   showConfigFlowDialog,
@@ -42,6 +42,7 @@ import { DataEntryFlowProgress } from "../../../data/data_entry_flow";
 @customElement("ha-config-entries-dashboard")
 export class HaConfigManagerDashboard extends LitElement {
   @property() public hass!: HomeAssistant;
+  @property() public showAdvanced!: boolean;
 
   @property() private configEntries!: ConfigEntry[];
 
@@ -81,7 +82,9 @@ export class HaConfigManagerDashboard extends LitElement {
                         <paper-item-body>
                           ${localizeConfigFlowTitle(this.hass.localize, flow)}
                         </paper-item-body>
-                        <mwc-button @click=${this._continueFlow}
+                        <mwc-button
+                          @click=${this._continueFlow}
+                          data-id="${flow.flow_id}"
                           >${this.hass.localize(
                             "ui.panel.config.integrations.configure"
                           )}</mwc-button
@@ -162,12 +165,14 @@ export class HaConfigManagerDashboard extends LitElement {
   private _createFlow() {
     showConfigFlowDialog(this, {
       dialogClosedCallback: () => fireEvent(this, "hass-reload-entries"),
+      showAdvanced: this.showAdvanced,
     });
   }
 
-  private _continueFlow(ev) {
+  private _continueFlow(ev: Event) {
     showConfigFlowDialog(this, {
-      continueFlowId: ev.model.item.flow_id,
+      continueFlowId:
+        (ev.target as HTMLElement).getAttribute("data-id") || undefined,
       dialogClosedCallback: () => fireEvent(this, "hass-reload-entries"),
     });
   }

@@ -14,9 +14,9 @@ import {
   CSSResult,
   html,
   LitElement,
-  PropertyDeclarations,
   PropertyValues,
   TemplateResult,
+  property,
 } from "lit-element";
 
 import {
@@ -37,39 +37,16 @@ import {
 } from "./types";
 
 export class ZHAClusterAttributes extends LitElement {
-  public hass?: HomeAssistant;
-  public isWide?: boolean;
-  public showHelp: boolean;
-  public selectedNode?: ZHADevice;
-  public selectedCluster?: Cluster;
-  private _attributes: Attribute[];
-  private _selectedAttributeIndex: number;
-  private _attributeValue?: any;
-  private _manufacturerCodeOverride?: string | number;
-  private _setAttributeServiceData?: SetAttributeServiceData;
-
-  constructor() {
-    super();
-    this.showHelp = false;
-    this._selectedAttributeIndex = -1;
-    this._attributes = [];
-    this._attributeValue = "";
-  }
-
-  static get properties(): PropertyDeclarations {
-    return {
-      hass: {},
-      isWide: {},
-      showHelp: {},
-      selectedNode: {},
-      selectedCluster: {},
-      _attributes: {},
-      _selectedAttributeIndex: {},
-      _attributeValue: {},
-      _manufacturerCodeOverride: {},
-      _setAttributeServiceData: {},
-    };
-  }
+  @property() public hass?: HomeAssistant;
+  @property() public isWide?: boolean;
+  @property() public showHelp = false;
+  @property() public selectedNode?: ZHADevice;
+  @property() public selectedCluster?: Cluster;
+  @property() private _attributes: Attribute[] = [];
+  @property() private _selectedAttributeIndex = -1;
+  @property() private _attributeValue?: any = "";
+  @property() private _manufacturerCodeOverride?: string | number;
+  @property() private _setAttributeServiceData?: SetAttributeServiceData;
 
   protected updated(changedProperties: PropertyValues): void {
     if (changedProperties.has("selectedCluster")) {
@@ -85,7 +62,11 @@ export class ZHAClusterAttributes extends LitElement {
     return html`
       <ha-config-section .isWide="${this.isWide}">
         <div style="position: relative" slot="header">
-          <span>Cluster Attributes</span>
+          <span>
+            ${this.hass!.localize(
+              "ui.panel.config.zha.cluster_attributes.header"
+            )}
+          </span>
           <paper-icon-button
             class="toggle-help-icon"
             @click="${this._onHelpTap}"
@@ -93,12 +74,18 @@ export class ZHAClusterAttributes extends LitElement {
           >
           </paper-icon-button>
         </div>
-        <span slot="introduction">View and edit cluster attributes.</span>
+        <span slot="introduction">
+          ${this.hass!.localize(
+            "ui.panel.config.zha.cluster_attributes.introduction"
+          )}
+        </span>
 
         <ha-card class="content">
           <div class="attribute-picker">
             <paper-dropdown-menu
-              label="Attributes of the selected cluster"
+              label="${this.hass!.localize(
+                "ui.panel.config.zha.cluster_attributes.attributes_of_cluster"
+              )}"
               class="flex"
             >
               <paper-listbox
@@ -122,7 +109,9 @@ export class ZHAClusterAttributes extends LitElement {
           ${this.showHelp
             ? html`
                 <div class="help-text">
-                  Select an attribute to view or set its value
+                  ${this.hass!.localize(
+                    "ui.panel.config.zha.cluster_attributes.help_attribute_dropdown"
+                  )}
                 </div>
               `
             : ""}
@@ -138,30 +127,40 @@ export class ZHAClusterAttributes extends LitElement {
     return html`
       <div class="input-text">
         <paper-input
-          label="Value"
+          label="${this.hass!.localize("ui.panel.config.zha.common.value")}"
           type="string"
           .value="${this._attributeValue}"
           @value-changed="${this._onAttributeValueChanged}"
-          placeholder="Value"
+          placeholder="${this.hass!.localize(
+            "ui.panel.config.zha.common.value"
+          )}"
         ></paper-input>
       </div>
       <div class="input-text">
         <paper-input
-          label="Manufacturer code override"
+          label="${this.hass!.localize(
+            "ui.panel.config.zha.common.manufacturer_code_override"
+          )}"
           type="number"
           .value="${this._manufacturerCodeOverride}"
           @value-changed="${this._onManufacturerCodeOverrideChanged}"
-          placeholder="Value"
+          placeholder="${this.hass!.localize(
+            "ui.panel.config.zha.common.value"
+          )}"
         ></paper-input>
       </div>
       <div class="card-actions">
-        <mwc-button @click="${this._onGetZigbeeAttributeClick}"
-          >Get Zigbee Attribute</mwc-button
-        >
+        <mwc-button @click="${this._onGetZigbeeAttributeClick}">
+          ${this.hass!.localize(
+            "ui.panel.config.zha.cluster_attributes.get_zigbee_attribute"
+          )}
+        </mwc-button>
         ${this.showHelp
           ? html`
               <div class="help-text2">
-                Get the value for the selected attribute
+                ${this.hass!.localize(
+                  "ui.panel.config.zha.cluster_attributes.help_get_zigbee_attribute"
+                )}
               </div>
             `
           : ""}
@@ -170,8 +169,11 @@ export class ZHAClusterAttributes extends LitElement {
           domain="zha"
           service="set_zigbee_cluster_attribute"
           .serviceData="${this._setAttributeServiceData}"
-          >Set Zigbee Attribute</ha-call-service-button
         >
+          ${this.hass!.localize(
+            "ui.panel.config.zha.cluster_attributes.set_zigbee_attribute"
+          )}
+        </ha-call-service-button>
         ${this.showHelp
           ? html`
               <ha-service-description

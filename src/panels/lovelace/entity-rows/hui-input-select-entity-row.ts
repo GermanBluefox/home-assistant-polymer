@@ -15,22 +15,30 @@ import "../../../components/ha-paper-dropdown-menu";
 import "../../../components/entity/state-badge";
 import "../components/hui-warning";
 
-import computeStateName from "../../../common/entity/compute_state_name";
+import { computeStateName } from "../../../common/entity/compute_state_name";
 
 import { HomeAssistant, InputSelectEntity } from "../../../types";
-import { EntityRow, EntityConfig } from "./types";
+import { EntityRow } from "./types";
 import { setInputSelectOption } from "../../../data/input-select";
 import { hasConfigOrEntityChanged } from "../common/has-changed";
 import { forwardHaptic } from "../../../data/haptics";
 import { stopPropagation } from "../../../common/dom/stop_propagation";
+import { classMap } from "lit-html/directives/class-map";
+import { DOMAINS_HIDE_MORE_INFO } from "../../../common/const";
+import { computeDomain } from "../../../common/entity/compute_domain";
+import { EntitiesCardEntityConfig } from "../cards/types";
+import { actionHandler } from "../common/directives/action-handler-directive";
+import { hasAction } from "../common/has-action";
+import { ActionHandlerEvent } from "../../../data/lovelace";
+import { handleAction } from "../common/handle-action";
 
 @customElement("hui-input-select-entity-row")
 class HuiInputSelectEntityRow extends LitElement implements EntityRow {
   @property() public hass?: HomeAssistant;
 
-  @property() private _config?: EntityConfig;
+  @property() private _config?: EntitiesCardEntityConfig;
 
-  public setConfig(config: EntityConfig): void {
+  public setConfig(config: EntitiesCardEntityConfig): void {
     if (!config || !config.entity) {
       throw new Error("Invalid Configuration: 'entity' required");
     }
@@ -63,8 +71,24 @@ class HuiInputSelectEntityRow extends LitElement implements EntityRow {
       `;
     }
 
+    const pointer =
+      (this._config.tap_action && this._config.tap_action.action !== "none") ||
+      (this._config.entity &&
+        !DOMAINS_HIDE_MORE_INFO.includes(computeDomain(this._config.entity)));
+
     return html`
-      <state-badge .stateObj="${stateObj}"></state-badge>
+      <state-badge
+        .stateObj=${stateObj}
+        class=${classMap({
+          pointer,
+        })}
+        @action=${this._handleAction}
+        .actionHandler=${actionHandler({
+          hasHold: hasAction(this._config!.hold_action),
+          hasDoubleClick: hasAction(this._config!.double_tap_action),
+        })}
+        tabindex="0"
+      ></state-badge>
       <ha-paper-dropdown-menu
         .label=${this._config.name || computeStateName(stateObj)}
         .value=${stateObj.state}
@@ -103,6 +127,10 @@ class HuiInputSelectEntityRow extends LitElement implements EntityRow {
     )!.selected = stateObj.attributes.options.indexOf(stateObj.state);
   }
 
+  private _handleAction(ev: ActionHandlerEvent) {
+    handleAction(this, this.hass!, this._config!, ev.detail.action!);
+  }
+
   static get styles(): CSSResult {
     return css`
       :host {
@@ -117,6 +145,9 @@ class HuiInputSelectEntityRow extends LitElement implements EntityRow {
       paper-item {
         cursor: pointer;
         min-width: 200px;
+      }
+      .pointer {
+        cursor: pointer;
       }
     `;
   }

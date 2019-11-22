@@ -1,6 +1,6 @@
 import { property, PropertyValues, customElement } from "lit-element";
 import "../../layouts/hass-loading-screen";
-import isComponentLoaded from "../../common/config/is_component_loaded";
+import { isComponentLoaded } from "../../common/config/is_component_loaded";
 import { HomeAssistant } from "../../types";
 import { CloudStatus, fetchCloudStatus } from "../../data/cloud";
 import { listenMediaQuery } from "../../common/dom/media_query";
@@ -110,6 +110,13 @@ class HaPanelConfig extends HassRouterPage {
         load: () =>
           import(
             /* webpackChunkName: "panel-config-script" */ "./script/ha-config-script"
+          ),
+      },
+      scene: {
+        tag: "ha-config-scene",
+        load: () =>
+          import(
+            /* webpackChunkName: "panel-config-scene" */ "./scene/ha-config-scene"
           ),
       },
       users: {

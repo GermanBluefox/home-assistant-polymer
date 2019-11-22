@@ -13,13 +13,14 @@ import { HassEntity } from "home-assistant-js-websocket";
 import "../../../components/ha-card";
 import "../../../components/ha-icon";
 
-import computeStateName from "../../../common/entity/compute_state_name";
+import { computeStateName } from "../../../common/entity/compute_state_name";
 
 import { LovelaceCardEditor, LovelaceCard } from "../types";
 import { HomeAssistant } from "../../../types";
 import { fireEvent } from "../../../common/dom/fire_event";
 import { hasConfigOrEntityChanged } from "../common/has-changed";
 import { PlantStatusCardConfig, PlantAttributeTarget } from "./types";
+import { applyThemesOnElement } from "../../../common/dom/apply_themes_on_element";
 
 const SENSORS = {
   moisture: "hass:water",
@@ -32,12 +33,14 @@ const SENSORS = {
 @customElement("hui-plant-status-card")
 class HuiPlantStatusCard extends LitElement implements LovelaceCard {
   public static async getConfigElement(): Promise<LovelaceCardEditor> {
-    await import(/* webpackChunkName: "hui-plant-status-card-editor" */ "../editor/config-elements/hui-plant-status-card-editor");
+    await import(
+      /* webpackChunkName: "hui-plant-status-card-editor" */ "../editor/config-elements/hui-plant-status-card-editor"
+    );
     return document.createElement("hui-plant-status-card-editor");
   }
 
   public static getStubConfig(): object {
-    return {};
+    return { entity: "" };
   }
 
   @property() public hass?: HomeAssistant;
@@ -58,6 +61,26 @@ class HuiPlantStatusCard extends LitElement implements LovelaceCard {
 
   protected shouldUpdate(changedProps: PropertyValues): boolean {
     return hasConfigOrEntityChanged(this, changedProps);
+  }
+
+  protected updated(changedProps: PropertyValues): void {
+    super.updated(changedProps);
+    if (!this._config || !this.hass) {
+      return;
+    }
+    const oldHass = changedProps.get("hass") as HomeAssistant | undefined;
+    const oldConfig = changedProps.get("_config") as
+      | PlantStatusCardConfig
+      | undefined;
+
+    if (
+      !oldHass ||
+      !oldConfig ||
+      oldHass.themes !== this.hass.themes ||
+      oldConfig.theme !== this._config.theme
+    ) {
+      applyThemesOnElement(this, this.hass.themes, this._config.theme);
+    }
   }
 
   protected render(): TemplateResult | void {

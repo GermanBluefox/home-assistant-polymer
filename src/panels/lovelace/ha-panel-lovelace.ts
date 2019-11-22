@@ -74,7 +74,10 @@ class LovelacePanel extends LitElement {
 
     if (state === "error") {
       return html`
-        <hass-error-screen title="Lovelace" .error="${this._errorMsg}">
+        <hass-error-screen
+          title="${this.hass!.localize("domain.lovelace")}"
+          .error="${this._errorMsg}"
+        >
           <mwc-button on-click="_forceFetchConfig"
             >${this.hass!.localize(
               "ui.panel.lovelace.reload_lovelace"
@@ -249,7 +252,17 @@ class LovelacePanel extends LitElement {
     this._setLovelaceConfig(conf, confMode);
   }
 
+  private _checkLovelaceConfig(config: LovelaceConfig) {
+    // Somehow there can be badges with value null, we remove those
+    config.views.forEach((view) => {
+      if (view.badges) {
+        view.badges = view.badges.filter(Boolean);
+      }
+    });
+  }
+
   private _setLovelaceConfig(config: LovelaceConfig, mode: Lovelace["mode"]) {
+    this._checkLovelaceConfig(config);
     this.lovelace = {
       config,
       mode,
@@ -273,6 +286,7 @@ class LovelacePanel extends LitElement {
       },
       saveConfig: async (newConfig: LovelaceConfig): Promise<void> => {
         const { config: previousConfig, mode: previousMode } = this.lovelace!;
+        this._checkLovelaceConfig(newConfig);
         try {
           // Optimistic update
           this._updateLovelace({

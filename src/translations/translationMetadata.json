@@ -46,7 +46,8 @@
     "nativeName": "Euskara"
   },
   "fa": {
-    "nativeName": "فارسی"
+    "nativeName": "فارسی",
+    "isRTL": true
   },
   "fi": {
     "nativeName": "Suomi"
@@ -150,6 +151,9 @@
   },
   "uk": {
     "nativeName": "Українська"
+  },
+  "ur": {
+    "nativeName": "اُردُو"
   },
   "vi": {
     "nativeName": "Tiếng Việt"

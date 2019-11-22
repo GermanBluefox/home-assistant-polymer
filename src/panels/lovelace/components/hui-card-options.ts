@@ -66,7 +66,9 @@ export class HuiCardOptions extends LitElement {
             <paper-icon-button
               icon="hass:dots-vertical"
               slot="dropdown-trigger"
-              aria-label="More options"
+              aria-label=${this.hass!.localize(
+                "ui.panel.lovelace.editor.edit_card.options"
+              )}
             ></paper-icon-button>
             <paper-listbox slot="dropdown-content">
               <paper-item @click="${this._moveCard}">
@@ -74,7 +76,7 @@ export class HuiCardOptions extends LitElement {
                   "ui.panel.lovelace.editor.edit_card.move"
                 )}</paper-item
               >
-              <paper-item @click="${this._deleteCard}">
+              <paper-item .class="delete-item" @click="${this._deleteCard}">
                 ${this.hass!.localize(
                   "ui.panel.lovelace.editor.edit_card.delete"
                 )}</paper-item
@@ -131,6 +133,10 @@ export class HuiCardOptions extends LitElement {
       paper-item {
         cursor: pointer;
       }
+
+      paper-item.delete-item {
+        color: var(--google-red-500);
+      }
     `;
   }
 
@@ -165,7 +171,7 @@ export class HuiCardOptions extends LitElement {
   }
 
   private _deleteCard(): void {
-    confDeleteCard(this.lovelace!, this.path!);
+    confDeleteCard(this, this.hass!, this.lovelace!, this.path!);
   }
 }
 

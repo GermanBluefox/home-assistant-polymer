@@ -16,10 +16,13 @@ import { fireEvent } from "../../../../common/dom/fire_event";
 import { configElementStyle } from "./config-elements-style";
 import { MarkdownCardConfig } from "../../cards/types";
 
+import "../../components/hui-theme-select-editor";
+
 const cardConfigStruct = struct({
   type: "string",
   title: "string?",
   content: "string",
+  theme: "string?",
 });
 
 @customElement("hui-markdown-card-editor")
@@ -42,6 +45,10 @@ export class HuiMarkdownCardEditor extends LitElement
     return this._config!.content || "";
   }
 
+  get _theme(): string {
+    return this._config!.theme || "Backend-selected";
+  }
+
   protected render(): TemplateResult | void {
     if (!this.hass) {
       return html``;
@@ -51,13 +58,21 @@ export class HuiMarkdownCardEditor extends LitElement
       ${configElementStyle}
       <div class="card-config">
         <paper-input
-          label="Title"
+          .label="${this.hass.localize(
+            "ui.panel.lovelace.editor.card.generic.title"
+          )} (${this.hass.localize(
+            "ui.panel.lovelace.editor.card.config.optional"
+          )})"
           .value="${this._title}"
           .configValue="${"title"}"
           @value-changed="${this._valueChanged}"
         ></paper-input>
         <paper-textarea
-          label="Content"
+          .label="${this.hass.localize(
+            "ui.panel.lovelace.editor.card.markdown.content"
+          )} (${this.hass.localize(
+            "ui.panel.lovelace.editor.card.config.required"
+          )})"
           .value="${this._content}"
           .configValue="${"content"}"
           @value-changed="${this._valueChanged}"
@@ -65,6 +80,12 @@ export class HuiMarkdownCardEditor extends LitElement
           autocomplete="off"
           spellcheck="false"
         ></paper-textarea>
+        <hui-theme-select-editor
+          .hass="${this.hass}"
+          .value="${this._theme}"
+          .configValue="${"theme"}"
+          @theme-changed="${this._valueChanged}"
+        ></hui-theme-select-editor>
       </div>
     `;
   }

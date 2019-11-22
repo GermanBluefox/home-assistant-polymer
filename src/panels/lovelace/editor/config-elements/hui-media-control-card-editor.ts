@@ -44,10 +44,15 @@ export class HuiMediaControlCardEditor extends LitElement
     return html`
       <div class="card-config">
         <ha-entity-picker
+          .label="${this.hass.localize(
+            "ui.panel.lovelace.editor.card.generic.entity"
+          )} (${this.hass.localize(
+            "ui.panel.lovelace.editor.card.config.required"
+          )})"
           .hass="${this.hass}"
           .value="${this._entity}"
           .configValue=${"entity"}
-          domain-filter="media_player"
+          include-domains='["media_player"]'
           @change="${this._valueChanged}"
           allow-custom-entity
         ></ha-entity-picker>

@@ -1,50 +1,44 @@
 {
+    "domain": {
+        "zwave": "Z-Wave"
+    },
     "panel": {
         "config": "Konfiguracija",
-        "states": "Pregled",
-        "map": "Mapa",
-        "logbook": "Dnevnik",
         "history": "Istorija",
+        "logbook": "Dnevnik",
         "mailbox": "Poštansko sanduče",
-        "shopping_list": "Lista za kupovinu"
+        "map": "Mapa",
+        "shopping_list": "Lista za kupovinu",
+        "states": "Pregled"
+    },
+    "state": {
+        "climate": {
+            "manual": "Упутство"
+        },
+        "weather": {
+            "clear-night": "Vedra noć",
+            "cloudy": "Oblačno",
+            "fog": "Magla",
+            "hail": "Grad",
+            "lightning": "Grmljavina",
+            "lightning-rainy": "Grmljavina sa kišom",
+            "partlycloudy": "Delimično oblačno",
+            "pouring": "Pljusak",
+            "rainy": "Kiša",
+            "snowy": "Sneg",
+            "snowy-rainy": "Sneg i kiša",
+            "sunny": "Sunčano",
+            "windy": "Vetrovito",
+            "windy-variant": "Vetrovito"
+        },
+        "zwave": {
+            "query_stage": {
+                "dead": " ({query_stage})",
+                "initializing": " ( {query_stage} )"
+            }
+        }
     },
     "ui": {
-        "sidebar": {
-            "log_out": "Odjaviti se"
-        },
-        "panel": {
-            "developer-tools": {
-                "tabs": {
-                    "mqtt": {
-                        "title": "MQTT"
-                    }
-                }
-            },
-            "config": {
-                "zwave": {
-                    "caption": "Z-Wave",
-                    "node_config": {
-                        "set_config_parameter": "Подесите параметар Цонфиг"
-                    }
-                },
-                "automation": {
-                    "editor": {
-                        "triggers": {
-                            "type": {
-                                "numeric_state": {
-                                    "label": "Numeričko stanje",
-                                    "above": "Iznad",
-                                    "below": "Ispod"
-                                },
-                                "sun": {
-                                    "label": "Sunce"
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        },
         "card": {
             "scene": {
                 "activate": "Aktiviraj"
@@ -67,8 +61,8 @@
                     "n": "S",
                     "ne": "SI",
                     "nne": "SSI",
-                    "nw": "SZ",
                     "nnw": "SSZ",
+                    "nw": "SZ",
                     "s": "J",
                     "se": "JI",
                     "sse": "JJI",
@@ -80,30 +74,45 @@
                 },
                 "forecast": "Vremenska prognoza"
             }
-        }
-    },
-    "domain": {
-        "zwave": "Z-Wave"
-    },
-    "state": {
-        "weather": {
-            "clear-night": "Vedra noć",
-            "cloudy": "Oblačno",
-            "fog": "Magla",
-            "hail": "Grad",
-            "lightning": "Grmljavina",
-            "lightning-rainy": "Grmljavina sa kišom",
-            "partlycloudy": "Delimično oblačno",
-            "pouring": "Pljusak",
-            "rainy": "Kiša",
-            "snowy": "Sneg",
-            "snowy-rainy": "Sneg i kiša",
-            "sunny": "Sunčano",
-            "windy": "Vetrovito",
-            "windy-variant": "Vetrovito"
         },
-        "climate": {
-            "manual": "Упутство"
+        "panel": {
+            "config": {
+                "automation": {
+                    "editor": {
+                        "triggers": {
+                            "type": {
+                                "numeric_state": {
+                                    "above": "Iznad",
+                                    "below": "Ispod",
+                                    "label": "Numeričko stanje"
+                                },
+                                "sun": {
+                                    "label": "Sunce"
+                                }
+                            }
+                        }
+                    }
+                },
+                "cloud": {
+                    "caption": "Home Assistant Cloud"
+                },
+                "zwave": {
+                    "caption": "Z-Wave",
+                    "node_config": {
+                        "set_config_parameter": "Подесите параметар Цонфиг"
+                    }
+                }
+            },
+            "developer-tools": {
+                "tabs": {
+                    "mqtt": {
+                        "title": "MQTT"
+                    }
+                }
+            }
+        },
+        "sidebar": {
+            "log_out": "Odjaviti se"
         }
     }
 }

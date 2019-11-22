@@ -15,24 +15,28 @@ import "@material/mwc-ripple";
 import "../../../components/ha-card";
 import "../components/hui-warning";
 
-import isValidEntityId from "../../../common/entity/valid_entity_id";
-import stateIcon from "../../../common/entity/state_icon";
-import computeStateDomain from "../../../common/entity/compute_state_domain";
-import computeStateName from "../../../common/entity/compute_state_name";
-import applyThemesOnElement from "../../../common/dom/apply_themes_on_element";
-import computeDomain from "../../../common/entity/compute_domain";
+import { isValidEntityId } from "../../../common/entity/valid_entity_id";
+import { stateIcon } from "../../../common/entity/state_icon";
+import { computeStateDomain } from "../../../common/entity/compute_state_domain";
+import { computeStateName } from "../../../common/entity/compute_state_name";
+import { applyThemesOnElement } from "../../../common/dom/apply_themes_on_element";
+import { computeDomain } from "../../../common/entity/compute_domain";
 
 import { HomeAssistant, LightEntity } from "../../../types";
 import { LovelaceCard, LovelaceCardEditor } from "../types";
-import { longPress } from "../common/directives/long-press-directive";
-import { handleClick } from "../common/handle-click";
 import { DOMAINS_TOGGLE } from "../../../common/const";
 import { EntityButtonCardConfig } from "./types";
+import { actionHandler } from "../common/directives/action-handler-directive";
+import { hasAction } from "../common/has-action";
+import { handleAction } from "../common/handle-action";
+import { ActionHandlerEvent } from "../../../data/lovelace";
 
 @customElement("hui-entity-button-card")
 class HuiEntityButtonCard extends LitElement implements LovelaceCard {
   public static async getConfigElement(): Promise<LovelaceCardEditor> {
-    await import(/* webpackChunkName: "hui-entity-button-card-editor" */ "../editor/config-elements/hui-entity-button-card-editor");
+    await import(
+      /* webpackChunkName: "hui-entity-button-card-editor" */ "../editor/config-elements/hui-entity-button-card-editor"
+    );
     return document.createElement("hui-entity-button-card-editor");
   }
 
@@ -61,6 +65,7 @@ class HuiEntityButtonCard extends LitElement implements LovelaceCard {
     this._config = {
       theme: "default",
       hold_action: { action: "more-info" },
+      double_tap_action: { action: "none" },
       show_icon: true,
       show_name: true,
       ...config,
@@ -89,13 +94,19 @@ class HuiEntityButtonCard extends LitElement implements LovelaceCard {
     }
 
     const oldHass = changedProps.get("hass") as HomeAssistant | undefined;
-    if (oldHass) {
-      return (
-        oldHass.states[this._config!.entity] !==
-        this.hass!.states[this._config!.entity]
-      );
+
+    if (
+      !oldHass ||
+      oldHass.themes !== this.hass!.themes ||
+      oldHass.language !== this.hass!.language
+    ) {
+      return true;
     }
-    return true;
+
+    return (
+      oldHass.states[this._config!.entity] !==
+      this.hass!.states[this._config!.entity]
+    );
   }
 
   protected render(): TemplateResult | void {
@@ -118,9 +129,11 @@ class HuiEntityButtonCard extends LitElement implements LovelaceCard {
 
     return html`
       <ha-card
-        @ha-click="${this._handleTap}"
-        @ha-hold="${this._handleHold}"
-        .longPress="${longPress()}"
+        @action=${this._handleAction}
+        .actionHandler=${actionHandler({
+          hasHold: hasAction(this._config!.hold_action),
+          hasDoubleClick: hasAction(this._config!.double_tap_action),
+        })}
       >
         ${this._config.show_icon
           ? html`
@@ -156,7 +169,16 @@ class HuiEntityButtonCard extends LitElement implements LovelaceCard {
       return;
     }
     const oldHass = changedProps.get("hass") as HomeAssistant | undefined;
-    if (!oldHass || oldHass.themes !== this.hass.themes) {
+    const oldConfig = changedProps.get("_config") as
+      | EntityButtonCardConfig
+      | undefined;
+
+    if (
+      !oldHass ||
+      !oldConfig ||
+      oldHass.themes !== this.hass.themes ||
+      oldConfig.theme !== this._config.theme
+    ) {
       applyThemesOnElement(this, this.hass.themes, this._config.theme);
     }
   }
@@ -212,12 +234,8 @@ class HuiEntityButtonCard extends LitElement implements LovelaceCard {
     return `hsl(${hue}, 100%, ${100 - sat / 2}%)`;
   }
 
-  private _handleTap() {
-    handleClick(this, this.hass!, this._config!, false);
-  }
-
-  private _handleHold() {
-    handleClick(this, this.hass!, this._config!, true);
+  private _handleAction(ev: ActionHandlerEvent) {
+    handleAction(this, this.hass!, this._config!, ev.detail.action!);
   }
 }
 

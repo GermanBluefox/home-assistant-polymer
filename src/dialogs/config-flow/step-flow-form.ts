@@ -12,10 +12,9 @@ import "@material/mwc-button";
 import "@polymer/paper-tooltip/paper-tooltip";
 import "@polymer/paper-spinner/paper-spinner";
 
-import "../../components/ha-form";
+import "../../components/ha-form/ha-form";
 import "../../components/ha-markdown";
 import "../../resources/ha-style";
-import { PolymerChangedEvent, applyPolymerEvent } from "../../polymer-types";
 import { HomeAssistant } from "../../types";
 import { fireEvent } from "../../common/dom/fire_event";
 import { configFlowContentStyles } from "./styles";
@@ -69,7 +68,7 @@ class StepFlowForm extends LitElement {
         ${this.flowConfig.renderShowFormStepDescription(this.hass, this.step)}
         <ha-form
           .data=${stepData}
-          @data-changed=${this._stepDataChanged}
+          @value-changed=${this._stepDataChanged}
           .schema=${step.data_schema}
           .error=${step.errors}
           .computeLabel=${this._labelCallback}
@@ -88,14 +87,17 @@ class StepFlowForm extends LitElement {
                 <mwc-button
                   @click=${this._submitStep}
                   .disabled=${!allRequiredInfoFilledIn}
-                >
-                  Submit
+                  >${this.hass.localize(
+                    "ui.panel.config.integrations.config_flow.submit"
+                  )}
                 </mwc-button>
 
                 ${!allRequiredInfoFilledIn
                   ? html`
-                      <paper-tooltip position="left">
-                        Not all required fields are filled in.
+                      <paper-tooltip position="left"
+                        >${this.hass.localize(
+                          "ui.panel.config.integrations.config_flow.not_all_required_fields"
+                        )}
                       </paper-tooltip>
                     `
                   : html``}
@@ -169,8 +171,8 @@ class StepFlowForm extends LitElement {
     }
   }
 
-  private _stepDataChanged(ev: PolymerChangedEvent<any>): void {
-    this._stepData = applyPolymerEvent(ev, this._stepData);
+  private _stepDataChanged(ev: CustomEvent): void {
+    this._stepData = ev.detail.value;
   }
 
   private _labelCallback = (field: FieldSchema): string =>

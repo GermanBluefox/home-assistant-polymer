@@ -2,12 +2,12 @@ import "@polymer/iron-flex-layout/iron-flex-layout-classes";
 import "@polymer/paper-input/paper-input";
 import { html } from "@polymer/polymer/lib/utils/html-tag";
 import { PolymerElement } from "@polymer/polymer/polymer-element";
-import "@vaadin/vaadin-date-picker/vaadin-date-picker";
+import "@vaadin/vaadin-date-picker/theme/material/vaadin-date-picker";
 
 import "../../../components/ha-relative-time";
 import "../../../components/paper-time-input";
 
-import attributeClassNames from "../../../common/entity/attribute_class_names";
+import { attributeClassNames } from "../../../common/entity/attribute_class_names";
 
 class DatetimeInput extends PolymerElement {
   static get template() {

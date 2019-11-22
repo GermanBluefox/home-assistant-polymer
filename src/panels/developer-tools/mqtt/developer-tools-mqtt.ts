@@ -9,17 +9,17 @@ import {
 } from "lit-element";
 import "@material/mwc-button";
 import "@polymer/paper-input/paper-input";
-import "@polymer/paper-input/paper-textarea";
 
 import { HomeAssistant } from "../../../types";
 
 import { haStyle } from "../../../resources/styles";
 import "../../../components/ha-card";
+import "../../../components/ha-code-editor";
 import "./mqtt-subscribe-card";
 
 @customElement("developer-tools-mqtt")
 class HaPanelDevMqtt extends LitElement {
-  @property() public hass?: HomeAssistant;
+  @property() public hass!: HomeAssistant;
 
   @property() private topic = "";
 
@@ -40,23 +40,37 @@ class HaPanelDevMqtt extends LitElement {
   protected render(): TemplateResult {
     return html`
       <div class="content">
-        <ha-card header="Publish a packet">
+        <ha-card
+          header="${this.hass.localize(
+            "ui.panel.developer-tools.tabs.mqtt.description_publish"
+          )}"
+        >
           <div class="card-content">
             <paper-input
-              label="topic"
+              label="${this.hass.localize(
+                "ui.panel.developer-tools.tabs.mqtt.topic"
+              )}"
               .value=${this.topic}
               @value-changed=${this._handleTopic}
             ></paper-input>
 
-            <paper-textarea
-              always-float-label
-              label="Payload (template allowed)"
+            <p>
+              ${this.hass.localize(
+                "ui.panel.developer-tools.tabs.mqtt.payload"
+              )}
+            </p>
+            <ha-code-editor
+              mode="jinja2"
               .value="${this.payload}"
               @value-changed=${this._handlePayload}
-            ></paper-textarea>
+            ></ha-code-editor>
           </div>
           <div class="card-actions">
-            <mwc-button @click=${this._publish}>Publish</mwc-button>
+            <mwc-button @click=${this._publish}
+              >${this.hass.localize(
+                "ui.panel.developer-tools.tabs.mqtt.publish"
+              )}</mwc-button
+            >
           </div>
         </ha-card>
 

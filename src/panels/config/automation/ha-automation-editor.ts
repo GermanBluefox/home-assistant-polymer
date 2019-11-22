@@ -4,8 +4,8 @@ import {
   html,
   CSSResult,
   css,
-  PropertyDeclarations,
   PropertyValues,
+  property,
 } from "lit-element";
 import "@polymer/app-layout/app-header/app-header";
 import "@polymer/app-layout/app-toolbar/app-toolbar";
@@ -20,7 +20,7 @@ import "../../../layouts/ha-app-layout";
 
 import Automation from "../js/automation";
 import unmountPreact from "../../../common/preact/unmount";
-import computeStateName from "../../../common/entity/compute_state_name";
+import { computeStateName } from "../../../common/entity/compute_state_name";
 
 import { haStyle } from "../../../resources/styles";
 import { HomeAssistant } from "../../../types";
@@ -28,6 +28,7 @@ import {
   AutomationEntity,
   AutomationConfig,
   deleteAutomation,
+  getAutomationEditorInitData,
 } from "../../../data/automation";
 import { navigate } from "../../../common/navigate";
 import { computeRTL } from "../../../common/util/compute_rtl";
@@ -36,27 +37,15 @@ function AutomationEditor(mountEl, props, mergeEl) {
   return render(h(Automation, props), mountEl, mergeEl);
 }
 
-class HaAutomationEditor extends LitElement {
-  public hass!: HomeAssistant;
-  public automation!: AutomationEntity;
-  public isWide?: boolean;
-  public creatingNew?: boolean;
-  private _config?: AutomationConfig;
-  private _dirty?: boolean;
+export class HaAutomationEditor extends LitElement {
+  @property() public hass!: HomeAssistant;
+  @property() public automation!: AutomationEntity;
+  @property() public isWide?: boolean;
+  @property() public creatingNew?: boolean;
+  @property() private _config?: AutomationConfig;
+  @property() private _dirty?: boolean;
   private _rendered?: unknown;
-  private _errors?: string;
-
-  static get properties(): PropertyDeclarations {
-    return {
-      hass: {},
-      automation: {},
-      creatingNew: {},
-      isWide: {},
-      _errors: {},
-      _dirty: {},
-      _config: {},
-    };
-  }
+  @property() private _errors?: string;
 
   constructor() {
     super();
@@ -93,6 +82,9 @@ class HaAutomationEditor extends LitElement {
               ? ""
               : html`
                   <paper-icon-button
+                    title="${this.hass.localize(
+                      "ui.panel.config.automation.picker.delete_automation"
+                    )}"
                     icon="hass:delete"
                     @click=${this._delete}
                   ></paper-icon-button>
@@ -178,14 +170,17 @@ class HaAutomationEditor extends LitElement {
     }
 
     if (changedProps.has("creatingNew") && this.creatingNew && this.hass) {
-      this._dirty = false;
+      const initData = getAutomationEditorInitData();
+      this._dirty = initData ? true : false;
       this._config = {
         alias: this.hass.localize(
           "ui.panel.config.automation.editor.default_name"
         ),
+        description: "",
         trigger: [{ platform: "state" }],
         condition: [],
         action: [{ service: "" }],
+        ...initData,
       };
     }
 
@@ -227,7 +222,11 @@ class HaAutomationEditor extends LitElement {
   }
 
   private async _delete() {
-    if (!confirm("Are you sure you want to delete this automation?")) {
+    if (
+      !confirm(
+        this.hass.localize("ui.panel.config.automation.picker.delete_confirm")
+      )
+    ) {
       return;
     }
     await deleteAutomation(this.hass, this.automation.attributes.id!);

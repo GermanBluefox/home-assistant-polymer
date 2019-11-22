@@ -18,17 +18,18 @@ import {
   createTileLayer,
   LeafletModuleType,
 } from "../../../common/dom/setup-leaflet-map";
-import computeStateDomain from "../../../common/entity/compute_state_domain";
-import computeStateName from "../../../common/entity/compute_state_name";
+import { computeStateDomain } from "../../../common/entity/compute_state_domain";
+import { computeStateName } from "../../../common/entity/compute_state_name";
 import { debounce } from "../../../common/util/debounce";
 import parseAspectRatio from "../../../common/util/parse-aspect-ratio";
-import computeDomain from "../../../common/entity/compute_domain";
+import { computeDomain } from "../../../common/entity/compute_domain";
 
 import { HomeAssistant } from "../../../types";
 import { LovelaceCard } from "../types";
 import { EntityConfig } from "../entity-rows/types";
 import { processConfigEntities } from "../common/process-config-entities";
 import { MapCardConfig } from "./types";
+import { classMap } from "lit-html/directives/class-map";
 
 @customElement("hui-map-card")
 class HuiMapCard extends LitElement implements LovelaceCard {
@@ -140,7 +141,10 @@ class HuiMapCard extends LitElement implements LovelaceCard {
     return html`
       <ha-card id="card" .header=${this._config.title}>
         <div id="root">
-          <div id="map"></div>
+          <div
+            id="map"
+            class=${classMap({ dark: this._config.dark_mode === true })}
+          ></div>
           <paper-icon-button
             @click=${this._fitMap}
             icon="hass:image-filter-center-focus"
@@ -323,13 +327,25 @@ class HuiMapCard extends LitElement implements LovelaceCard {
           continue;
         }
 
+        // create icon
+        let iconHTML = "";
+        if (icon) {
+          const el = document.createElement("ha-icon");
+          el.setAttribute("icon", icon);
+          iconHTML = el.outerHTML;
+        } else {
+          const el = document.createElement("span");
+          el.innerHTML = title;
+          iconHTML = el.outerHTML;
+        }
+
         // create marker with the icon
         mapItems.push(
           Leaflet.marker([latitude, longitude], {
             icon: Leaflet.divIcon({
-              html: icon ? `<ha-icon icon="${icon}"></ha-icon>` : title,
+              html: iconHTML,
               iconSize: [24, 24],
-              className: "",
+              className: this._config!.dark_mode === true ? "dark" : "light",
             }),
             interactive: false,
             title,
@@ -433,6 +449,11 @@ class HuiMapCard extends LitElement implements LovelaceCard {
         left: 0;
         width: 100%;
         height: 100%;
+        background: #fafaf8;
+      }
+
+      #map.dark {
+        background: #090909;
       }
 
       paper-icon-button {
@@ -447,6 +468,14 @@ class HuiMapCard extends LitElement implements LovelaceCard {
 
       :host([ispanel]) #root {
         height: 100%;
+      }
+
+      .dark {
+        color: #ffffff;
+      }
+
+      .light {
+        color: #000000;
       }
     `;
   }

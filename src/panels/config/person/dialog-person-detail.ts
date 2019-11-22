@@ -6,17 +6,16 @@ import {
   TemplateResult,
   property,
 } from "lit-element";
-import "@polymer/paper-dialog-scrollable/paper-dialog-scrollable";
+import memoizeOne from "memoize-one";
+
 import "@polymer/paper-input/paper-input";
 import "@material/mwc-button";
-
-import "../../../components/dialog/ha-paper-dialog";
+import "@material/mwc-dialog";
 
 import "../../../components/entity/ha-entities-picker";
 import "../../../components/user/ha-user-picker";
 import { PersonDetailDialogParams } from "./show-dialog-person-detail";
 import { PolymerChangedEvent } from "../../../polymer-types";
-import { haStyleDialog } from "../../../resources/styles";
 import { HomeAssistant } from "../../../types";
 import { PersonMutableParams } from "../../../data/person";
 
@@ -28,6 +27,13 @@ class DialogPersonDetail extends LitElement {
   @property() private _error?: string;
   @property() private _params?: PersonDetailDialogParams;
   @property() private _submitting: boolean = false;
+
+  private _deviceTrackersAvailable = memoizeOne((hass) => {
+    return Object.keys(hass.states).some(
+      (entityId) =>
+        entityId.substr(0, entityId.indexOf(".")) === "device_tracker"
+    );
+  });
 
   public async showDialog(params: PersonDetailDialogParams): Promise<void> {
     this._params = params;
@@ -50,13 +56,14 @@ class DialogPersonDetail extends LitElement {
     }
     const nameInvalid = this._name.trim() === "";
     return html`
-      <ha-paper-dialog
-        with-backdrop
-        opened
-        @opened-changed="${this._openedChanged}"
+      <mwc-dialog
+        open
+        @closing="${this._close}"
+        .title=${this._params.entry
+          ? this._params.entry.name
+          : this.hass!.localize("ui.panel.config.person.detail.new_person")}
       >
-        <h2>${this._params.entry ? this._params.entry.name : "New Person"}</h2>
-        <paper-dialog-scrollable>
+        <div>
           ${this._error
             ? html`
                 <div class="error">${this._error}</div>
@@ -66,57 +73,101 @@ class DialogPersonDetail extends LitElement {
             <paper-input
               .value=${this._name}
               @value-changed=${this._nameChanged}
-              label="Name"
-              error-message="Name is required"
+              label="${this.hass!.localize(
+                "ui.panel.config.person.detail.name"
+              )}"
+              error-message="${this.hass!.localize(
+                "ui.panel.config.person.detail.name_error_msg"
+              )}"
               .invalid=${nameInvalid}
             ></paper-input>
             <ha-user-picker
-              label="Linked User"
+              label="${this.hass!.localize(
+                "ui.panel.config.person.detail.linked_user"
+              )}"
               .hass=${this.hass}
               .value=${this._userId}
               .users=${this._params.users}
               @value-changed=${this._userChanged}
             ></ha-user-picker>
-            <p>
-              ${this.hass.localize(
-                "ui.panel.config.person.detail.device_tracker_intro"
-              )}
-            </p>
-            <ha-entities-picker
-              .hass=${this.hass}
-              .value=${this._deviceTrackers}
-              domain-filter="device_tracker"
-              .pickedEntityLabel=${this.hass.localize(
-                "ui.panel.config.person.detail.device_tracker_picked"
-              )}
-              .pickEntityLabel=${this.hass.localize(
-                "ui.panel.config.person.detail.device_tracker_pick"
-              )}
-              @value-changed=${this._deviceTrackersChanged}
-            ></ha-entities-picker>
+            ${this._deviceTrackersAvailable(this.hass)
+              ? html`
+                  <p>
+                    ${this.hass.localize(
+                      "ui.panel.config.person.detail.device_tracker_intro"
+                    )}
+                  </p>
+                  <ha-entities-picker
+                    .hass=${this.hass}
+                    .value=${this._deviceTrackers}
+                    include-domains='["device_tracker"]'
+                    .pickedEntityLabel=${this.hass.localize(
+                      "ui.panel.config.person.detail.device_tracker_picked"
+                    )}
+                    .pickEntityLabel=${this.hass.localize(
+                      "ui.panel.config.person.detail.device_tracker_pick"
+                    )}
+                    @value-changed=${this._deviceTrackersChanged}
+                  >
+                  </ha-entities-picker>
+                `
+              : html`
+                  <p>
+                    ${this.hass!.localize(
+                      "ui.panel.config.person.detail.no_device_tracker_available_intro"
+                    )}
+                  </p>
+                  <ul>
+                    <li>
+                      <a
+                        href="https://www.home-assistant.io/integrations/#presence-detection"
+                        target="_blank"
+                        >${this.hass!.localize(
+                          "ui.panel.config.person.detail.link_presence_detection_integrations"
+                        )}</a
+                      >
+                    </li>
+                    <li>
+                      <a
+                        @click="${this._closeDialog}"
+                        href="/config/integrations"
+                      >
+                        ${this.hass!.localize(
+                          "ui.panel.config.person.detail.link_integrations_page"
+                        )}</a
+                      >
+                    </li>
+                  </ul>
+                `}
           </div>
-        </paper-dialog-scrollable>
-        <div class="paper-dialog-buttons">
-          ${this._params.entry
-            ? html`
-                <mwc-button
-                  class="warning"
-                  @click="${this._deleteEntry}"
-                  .disabled=${this._submitting}
-                >
-                  DELETE
-                </mwc-button>
-              `
-            : html``}
-          <mwc-button
-            @click="${this._updateEntry}"
-            .disabled=${nameInvalid || this._submitting}
-          >
-            ${this._params.entry ? "UPDATE" : "CREATE"}
-          </mwc-button>
         </div>
-      </ha-paper-dialog>
+        ${this._params.entry
+          ? html`
+              <mwc-button
+                slot="secondaryAction"
+                class="warning"
+                @click="${this._deleteEntry}"
+                .disabled=${this._submitting}
+              >
+                ${this.hass!.localize("ui.panel.config.person.detail.delete")}
+              </mwc-button>
+            `
+          : html``}
+        <mwc-button
+          slot="primaryAction"
+          @click="${this._updateEntry}"
+          .disabled=${nameInvalid || this._submitting}
+        >
+          ${this._params.entry
+            ? this.hass!.localize("ui.panel.config.person.detail.update")
+            : this.hass!.localize("ui.panel.config.person.detail.create")}
+        </mwc-button>
+      </mwc-dialog>
     `;
+  }
+
+  private _closeDialog() {
+    this._params = undefined;
   }
 
   private _nameChanged(ev: PolymerChangedEvent<string>) {
@@ -166,18 +217,16 @@ class DialogPersonDetail extends LitElement {
     }
   }
 
-  private _openedChanged(ev: PolymerChangedEvent<boolean>): void {
-    if (!(ev.detail as any).value) {
-      this._params = undefined;
-    }
+  private _close(): void {
+    this._params = undefined;
   }
 
   static get styles(): CSSResult[] {
     return [
-      haStyleDialog,
       css`
-        ha-paper-dialog {
+        mwc-dialog {
           min-width: 400px;
+          max-width: 600px;
         }
         .form {
           padding-bottom: 24px;
@@ -186,10 +235,13 @@ class DialogPersonDetail extends LitElement {
           margin-top: 16px;
         }
         mwc-button.warning {
-          margin-right: auto;
+          --mdc-theme-primary: var(--google-red-500);
         }
         .error {
           color: var(--google-red-500);
+        }
+        a {
+          color: var(--primary-color);
         }
       `,
     ];

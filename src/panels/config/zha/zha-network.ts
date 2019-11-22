@@ -10,8 +10,8 @@ import {
   CSSResult,
   html,
   LitElement,
-  PropertyDeclarations,
   TemplateResult,
+  property,
 } from "lit-element";
 
 import { navigate } from "../../../common/navigate";
@@ -19,41 +19,35 @@ import { haStyle } from "../../../resources/styles";
 import { HomeAssistant } from "../../../types";
 
 export class ZHANetwork extends LitElement {
-  public hass?: HomeAssistant;
-  public isWide?: boolean;
-  private _showHelp: boolean;
-
-  constructor() {
-    super();
-    this._showHelp = false;
-  }
-
-  static get properties(): PropertyDeclarations {
-    return {
-      hass: {},
-      isWide: {},
-      _showHelp: {},
-      _joinParams: {},
-    };
-  }
+  @property() public hass?: HomeAssistant;
+  @property() public isWide?: boolean;
+  @property() private _showHelp = false;
 
   protected render(): TemplateResult | void {
     return html`
       <ha-config-section .isWide="${this.isWide}">
         <div style="position: relative" slot="header">
-          <span>Network Management</span>
+          <span>
+            ${this.hass!.localize(
+              "ui.panel.config.zha.network_management.header"
+            )}
+          </span>
           <paper-icon-button
             class="toggle-help-icon"
             @click="${this._onHelpTap}"
             icon="hass:help-circle"
           ></paper-icon-button>
         </div>
-        <span slot="introduction">Commands that affect entire network</span>
+        <span slot="introduction">
+          ${this.hass!.localize(
+            "ui.panel.config.zha.network_management.introduction"
+          )}
+        </span>
 
         <ha-card class="content">
           <div class="card-actions">
             <mwc-button @click=${this._onAddDevicesClick}>
-              Add Devices
+              ${this.hass!.localize("ui.panel.config.zha.common.add_devices")}
             </mwc-button>
             ${this._showHelp
               ? html`

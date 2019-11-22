@@ -10,7 +10,7 @@ import "../../../../components/ha-paper-icon-button-next";
 
 import { EventsMixin } from "../../../../mixins/events-mixin";
 import LocalizeMixin from "../../../../mixins/localize-mixin";
-
+import { property } from "lit-element";
 /*
  * @appliesMixin EventsMixin
  * @appliesMixin LocalizeMixin
@@ -18,9 +18,9 @@ import LocalizeMixin from "../../../../mixins/localize-mixin";
 export class HuiNotificationDrawer extends EventsMixin(
   LocalizeMixin(PolymerElement)
 ) {
-  public open: boolean = false;
-  public hidden: boolean = true;
-  public classList: any;
+  @property() public open: boolean = false;
+  @property() public hidden: boolean = true;
+  @property() public classList: any;
   private _openTimer: number = 0;
 
   static get template() {

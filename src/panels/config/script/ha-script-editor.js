@@ -12,8 +12,8 @@ import "../../../components/ha-fab";
 import Script from "../js/script";
 import unmountPreact from "../../../common/preact/unmount";
 
-import computeObjectId from "../../../common/entity/compute_object_id";
-import computeStateName from "../../../common/entity/compute_state_name";
+import { computeObjectId } from "../../../common/entity/compute_object_id";
+import { computeStateName } from "../../../common/entity/compute_state_name";
 import NavigateMixin from "../../../mixins/navigate-mixin";
 import LocalizeMixin from "../../../mixins/localize-mixin";
 
@@ -100,10 +100,11 @@ class HaScriptEditor extends LocalizeMixin(NavigateMixin(PolymerElement)) {
             <ha-paper-icon-button-arrow-prev
               on-click="backTapped"
             ></ha-paper-icon-button-arrow-prev>
-            <div main-title>Script [[computeName(script)]]</div>
+            <div main-title>[[computeHeader(script)]]</div>
             <template is="dom-if" if="[[!creatingNew]]">
               <paper-icon-button
                 icon="hass:delete"
+                title="[[localize('ui.panel.config.script.editor.delete_script')]]"
                 on-click="_delete"
               ></paper-icon-button>
             </template>
@@ -120,7 +121,7 @@ class HaScriptEditor extends LocalizeMixin(NavigateMixin(PolymerElement)) {
           is-wide$="[[isWide]]"
           dirty$="[[dirty]]"
           icon="hass:content-save"
-          title="Save"
+          title="[[localize('ui.common.save')]]"
           on-click="saveScript"
           rtl$="[[rtl]]"
         ></ha-fab>
@@ -232,7 +233,11 @@ class HaScriptEditor extends LocalizeMixin(NavigateMixin(PolymerElement)) {
           this._updateComponent();
         },
         () => {
-          alert("Only scripts inside scripts.yaml are editable.");
+          alert(
+            this.hass.localize(
+              "ui.panel.config.script.editor.load_error_not_editable"
+            )
+          );
           history.back();
         }
       );
@@ -244,7 +249,7 @@ class HaScriptEditor extends LocalizeMixin(NavigateMixin(PolymerElement)) {
     }
     this.dirty = false;
     this.config = {
-      alias: "New Script",
+      alias: this.hass.localize("ui.panel.config.script.editor.default_name"),
       sequence: [{ service: "", data: {} }],
     };
     this._updateComponent();
@@ -254,7 +259,9 @@ class HaScriptEditor extends LocalizeMixin(NavigateMixin(PolymerElement)) {
     if (
       this.dirty &&
       // eslint-disable-next-line
-      !confirm("You have unsaved changes. Are you sure you want to leave?")
+      !confirm(
+        this.hass.localize("ui.panel.config.common.editor.confirm_unsaved")
+      )
     ) {
       return;
     }
@@ -281,7 +288,11 @@ class HaScriptEditor extends LocalizeMixin(NavigateMixin(PolymerElement)) {
   }
 
   async _delete() {
-    if (!confirm("Are you sure you want to delete this script?")) {
+    if (
+      !confirm(
+        this.hass.localize("ui.panel.config.script.editor.delete_confirm")
+      )
+    ) {
       return;
     }
     await deleteScript(this.hass, computeObjectId(this.script.entity_id));
@@ -307,8 +318,14 @@ class HaScriptEditor extends LocalizeMixin(NavigateMixin(PolymerElement)) {
     );
   }
 
-  computeName(script) {
-    return script && computeStateName(script);
+  computeHeader(script) {
+    return script
+      ? this.hass.localize(
+          "ui.panel.config.script.editor.header",
+          "name",
+          computeStateName(script)
+        )
+      : this.hass.localize("ui.panel.config.script.editor.default_name");
   }
 
   _computeRTL(hass) {

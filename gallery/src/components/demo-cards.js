@@ -1,9 +1,9 @@
 import { html } from "@polymer/polymer/lib/utils/html-tag";
 import { PolymerElement } from "@polymer/polymer/polymer-element";
 import "@polymer/app-layout/app-toolbar/app-toolbar";
-import "@polymer/paper-toggle-button/paper-toggle-button";
 
 import "./demo-card";
+import "../../../src/components/ha-switch";
 
 class DemoCards extends PolymerElement {
   static get template() {
@@ -26,9 +26,9 @@ class DemoCards extends PolymerElement {
       </style>
       <app-toolbar>
         <div class="filters">
-          <paper-toggle-button checked="{{_showConfig}}"
-            >Show config</paper-toggle-button
-          >
+          <ha-switch checked="[[_showConfig]]" on-change="_showConfigToggled">
+            Show config
+          </ha-switch>
         </div>
       </app-toolbar>
       <div class="cards">
@@ -52,6 +52,10 @@ class DemoCards extends PolymerElement {
         value: false,
       },
     };
+  }
+
+  _showConfigToggled(ev) {
+    this._showConfig = ev.target.checked;
   }
 }
 

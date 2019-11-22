@@ -1,4 +1,4 @@
-import computeStateName from "../../../common/entity/compute_state_name";
+import { computeStateName } from "../../../common/entity/compute_state_name";
 import { HomeAssistant } from "../../../types";
 import { LovelaceElementConfig } from "../elements/types";
 import { ActionConfig } from "../../../data/lovelace";
@@ -8,6 +8,7 @@ interface Config extends LovelaceElementConfig {
   title?: string;
   tap_action?: ActionConfig;
   hold_action?: ActionConfig;
+  double_tap_action?: ActionConfig;
 }
 
 export const computeTooltip = (hass: HomeAssistant, config: Config): string => {
@@ -64,6 +65,13 @@ function computeActionTooltip(
         "ui.panel.lovelace.cards.picture-elements.navigate_to",
         "location",
         config.navigation_path
+      )}`;
+      break;
+    case "url":
+      tooltip += `${hass.localize(
+        "ui.panel.lovelace.cards.picture-elements.url",
+        "url_path",
+        config.url_path
       )}`;
       break;
     case "toggle":

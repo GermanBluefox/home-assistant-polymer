@@ -40,6 +40,8 @@ declare global {
   }
 }
 
+export type Constructor<T = {}> = new (...args: any[]) => T;
+
 export interface WebhookError {
   code: number;
   message: string;
@@ -114,6 +116,16 @@ export interface Resources {
   [language: string]: { [key: string]: string };
 }
 
+export interface Context {
+  id: string;
+  parrent_id?: string;
+  user_id?: string;
+}
+
+export interface ServiceCallResponse {
+  context: Context;
+}
+
 export interface HomeAssistant {
   auth: Auth & { external?: ExternalMessaging };
   connection: Connection;
@@ -139,6 +151,7 @@ export interface HomeAssistant {
   localize: LocalizeFunc;
   translationMetadata: TranslationMetadata;
 
+  vibrate: boolean;
   dockedSidebar: "docked" | "always_hidden" | "auto";
   moreInfoEntityId: string | null;
   user?: CurrentUser;
@@ -147,7 +160,7 @@ export interface HomeAssistant {
     domain: string,
     service: string,
     serviceData?: { [key: string]: any }
-  ): Promise<void>;
+  ): Promise<ServiceCallResponse>;
   callApi<T>(
     method: "GET" | "POST" | "PUT" | "DELETE",
     path: string,

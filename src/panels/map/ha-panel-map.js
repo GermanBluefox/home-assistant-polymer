@@ -7,8 +7,8 @@ import "../../components/ha-icon";
 
 import "./ha-entity-marker";
 
-import computeStateDomain from "../../common/entity/compute_state_domain";
-import computeStateName from "../../common/entity/compute_state_name";
+import { computeStateDomain } from "../../common/entity/compute_state_domain";
+import { computeStateName } from "../../common/entity/compute_state_name";
 import LocalizeMixin from "../../mixins/localize-mixin";
 import { setupLeafletMap } from "../../common/dom/setup-leaflet-map";
 
@@ -23,6 +23,10 @@ class HaPanelMap extends LocalizeMixin(PolymerElement) {
           height: calc(100% - 64px);
           width: 100%;
           z-index: 0;
+        }
+
+        .light {
+          color: #000000;
         }
       </style>
 
@@ -120,16 +124,18 @@ class HaPanelMap extends LocalizeMixin(PolymerElement) {
           el.setAttribute("icon", entity.attributes.icon);
           iconHTML = el.outerHTML;
         } else {
-          iconHTML = title;
+          const el = document.createElement("span");
+          el.innerHTML = title;
+          iconHTML = el.outerHTML;
         }
 
         icon = this.Leaflet.divIcon({
           html: iconHTML,
           iconSize: [24, 24],
-          className: "",
+          className: "light",
         });
 
-        // create market with the icon
+        // create marker with the icon
         mapItems.push(
           this.Leaflet.marker(
             [entity.attributes.latitude, entity.attributes.longitude],

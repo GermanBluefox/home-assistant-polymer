@@ -11,9 +11,9 @@ import {
 } from "lit-element";
 import "@polymer/paper-spinner/paper-spinner";
 
-import applyThemesOnElement from "../../../common/dom/apply_themes_on_element";
-import computeStateName from "../../../common/entity/compute_state_name";
-import stateIcon from "../../../common/entity/state_icon";
+import { applyThemesOnElement } from "../../../common/dom/apply_themes_on_element";
+import { computeStateName } from "../../../common/entity/compute_state_name";
+import { stateIcon } from "../../../common/entity/state_icon";
 
 import "../../../components/ha-card";
 import "../../../components/ha-icon";
@@ -279,7 +279,16 @@ class HuiSensorCard extends LitElement implements LovelaceCard {
     }
 
     const oldHass = changedProps.get("hass") as HomeAssistant | undefined;
-    if (!oldHass || oldHass.themes !== this.hass.themes) {
+    const oldConfig = changedProps.get("_config") as
+      | SensorCardConfig
+      | undefined;
+
+    if (
+      !oldHass ||
+      !oldConfig ||
+      oldHass.themes !== this.hass.themes ||
+      oldConfig.theme !== this._config.theme
+    ) {
       applyThemesOnElement(this, this.hass.themes, this._config!.theme);
     }
 

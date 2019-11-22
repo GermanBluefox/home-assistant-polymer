@@ -14,20 +14,37 @@ import "../../../components/ha-card";
 import "../components/hui-image";
 import "../components/hui-warning";
 
-import computeDomain from "../../../common/entity/compute_domain";
-import computeStateDisplay from "../../../common/entity/compute_state_display";
-import computeStateName from "../../../common/entity/compute_state_name";
+import { computeDomain } from "../../../common/entity/compute_domain";
+import { computeStateName } from "../../../common/entity/compute_state_name";
 
-import { longPress } from "../common/directives/long-press-directive";
+import { computeStateDisplay } from "../../../common/entity/compute_state_display";
 import { HomeAssistant } from "../../../types";
-import { LovelaceCard } from "../types";
-import { handleClick } from "../common/handle-click";
+import { LovelaceCard, LovelaceCardEditor } from "../types";
 import { UNAVAILABLE } from "../../../data/entity";
 import { hasConfigOrEntityChanged } from "../common/has-changed";
 import { PictureEntityCardConfig } from "./types";
+import { applyThemesOnElement } from "../../../common/dom/apply_themes_on_element";
+import { actionHandler } from "../common/directives/action-handler-directive";
+import { hasAction } from "../common/has-action";
+import { ActionHandlerEvent } from "../../../data/lovelace";
+import { handleAction } from "../common/handle-action";
 
 @customElement("hui-picture-entity-card")
 class HuiPictureEntityCard extends LitElement implements LovelaceCard {
+  public static async getConfigElement(): Promise<LovelaceCardEditor> {
+    await import(
+      /* webpackChunkName: "hui-picture-entity-card-editor" */ "../editor/config-elements/hui-picture-entity-card-editor"
+    );
+    return document.createElement("hui-picture-entity-card-editor");
+  }
+  public static getStubConfig(): object {
+    return {
+      entity: "",
+      image:
+        "https://www.home-assistant.io/images/merchandise/shirt-frontpage.png",
+    };
+  }
+
   @property() public hass?: HomeAssistant;
 
   @property() private _config?: PictureEntityCardConfig;
@@ -53,6 +70,26 @@ class HuiPictureEntityCard extends LitElement implements LovelaceCard {
 
   protected shouldUpdate(changedProps: PropertyValues): boolean {
     return hasConfigOrEntityChanged(this, changedProps);
+  }
+
+  protected updated(changedProps: PropertyValues): void {
+    super.updated(changedProps);
+    if (!this._config || !this.hass) {
+      return;
+    }
+    const oldHass = changedProps.get("hass") as HomeAssistant | undefined;
+    const oldConfig = changedProps.get("_config") as
+      | PictureEntityCardConfig
+      | undefined;
+
+    if (
+      !oldHass ||
+      !oldConfig ||
+      oldHass.themes !== this.hass.themes ||
+      oldConfig.theme !== this._config.theme
+    ) {
+      applyThemesOnElement(this, this.hass.themes, this._config.theme);
+    }
   }
 
   protected render(): TemplateResult | void {
@@ -102,21 +139,24 @@ class HuiPictureEntityCard extends LitElement implements LovelaceCard {
     return html`
       <ha-card>
         <hui-image
-          .hass="${this.hass}"
-          .image="${this._config.image}"
-          .stateImage="${this._config.state_image}"
-          .cameraImage="${computeDomain(this._config.entity) === "camera"
+          .hass=${this.hass}
+          .image=${this._config.image}
+          .stateImage=${this._config.state_image}
+          .stateFilter=${this._config.state_filter}
+          .cameraImage=${computeDomain(this._config.entity) === "camera"
             ? this._config.entity
-            : this._config.camera_image}"
-          .cameraView="${this._config.camera_view}"
-          .entity="${this._config.entity}"
-          .aspectRatio="${this._config.aspect_ratio}"
-          @ha-click="${this._handleTap}"
-          @ha-hold="${this._handleHold}"
-          .longPress="${longPress()}"
-          class="${classMap({
+            : this._config.camera_image}
+          .cameraView=${this._config.camera_view}
+          .entity=${this._config.entity}
+          .aspectRatio=${this._config.aspect_ratio}
+          @action=${this._handleAction}
+          .actionHandler=${actionHandler({
+            hasHold: hasAction(this._config!.hold_action),
+            hasDoubleClick: hasAction(this._config!.double_tap_action),
+          })}
+          class=${classMap({
             clickable: stateObj.state !== UNAVAILABLE,
-          })}"
+          })}
         ></hui-image>
         ${footer}
       </ha-card>
@@ -164,12 +204,8 @@ class HuiPictureEntityCard extends LitElement implements LovelaceCard {
     `;
   }
 
-  private _handleTap() {
-    handleClick(this, this.hass!, this._config!, false);
-  }
-
-  private _handleHold() {
-    handleClick(this, this.hass!, this._config!, true);
+  private _handleAction(ev: ActionHandlerEvent) {
+    handleAction(this, this.hass!, this._config!, ev.detail.action!);
   }
 }
 

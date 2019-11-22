@@ -3,7 +3,7 @@ import { PolymerElement } from "@polymer/polymer";
 import "@polymer/paper-icon-button";
 
 import "../../src/resources/ha-style";
-import applyThemesOnElement from "../../src/common/dom/apply_themes_on_element";
+import { applyThemesOnElement } from "../../src/common/dom/apply_themes_on_element";
 import { fireEvent } from "../../src/common/dom/fire_event";
 import {
   HassRouterPage,
@@ -13,9 +13,11 @@ import { HomeAssistant } from "../../src/types";
 import {
   fetchHassioSupervisorInfo,
   fetchHassioHostInfo,
+  fetchHassioHassOsInfo,
   fetchHassioHomeAssistantInfo,
   HassioSupervisorInfo,
   HassioHostInfo,
+  HassioHassOSInfo,
   HassioHomeAssistantInfo,
   fetchHassioAddonInfo,
   createHassioSession,
@@ -70,6 +72,7 @@ class HassioMain extends ProvideHassLitMixin(HassRouterPage) {
 
   @property() private _supervisorInfo: HassioSupervisorInfo;
   @property() private _hostInfo: HassioHostInfo;
+  @property() private _hassOsInfo?: HassioHassOSInfo;
   @property() private _hassInfo: HassioHomeAssistantInfo;
 
   protected firstUpdated(changedProps: PropertyValues) {
@@ -117,6 +120,7 @@ class HassioMain extends ProvideHassLitMixin(HassRouterPage) {
         supervisorInfo: this._supervisorInfo,
         hostInfo: this._hostInfo,
         hassInfo: this._hassInfo,
+        hassOsInfo: this._hassOsInfo,
         route,
       });
     } else {
@@ -125,6 +129,7 @@ class HassioMain extends ProvideHassLitMixin(HassRouterPage) {
       el.supervisorInfo = this._supervisorInfo;
       el.hostInfo = this._hostInfo;
       el.hassInfo = this._hassInfo;
+      el.hassOsInfo = this._hassOsInfo;
       el.route = route;
     }
   }
@@ -143,6 +148,10 @@ class HassioMain extends ProvideHassLitMixin(HassRouterPage) {
     this._supervisorInfo = supervisorInfo;
     this._hostInfo = hostInfo;
     this._hassInfo = hassInfo;
+
+    if (this._hostInfo.features && this._hostInfo.features.includes("hassos")) {
+      this._hassOsInfo = await fetchHassioHassOsInfo(this.hass);
+    }
   }
 
   private async _redirectIngress(addonSlug: string) {

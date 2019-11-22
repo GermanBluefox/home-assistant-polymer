@@ -6,6 +6,7 @@ import {
   CSSResult,
   property,
   customElement,
+  PropertyValues,
 } from "lit-element";
 import { repeat } from "lit-html/directives/repeat";
 import { PaperInputElement } from "@polymer/paper-input/paper-input";
@@ -23,12 +24,15 @@ import {
   clearItems,
   addItem,
 } from "../../../data/shopping-list";
-import { ShoppingListCardConfig } from "./types";
+import { ShoppingListCardConfig, SensorCardConfig } from "./types";
+import { applyThemesOnElement } from "../../../common/dom/apply_themes_on_element";
 
 @customElement("hui-shopping-list-card")
 class HuiShoppingListCard extends LitElement implements LovelaceCard {
   public static async getConfigElement(): Promise<LovelaceCardEditor> {
-    await import(/* webpackChunkName: "hui-shopping-list-editor" */ "../editor/config-elements/hui-shopping-list-editor");
+    await import(
+      /* webpackChunkName: "hui-shopping-list-editor" */ "../editor/config-elements/hui-shopping-list-editor"
+    );
     return document.createElement("hui-shopping-list-card-editor");
   }
 
@@ -74,6 +78,26 @@ class HuiShoppingListCard extends LitElement implements LovelaceCard {
 
     if (this._unsubEvents) {
       this._unsubEvents.then((unsub) => unsub());
+    }
+  }
+
+  protected updated(changedProps: PropertyValues): void {
+    super.updated(changedProps);
+    if (!this._config || !this.hass) {
+      return;
+    }
+    const oldHass = changedProps.get("hass") as HomeAssistant | undefined;
+    const oldConfig = changedProps.get("_config") as
+      | SensorCardConfig
+      | undefined;
+
+    if (
+      !oldHass ||
+      !oldConfig ||
+      oldHass.themes !== this.hass.themes ||
+      oldConfig.theme !== this._config.theme
+    ) {
+      applyThemesOnElement(this, this.hass.themes, this._config.theme);
     }
   }
 

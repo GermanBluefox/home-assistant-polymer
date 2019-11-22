@@ -3,8 +3,8 @@ import "@polymer/paper-radio-button/paper-radio-button";
 import "@polymer/paper-radio-group/paper-radio-group";
 import "../../../../components/entity/ha-entity-picker";
 
-import hasLocation from "../../../../common/entity/has_location";
-import computeStateDomain from "../../../../common/entity/compute_state_domain";
+import { hasLocation } from "../../../../common/entity/has_location";
+import { computeStateDomain } from "../../../../common/entity/compute_state_domain";
 
 function zoneAndLocationFilter(stateObj) {
   return hasLocation(stateObj) && computeStateDomain(stateObj) !== "zone";
@@ -42,7 +42,7 @@ export default class ZoneTrigger extends Component<any> {
           onChange={this.zonePicked}
           hass={hass}
           allowCustomEntity
-          domainFilter="zone"
+          includeDomains={["zone"]}
         />
         <label id="eventlabel">
           {localize(

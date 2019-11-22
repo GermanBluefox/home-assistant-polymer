@@ -4,7 +4,7 @@ import {
   html,
   css,
   CSSResult,
-  PropertyDeclarations,
+  property,
 } from "lit-element";
 import "@polymer/paper-item/paper-item";
 import "@polymer/paper-item/paper-item-body";
@@ -30,20 +30,11 @@ import {
 import { User, fetchUsers } from "../../../data/user";
 
 class HaConfigPerson extends LitElement {
-  public hass?: HomeAssistant;
-  public isWide?: boolean;
-  private _storageItems?: Person[];
-  private _configItems?: Person[];
+  @property() public hass?: HomeAssistant;
+  @property() public isWide?: boolean;
+  @property() private _storageItems?: Person[];
+  @property() private _configItems?: Person[];
   private _usersLoad?: Promise<User[]>;
-
-  static get properties(): PropertyDeclarations {
-    return {
-      hass: {},
-      isWide: {},
-      _storageItems: {},
-      _configItems: {},
-    };
-  }
 
   protected render(): TemplateResult | void {
     if (
@@ -55,17 +46,21 @@ class HaConfigPerson extends LitElement {
         <hass-loading-screen></hass-loading-screen>
       `;
     }
+    const hass = this.hass;
     return html`
-      <hass-subpage header="Persons">
+      <hass-subpage header=${hass.localize("ui.panel.config.person.caption")}>
         <ha-config-section .isWide=${this.isWide}>
-          <span slot="header">Persons</span>
+          <span slot="header"
+            >${hass.localize("ui.panel.config.person.caption")}</span
+          >
           <span slot="introduction">
-            Here you can define each person of interest in Home Assistant.
+            ${hass.localize("ui.panel.config.person.introduction")}
             ${this._configItems.length > 0
               ? html`
                   <p>
-                    Note: persons configured via configuration.yaml cannot be
-                    edited via the UI.
+                    ${hass.localize(
+                      "ui.panel.config.person.note_about_persons_configured_in_yaml"
+                    )}
                   </p>
                 `
               : ""}
@@ -83,9 +78,13 @@ class HaConfigPerson extends LitElement {
             ${this._storageItems.length === 0
               ? html`
                   <div class="empty">
-                    Looks like you have not created any persons yet.
+                    ${hass.localize(
+                      "ui.panel.config.person.no_persons_created_yet"
+                    )}
                     <mwc-button @click=${this._createPerson}>
-                      CREATE PERSON</mwc-button
+                      ${hass.localize(
+                        "ui.panel.config.person.create_person"
+                      )}</mwc-button
                     >
                   </div>
                 `
@@ -112,7 +111,7 @@ class HaConfigPerson extends LitElement {
       <ha-fab
         ?is-wide=${this.isWide}
         icon="hass:plus"
-        title="Add Person"
+        title="${hass.localize("ui.panel.config.person.add_person")}"
         @click=${this._createPerson}
       ></ha-fab>
     `;
@@ -180,9 +179,11 @@ class HaConfigPerson extends LitElement {
       },
       removeEntry: async () => {
         if (
-          !confirm(`Are you sure you want to delete this person?
+          !confirm(`${this.hass!.localize(
+            "ui.panel.config.person.confirm_delete"
+          )}
 
-All devices belonging to this person will become unassigned.`)
+${this.hass!.localize("ui.panel.config.person.confirm_delete2")}`)
         ) {
           return false;
         }

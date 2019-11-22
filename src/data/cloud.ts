@@ -1,5 +1,7 @@
 import { HomeAssistant } from "../types";
 import { EntityFilter } from "../common/entity/entity_filter";
+import { AutomationConfig } from "./automation";
+import { PlaceholderContainer } from "../panels/config/automation/thingtalk/dialog-thingtalk";
 
 interface CloudStatusBase {
   logged_in: boolean;
@@ -36,6 +38,7 @@ export interface CloudPreferences {
     [entityId: string]: AlexaEntityConfig;
   };
   alexa_report_state: boolean;
+  google_report_state: boolean;
 }
 
 export type CloudStatusLoggedIn = CloudStatusBase & {
@@ -60,6 +63,11 @@ export interface CloudWebhook {
   cloudhook_id: string;
   cloudhook_url: string;
   managed?: boolean;
+}
+
+export interface ThingTalkConversion {
+  config: Partial<AutomationConfig>;
+  placeholders: PlaceholderContainer;
 }
 
 export const fetchCloudStatus = (hass: HomeAssistant) =>
@@ -90,12 +98,16 @@ export const disconnectCloudRemote = (hass: HomeAssistant) =>
 export const fetchCloudSubscriptionInfo = (hass: HomeAssistant) =>
   hass.callWS<SubscriptionInfo>({ type: "cloud/subscription" });
 
+export const convertThingTalk = (hass: HomeAssistant, query: string) =>
+  hass.callWS<ThingTalkConversion>({ type: "cloud/thingtalk/convert", query });
+
 export const updateCloudPref = (
   hass: HomeAssistant,
   prefs: {
     google_enabled?: CloudPreferences["google_enabled"];
     alexa_enabled?: CloudPreferences["alexa_enabled"];
     alexa_report_state?: CloudPreferences["alexa_report_state"];
+    google_report_state?: CloudPreferences["google_report_state"];
     google_secure_devices_pin?: CloudPreferences["google_secure_devices_pin"];
   }
 ) =>

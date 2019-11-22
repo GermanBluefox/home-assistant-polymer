@@ -17,12 +17,12 @@ import hassCallApi from "../util/hass-call-api";
 import { subscribePanels } from "../data/ws-panels";
 import { forwardHaptic } from "../data/haptics";
 import { fireEvent } from "../common/dom/fire_event";
-import { Constructor, LitElement } from "lit-element";
+import { Constructor, ServiceCallResponse } from "../types";
 import { HassBaseEl } from "./hass-base-mixin";
 import { broadcastConnectionStatus } from "../data/connection-status";
 
-export const connectionMixin = (
-  superClass: Constructor<LitElement & HassBaseEl>
+export const connectionMixin = <T extends Constructor<HassBaseEl>>(
+  superClass: T
 ) =>
   class extends superClass {
     protected initializeHass(auth: Auth, conn: Connection) {
@@ -45,6 +45,7 @@ export const connectionMixin = (
 
         translationMetadata,
         dockedSidebar: "docked",
+        vibrate: true,
         moreInfoEntityId: null,
         hassUrl: (path = "") => new URL(path, auth.data.hassUrl).toString(),
         callService: async (domain, service, serviceData = {}) => {
@@ -53,7 +54,12 @@ export const connectionMixin = (
             console.log("Calling service", domain, service, serviceData);
           }
           try {
-            await callService(conn, domain, service, serviceData);
+            return (await callService(
+              conn,
+              domain,
+              service,
+              serviceData
+            )) as Promise<ServiceCallResponse>;
           } catch (err) {
             if (__DEV__) {
               // tslint:disable-next-line: no-console
@@ -89,13 +95,13 @@ export const connectionMixin = (
           conn.sendMessage(msg);
         },
         // For messages that expect a response
-        callWS: <T>(msg) => {
+        callWS: <R>(msg) => {
           if (__DEV__) {
             // tslint:disable-next-line: no-console
             console.log("Sending", msg);
           }
 
-          const resp = conn.sendMessagePromise<T>(msg);
+          const resp = conn.sendMessagePromise<R>(msg);
 
           if (__DEV__) {
             resp.then(

@@ -13,7 +13,7 @@ import { fireEvent } from "../common/dom/fire_event";
 import { HomeAssistant } from "../types";
 import { UnsubscribeFunc } from "home-assistant-js-websocket";
 import { subscribeNotifications } from "../data/persistent_notification";
-import computeDomain from "../common/entity/compute_domain";
+import { computeDomain } from "../common/entity/compute_domain";
 
 @customElement("ha-menu-button")
 class HaMenuButton extends LitElement {
@@ -51,7 +51,7 @@ class HaMenuButton extends LitElement {
         ));
     return html`
       <paper-icon-button
-        aria-label="Sidebar Toggle"
+        aria-label=${this.hass.localize("ui.sidebar.sidebar_toggle")}
         .icon=${this.hassio ? "hassio:menu" : "hass:menu"}
         @click=${this._toggleMenu}
       ></paper-icon-button>

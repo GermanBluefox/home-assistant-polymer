@@ -1,19 +1,19 @@
 import {
   html,
   LitElement,
-  PropertyDeclarations,
   TemplateResult,
   CSSResult,
   css,
+  property,
 } from "lit-element";
 import "@material/mwc-button";
-import "@polymer/paper-toggle-button/paper-toggle-button";
-// tslint:disable-next-line
-import { PaperToggleButtonElement } from "@polymer/paper-toggle-button/paper-toggle-button";
 import "../../../../components/buttons/ha-call-api-button";
 
 import "../../../../components/ha-card";
+import "../../../../components/ha-switch";
 
+// tslint:disable-next-line
+import { HaSwitch } from "../../../../components/ha-switch";
 import { fireEvent } from "../../../../common/dom/fire_event";
 import { HomeAssistant } from "../../../../types";
 import { CloudStatusLoggedIn, updateCloudPref } from "../../../../data/cloud";
@@ -21,15 +21,8 @@ import { PaperInputElement } from "@polymer/paper-input/paper-input";
 import { showSaveSuccessToast } from "../../../../util/toast-saved-success";
 
 export class CloudGooglePref extends LitElement {
-  public hass?: HomeAssistant;
-  public cloudStatus?: CloudStatusLoggedIn;
-
-  static get properties(): PropertyDeclarations {
-    return {
-      hass: {},
-      cloudStatus: {},
-    };
-  }
+  @property() public hass?: HomeAssistant;
+  @property() public cloudStatus?: CloudStatusLoggedIn;
 
   protected render(): TemplateResult | void {
     if (!this.cloudStatus) {
@@ -38,27 +31,34 @@ export class CloudGooglePref extends LitElement {
 
     const {
       google_enabled,
+      google_report_state,
       google_secure_devices_pin,
     } = this.cloudStatus.prefs;
 
     return html`
-      <ha-card header="Google Assistant">
-        <paper-toggle-button
-          id="google_enabled"
-          .checked="${google_enabled}"
-          @change="${this._toggleChanged}"
-        ></paper-toggle-button>
+      <ha-card
+        header=${this.hass!.localize(
+          "ui.panel.config.cloud.account.google.title"
+        )}
+      >
+        <div class="switch">
+          <ha-switch
+            id="google_enabled"
+            .checked="${google_enabled}"
+            @change="${this._enableToggleChanged}"
+          ></ha-switch>
+        </div>
         <div class="card-content">
-          With the Google Assistant integration for Home Assistant Cloud you'll
-          be able to control all your Home Assistant devices via any Google
-          Assistant-enabled device.
+          ${this.hass!.localize("ui.panel.config.cloud.account.google.info")}
           <ul>
             <li>
               <a
                 href="https://assistant.google.com/services/a/uid/00000091fd5fb875?hl=en-US"
                 target="_blank"
               >
-                Activate the Home Assistant skill for Google Assistant
+                ${this.hass!.localize(
+                  "ui.panel.config.cloud.account.google.enable_ha_skill"
+                )}
               </a>
             </li>
             <li>
@@ -66,25 +66,49 @@ export class CloudGooglePref extends LitElement {
                 href="https://www.nabucasa.com/config/google_assistant/"
                 target="_blank"
               >
-                Config documentation
+                ${this.hass!.localize(
+                  "ui.panel.config.cloud.account.google.config_documentation"
+                )}
               </a>
             </li>
           </ul>
-          <em
-            >This integration requires a Google Assistant-enabled device like
-            the Google Home or Android phone.</em
-          >
           ${google_enabled
             ? html`
+                <div class="state-reporting">
+                  <h3>
+                    ${this.hass!.localize(
+                      "ui.panel.config.cloud.account.google.enable_state_reporting"
+                    )}
+                  </h3>
+                  <div class="state-reporting-switch">
+                    <ha-switch
+                      .checked=${google_report_state}
+                      @change=${this._reportToggleChanged}
+                    ></ha-switch>
+                  </div>
+                </div>
+                <p>
+                  ${this.hass!.localize(
+                    "ui.panel.config.cloud.account.google.info_state_reporting"
+                  )}
+                </p>
                 <div class="secure_devices">
-                  Please enter a pin to interact with security devices. Security
-                  devices are doors, garage doors and locks. You will be asked
-                  to say/enter this pin when interacting with such devices via
-                  Google Assistant.
+                  <h3>
+                    ${this.hass!.localize(
+                      "ui.panel.config.cloud.account.google.security_devices"
+                    )}
+                  </h3>
+                  ${this.hass!.localize(
+                    "ui.panel.config.cloud.account.google.enter_pin_info"
+                  )}
                   <paper-input
-                    label="Secure Devices Pin"
+                    label="${this.hass!.localize(
+                      "ui.panel.config.cloud.account.google.devices_pin"
+                    )}"
                     id="google_secure_devices_pin"
-                    placeholder="Enter a PIN to use secure devices"
+                    placeholder="${this.hass!.localize(
+                      "ui.panel.config.cloud.account.google.enter_pin_hint"
+                    )}"
                     .value=${google_secure_devices_pin || ""}
                     @change="${this._pinChanged}"
                   ></paper-input>
@@ -98,23 +122,46 @@ export class CloudGooglePref extends LitElement {
             .disabled="${!google_enabled}"
             path="cloud/google_actions/sync"
           >
-            Sync entities to Google
+            ${this.hass!.localize(
+              "ui.panel.config.cloud.account.google.sync_entities"
+            )}
           </ha-call-api-button>
           <div class="spacer"></div>
           <a href="/config/cloud/google-assistant">
-            <mwc-button>Manage Entities</mwc-button>
+            <mwc-button
+              >${this.hass!.localize(
+                "ui.panel.config.cloud.account.google.manage_entities"
+              )}</mwc-button
+            >
           </a>
         </div>
       </ha-card>
     `;
   }
 
-  private async _toggleChanged(ev) {
-    const toggle = ev.target as PaperToggleButtonElement;
+  private async _enableToggleChanged(ev) {
+    const toggle = ev.target as HaSwitch;
     try {
       await updateCloudPref(this.hass!, { [toggle.id]: toggle.checked! });
       fireEvent(this, "ha-refresh-cloud-status");
     } catch (err) {
+      toggle.checked = !toggle.checked;
+    }
+  }
+
+  private async _reportToggleChanged(ev) {
+    const toggle = ev.target as HaSwitch;
+    try {
+      await updateCloudPref(this.hass!, {
+        google_report_state: toggle.checked!,
+      });
+      fireEvent(this, "ha-refresh-cloud-status");
+    } catch (err) {
+      alert(
+        `Unable to ${toggle.checked ? "enable" : "disable"} report state. ${
+          err.message
+        }`
+      );
       toggle.checked = !toggle.checked;
     }
   }
@@ -128,7 +175,11 @@ export class CloudGooglePref extends LitElement {
       showSaveSuccessToast(this, this.hass!);
       fireEvent(this, "ha-refresh-cloud-status");
     } catch (err) {
-      alert(`Unable to store pin: ${err.message}`);
+      alert(
+        `${this.hass!.localize(
+          "ui.panel.config.cloud.account.google.enter_pin_error"
+        )} ${err.message}`
+      );
       input.value = this.cloudStatus!.prefs.google_secure_devices_pin;
     }
   }
@@ -138,10 +189,9 @@ export class CloudGooglePref extends LitElement {
       a {
         color: var(--primary-color);
       }
-      ha-card > paper-toggle-button {
-        margin: -4px 0;
+      .switch {
         position: absolute;
-        right: 8px;
+        right: 24px;
         top: 32px;
       }
       ha-call-api-button {
@@ -149,7 +199,7 @@ export class CloudGooglePref extends LitElement {
         font-weight: 500;
       }
       .secure_devices {
-        padding-top: 16px;
+        padding-top: 8px;
       }
       paper-input {
         width: 250px;
@@ -162,6 +212,25 @@ export class CloudGooglePref extends LitElement {
       }
       .spacer {
         flex-grow: 1;
+      }
+      .state-reporting {
+        display: flex;
+        margin-top: 1.5em;
+      }
+      .state-reporting + p {
+        margin-top: 0.5em;
+      }
+      h3 {
+        margin: 0 0 8px 0;
+      }
+      .state-reporting h3 {
+        flex-grow: 1;
+        margin: 0;
+      }
+      .state-reporting-switch {
+        margin-top: 0.25em;
+        margin-right: 7px;
+        margin-left: 0.5em;
       }
     `;
   }

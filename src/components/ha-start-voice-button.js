@@ -4,7 +4,7 @@ import { PolymerElement } from "@polymer/polymer/polymer-element";
 
 import { EventsMixin } from "../mixins/events-mixin";
 
-import isComponentLoaded from "../common/config/is_component_loaded";
+import { isComponentLoaded } from "../common/config/is_component_loaded";
 import { fireEvent } from "../common/dom/fire_event";
 
 /*
@@ -48,7 +48,7 @@ class HaStartVoiceButton extends EventsMixin(PolymerElement) {
     fireEvent(this, "show-dialog", {
       dialogImport: () =>
         import(
-          /* webpackChunkName: "voice-command-dialog" */ "../dialogs/ha-voice-command-dialog"
+          /* webpackChunkName: "voice-command-dialog" */ "../dialogs/voice-command-dialog/ha-voice-command-dialog"
         ),
       dialogTag: "ha-voice-command-dialog",
     });

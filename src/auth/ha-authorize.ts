@@ -2,11 +2,10 @@ import { litLocalizeLiteMixin } from "../mixins/lit-localize-lite-mixin";
 import {
   LitElement,
   html,
-  PropertyDeclarations,
   PropertyValues,
   CSSResult,
-  property,
   css,
+  property,
 } from "lit-element";
 import "./ha-auth-flow";
 import { AuthProvider, fetchAuthProviders } from "../data/auth";
@@ -49,16 +48,6 @@ class HaAuthorize extends litLocalizeLiteMixin(LitElement) {
     if (query.state) {
       this.oauth2State = query.state;
     }
-  }
-
-  static get properties(): PropertyDeclarations {
-    return {
-      _authProvider: {},
-      _authProviders: {},
-      clientId: {},
-      redirectUri: {},
-      oauth2State: {},
-    };
   }
 
   protected render() {

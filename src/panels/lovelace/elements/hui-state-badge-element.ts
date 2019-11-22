@@ -10,10 +10,14 @@ import {
 import "../../../components/entity/ha-state-label-badge";
 import "../components/hui-warning-element";
 
-import computeStateName from "../../../common/entity/compute_state_name";
+import { computeStateName } from "../../../common/entity/compute_state_name";
 import { LovelaceElement, StateBadgeElementConfig } from "./types";
 import { HomeAssistant } from "../../../types";
 import { hasConfigOrEntityChanged } from "../common/has-changed";
+import { actionHandler } from "../common/directives/action-handler-directive";
+import { hasAction } from "../common/has-action";
+import { ActionHandlerEvent } from "../../../data/lovelace";
+import { handleAction } from "../common/handle-action";
 
 @customElement("hui-state-badge-element")
 export class HuiStateBadgeElement extends LitElement
@@ -61,8 +65,17 @@ export class HuiStateBadgeElement extends LitElement
           : this._config.title === null
           ? ""
           : this._config.title}"
+        @action=${this._handleAction}
+        .actionHandler=${actionHandler({
+          hasHold: hasAction(this._config!.hold_action),
+          hasDoubleClick: hasAction(this._config!.double_tap_action),
+        })}
       ></ha-state-label-badge>
     `;
+  }
+
+  private _handleAction(ev: ActionHandlerEvent) {
+    handleAction(this, this.hass!, this._config!, ev.detail.action!);
   }
 }
 
