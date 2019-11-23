@@ -69,6 +69,7 @@ class HUIRoot extends LitElement {
   private _unsubNotifications?: () => void; // IoB
 
   private _viewCache?: { [viewId: string]: HUIView };
+
   private _debouncedConfigChanged: () => void;
 
   // IoB

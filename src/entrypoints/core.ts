@@ -20,7 +20,7 @@ import { fetchConfig, WindowWithLovelaceProm } from "../data/lovelace";
 declare global {
   interface Window {
     hassConnection: Promise<{ auth: Auth; conn: Connection }>;
-    hassNoAuth: string;
+    hassNoAuth: string; // IoB
   }
 }
 

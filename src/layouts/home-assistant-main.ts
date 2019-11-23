@@ -8,7 +8,7 @@ import {
   property,
 } from "lit-element";
 import "@polymer/app-layout/app-drawer-layout/app-drawer-layout";
-// import "@polymer/app-layout/app-drawer/app-drawer"; // IoB
+import "@polymer/app-layout/app-drawer/app-drawer";
 // Not a duplicate, it's for typing
 // tslint:disable-next-line
 import { AppDrawerElement } from "@polymer/app-layout/app-drawer/app-drawer";
@@ -61,23 +61,22 @@ class HomeAssistantMain extends LitElement {
         .forceNarrow=${sidebarNarrow}
         responsive-width="0"
       >
-        <!-- Disabled for IoB -->
-        <!--app-drawer
+        <app-drawer
           id="drawer"
           align="start"
           slot="drawer"
           .disableSwipe=${disableSwipe}
           .swipeOpen=${!disableSwipe}
           .persistent=${!this.narrow &&
-          this.hass.dockedSidebar !== "always_hidden"}
+            this.hass.dockedSidebar !== "always_hidden"}
         >
           <ha-sidebar
             .hass=${hass}
             .narrow=${sidebarNarrow}
             .alwaysExpand=${sidebarNarrow ||
-          this.hass.dockedSidebar === "docked"}
+              this.hass.dockedSidebar === "docked"}
           ></ha-sidebar>
-        </app-drawer-->
+        </app-drawer>
 
         <partial-panel-resolver
           .narrow=${this.narrow}
@@ -89,7 +88,7 @@ class HomeAssistantMain extends LitElement {
   }
 
   protected firstUpdated() {
-    // import(/* webpackChunkName: "ha-sidebar" */ "../components/ha-sidebar"); // IoB
+    import(/* webpackChunkName: "ha-sidebar" */ "../components/ha-sidebar");
 
     this.addEventListener("hass-toggle-menu", () => {
       if (this._sidebarNarrow) {
