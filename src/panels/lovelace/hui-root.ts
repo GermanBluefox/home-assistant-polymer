@@ -573,24 +573,22 @@ class HUIRoot extends LitElement {
   // for IoB
   private renderNotificationButton(withVoice?: boolean): TemplateResult | void {
     return html`
-      <paper-icon-button
-        aria-label="Show Notifications"
-        icon="hass:bell"
+      <paper-icon-item
+        style="cursor: pointer; position: relative;"
+        aria-label="${this.hass.localize("ui.notification_drawer.title")}"
         @click=${this._handleShowNotificationDrawer}
-      ></paper-icon-button>
-      ${this._notificationsCount > 0
-        ? html`
-            <span
-              style="position: absolute;top: 0;right: -3px;width: 20px;height: 20px;border-radius: 50%;background: var(--accent-color);pointer-events: none;z-index: 1;"
-            >
-              <div
-                style="right: 8px;top: 5px;position: absolute;font-size: 0.6em;"
+      >
+        <ha-icon slot="item-icon" icon="hass:bell"></ha-icon>
+        ${this._notificationsCount > 0
+          ? html`
+              <span
+                style="top: -6px; right: -6px; font-size: 0.7rem; position: absolute; min-width: 20px; box-sizing: border-box; border-radius: 50%; font-weight: 400; background-color: var(--accent-color); line-height: 20px; text-align: center; padding: 0 6px; color: var(--text-primary-color);"
               >
                 ${this._notificationsCount}
-              </div>
-            </span>
-          `
-        : ""}
+              </span>
+            `
+          : ""}
+      </paper-icon-item>
       ${withVoice && this._conversation(this.hass.config.components)
         ? html`
             <paper-icon-button
