@@ -53,7 +53,13 @@ export class HuiNotificationDrawer extends EventsMixin(
       <app-toolbar>
         <div main-title>[[localize('ui.notification_drawer.title')]]</div>
         <!--IoB-->
-        <paper-icon-button icon="hass:notification-clear-all" on-click="_ackAll" title="[[localize('ui.notification_drawer.ack_all')]]"></paper-icon-button>
+        <template is="dom-if" if="[[!_empty(_notificationsBackend)]]">
+          <paper-icon-button
+            icon="hass:notification-clear-all"
+            on-click="_ackAll"
+            title="[[localize('ui.notification_drawer.ack_all')]]"
+          ></paper-icon-button>
+        </template>
         <ha-paper-icon-button-prev on-click="_closeDrawer"></paper-icon-button>
       </app-toolbar>
       <div class="notifications">
@@ -110,13 +116,12 @@ export class HuiNotificationDrawer extends EventsMixin(
   // IoB
   _ackAll(ev) {
     ev.stopPropagation();
-    this._notificationsBackend &&
-      this._notificationsBackend.forEach(
-        (notification) =>
-          this.hass &&
-          this.hass.callService("persistent_notification", "dismiss", {
-            notification_id: notification.notification_id,
-          })
+    this.hass &&
+      this._notificationsBackend &&
+      this._notificationsBackend.forEach((notification) =>
+        this.hass.callService("persistent_notification", "dismiss", {
+          notification_id: notification.notification_id,
+        })
       );
   }
 
