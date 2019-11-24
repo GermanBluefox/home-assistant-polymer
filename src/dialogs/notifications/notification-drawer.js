@@ -114,14 +114,22 @@ export class HuiNotificationDrawer extends EventsMixin(
   }
 
   // IoB
+  async DismissAllNotifications(array, callback) {
+    for (let index = 0; index < array.length; index++) {
+      await callback(array[index], index, array);
+    }
+  }
+  // IoB
   _ackAll(ev) {
     ev.stopPropagation();
     this.hass &&
       this._notificationsBackend &&
-      this._notificationsBackend.forEach((notification) =>
-        this.hass.callService("persistent_notification", "dismiss", {
-          notification_id: notification.notification_id,
-        })
+      this.DismissAllNotifications(
+        this._notificationsBackend,
+        async (notification) =>
+          await this.hass.callService("persistent_notification", "dismiss", {
+            notification_id: notification.notification_id,
+          })
       );
   }
 
