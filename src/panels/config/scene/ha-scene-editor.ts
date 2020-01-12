@@ -37,7 +37,6 @@ import {
   saveScene,
   SCENE_IGNORED_DOMAINS,
   SceneEntities,
-  SCENE_SAVED_ATTRIBUTES,
   applyScene,
   activateScene,
 } from "../../../data/scene";
@@ -70,7 +69,7 @@ interface DeviceEntitiesLookup {
 @customElement("ha-scene-editor")
 export class HaSceneEditor extends SubscribeMixin(LitElement) {
   @property() public hass!: HomeAssistant;
-  @property() public narrow?: boolean;
+  @property() public isWide?: boolean;
   @property() public scene?: SceneEntity;
   @property() public creatingNew?: boolean;
   @property() public showAdvanced!: boolean;
@@ -197,7 +196,7 @@ export class HaSceneEditor extends SubscribeMixin(LitElement) {
               rtl: computeRTL(this.hass),
             })}"
           >
-            <ha-config-section .isWide=${!this.narrow}>
+            <ha-config-section .isWide=${this.isWide}>
               <div slot="header">
                 ${this.scene
                   ? computeStateName(this.scene)
@@ -223,7 +222,7 @@ export class HaSceneEditor extends SubscribeMixin(LitElement) {
               </ha-card>
             </ha-config-section>
 
-            <ha-config-section .isWide=${!this.narrow}>
+            <ha-config-section .isWide=${this.isWide}>
               <div slot="header">
                 ${this.hass.localize(
                   "ui.panel.config.scene.editor.devices.header"
@@ -294,7 +293,7 @@ export class HaSceneEditor extends SubscribeMixin(LitElement) {
 
             ${this.showAdvanced
               ? html`
-                  <ha-config-section .isWide=${!this.narrow}>
+                  <ha-config-section .isWide=${this.isWide}>
                     <div slot="header">
                       ${this.hass.localize(
                         "ui.panel.config.scene.editor.entities.header"
@@ -372,7 +371,7 @@ export class HaSceneEditor extends SubscribeMixin(LitElement) {
         </div>
         <ha-fab
           slot="fab"
-          ?is-wide="${!this.narrow}"
+          ?is-wide="${this.isWide}"
           ?dirty="${this._dirty}"
           icon="hass:content-save"
           .title="${this.hass.localize("ui.panel.config.scene.editor.save")}"
@@ -617,17 +616,7 @@ export class HaSceneEditor extends SubscribeMixin(LitElement) {
     if (!stateObj) {
       return;
     }
-    const domain = computeDomain(entityId);
-    const attributes = {};
-    for (const attribute in stateObj.attributes) {
-      if (
-        SCENE_SAVED_ATTRIBUTES[domain] &&
-        SCENE_SAVED_ATTRIBUTES[domain].includes(attribute)
-      ) {
-        attributes[attribute] = stateObj.attributes[attribute];
-      }
-    }
-    return { ...attributes, state: stateObj.state };
+    return { ...stateObj.attributes, state: stateObj.state };
   }
 
   private async _saveScene(): Promise<void> {

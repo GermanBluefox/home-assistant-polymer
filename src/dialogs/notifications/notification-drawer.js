@@ -49,7 +49,7 @@ export class HuiNotificationDrawer extends EventsMixin(
         text-align: center;
       }
     </style>
-    <app-drawer id='drawer' opened="{{open}}" disable-swipe align="start">
+    <app-drawer id="drawer" opened="{{open}}" disable-swipe align="start">
       <app-toolbar>
         <div main-title>[[localize('ui.notification_drawer.title')]]</div>
         <!--IoB-->
@@ -60,7 +60,7 @@ export class HuiNotificationDrawer extends EventsMixin(
             title="[[localize('ui.notification_drawer.ack_all')]]"
           ></paper-icon-button>
         </template>
-        <ha-paper-icon-button-prev on-click="_closeDrawer"></paper-icon-button>
+        <ha-paper-icon-button-prev on-click="_closeDrawer" aria-label$="[[localize('ui.notification_drawer.close')]]"></paper-icon-button>
       </app-toolbar>
       <div class="notifications">
         <template is="dom-if" if="[[!_empty(notifications)]]">

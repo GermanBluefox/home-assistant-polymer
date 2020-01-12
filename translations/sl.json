@@ -587,9 +587,11 @@
                 "title": "Preklopi domene"
             },
             "more_info_control": {
+                "dismiss": "Opusti pogovorno okno",
                 "script": {
                     "last_action": "Zadnje Dejanje"
                 },
+                "settings": "Nastavitve entitete",
                 "sun": {
                     "elevation": "Nadmorska višina",
                     "rising": "Naraščajoče",
@@ -600,6 +602,7 @@
                 }
             },
             "more_info_settings": {
+                "back": "Pojdi nazaj",
                 "entity_id": "ID entitete",
                 "name": "Preglasitev imena",
                 "save": "Shrani"
@@ -658,6 +661,7 @@
         },
         "notification_drawer": {
             "click_to_configure": "Kliknite gumb, da konfigurirate {entity}",
+            "close": "Zapri",
             "empty": "Ni obvestil",
             "title": "Obvestila"
         },
@@ -672,7 +676,7 @@
         "panel": {
             "config": {
                 "area_registry": {
-                    "caption": "Register območij",
+                    "caption": "Območja",
                     "create_area": "USTVARITE OBMOČJE",
                     "description": "Pregled vseh območij v vašem domu.",
                     "editor": {
@@ -684,7 +688,7 @@
                     "no_areas": "Izgleda, da še nimate območij!",
                     "picker": {
                         "create_area": "USTVARITE OBMOČJE",
-                        "header": "Register območij",
+                        "header": "Območja",
                         "integrations_page": "Stran za integracije",
                         "introduction": "Področja se uporabljajo za organizacijo področja naprav. Te informacije bodo uporabljene v celotnem Home Assistant-u in vam bodo pomagale pri organizaciji vašega vmesnika, dovoljenj in integracij z drugimi sistemi.",
                         "introduction2": "Če želite namestiti napravo na območje, uporabite spodnjo povezavo, da se pomaknete na stran za integracije, nato pa kliknite konfigurirano integracijo, da pridete do kartic naprave.",
@@ -692,7 +696,7 @@
                     }
                 },
                 "automation": {
-                    "caption": "Avtomatizacija",
+                    "caption": "Avtomatizacije",
                     "description": "Ustvarite in uredite avtomatizacije",
                     "editor": {
                         "actions": {
@@ -806,9 +810,11 @@
                             "label": "Opis",
                             "placeholder": "Izbirni opis"
                         },
+                        "edit_ui": "Uredi z uporabniškim vmesnikom",
+                        "edit_yaml": "Uredi z YAML-om",
                         "introduction": "Uporabite avtomatizacije za oživitev vašega doma.",
                         "load_error_not_editable": "Urejati je mogoče le avtomatizacije v automations.yaml.",
-                        "load_error_unknown": "Napaka pri nalaganju avtomatizacije ( {err_no}).",
+                        "load_error_unknown": "Napaka pri nalaganju avtomatizacije ({err_no}).",
                         "save": "Shrani",
                         "triggers": {
                             "add": "Dodaj sprožilec",
@@ -1131,12 +1137,12 @@
                     "attributes_outside": "Naslednji atributi so prilagojeni zunaj customize.yaml",
                     "attributes_override": "Če jih želite, jih lahko preglasite.",
                     "attributes_set": "Naslednji atributi entitete so nastavljeni programsko.",
-                    "caption": "Prilagajanje",
+                    "caption": "Prilagoditve",
                     "description": "Prilagodite svoje entitete",
                     "different_include": "Mogoče prek domene, globusa ali drugačne vsebovanosti.",
                     "pick_attribute": "Izberite atribut, ki ga želite preglasiti",
                     "picker": {
-                        "header": "Prilagajanje",
+                        "header": "Prilagoditve",
                         "introduction": "Prilagajanja atributov na entiteti. Dodane/spremenjene prilagoditve začnejo veljati takoj. Odstranjene pa po posodobitvi entitete."
                     },
                     "warning": {
@@ -1172,13 +1178,12 @@
                     "description": "Upravljajte povezane naprave",
                     "details": "Tu so vse podrobnosti vaše naprave.",
                     "device_not_found": "Naprave ni bilo mogoče najti",
-                    "entities": "Entitete",
                     "info": "Informacije o napravi",
                     "unknown_error": "Neznana napaka",
                     "unnamed_device": "Neimenovana naprava"
                 },
                 "entity_registry": {
-                    "caption": "Seznam entitet",
+                    "caption": "Entitete",
                     "description": "Pregled vseh znanih entitet.",
                     "editor": {
                         "confirm_delete": "Ali ste prepričani, da želite izbrisati ta vnos?",
@@ -1193,7 +1198,7 @@
                         "update": "POSODOBITEV"
                     },
                     "picker": {
-                        "header": "Seznam entitet",
+                        "header": "Entitete",
                         "headers": {
                             "enabled": "Omogočeno",
                             "entity_id": "ID subjekta",
@@ -1247,8 +1252,20 @@
                     "configure": "Konfiguriraj",
                     "configured": "Konfigurirano",
                     "description": "Upravljanje in nastavitev integracij",
+                    "details": "Podrobnosti integracije",
                     "discovered": "Odkrito",
                     "home_assistant_website": "spletne strani Home Assistant",
+                    "ignore": {
+                        "confirm_delete_ignore": "Zaradi tega bo integracija spet prikazana v vaših odkritih integracijah, ko bodo odkrite. To lahko zahteva ponovni zagon ali traja nekaj časa.",
+                        "confirm_delete_ignore_title": "Ali želite prenehati ignorirati {name}?",
+                        "confirm_ignore": "Ali ste prepričani, da ne želite nastaviti te integracije? To lahko razveljavite s klikom na 'Prikaži prezrte integracije' v prelivnem meniju v zgornjem desnem kotu.",
+                        "confirm_ignore_title": "Prezri odkritje {name}?",
+                        "hide_ignored": "Skrij prezrte integracije",
+                        "ignore": "Ignoriraj",
+                        "ignored": "Ignorirano",
+                        "show_ignored": "Pokaži prezrte integracije",
+                        "stop_ignore": "Prenehajte ignorirati"
+                    },
                     "integration_not_found": "Integracije ni mogoče najti.",
                     "new": "Nastavite novo integracijo",
                     "none": "Nič še ni konfigurirano",
@@ -1327,6 +1344,7 @@
                     "caption": "Skripte",
                     "description": "Ustvarite in uredite skripte",
                     "editor": {
+                        "alias": "Ime",
                         "default_name": "Nova Skripta",
                         "delete_confirm": "Ali ste prepričani, da želite izbrisati to skripto?",
                         "delete_script": "Izbriši skripto",
@@ -1535,7 +1553,7 @@
                     "events": {
                         "alert_event_type": "Vrsta dogodka je obvezno polje",
                         "available_events": "Razpoložljivi dogodki",
-                        "count_listeners": "({count} poslušalcev)",
+                        "count_listeners": " ({count} poslušalcev)",
                         "data": "Podatki o dogodku (YAML, neobvezno)",
                         "description": "Zaženite dogodek na \"event bus\".",
                         "documentation": "Dokumentacija o dogodkih.",
@@ -1611,6 +1629,10 @@
                     "states": {
                         "alert_entity_field": "Entiteta je obvezno polje",
                         "attributes": "Lastnosti",
+                        "copied": "Kopirano v odložišče",
+                        "copy_entity_attribute": "Kopiraj atribute",
+                        "copy_entity_id": "Kopiraj ID",
+                        "copy_entity_state": "Kopiraj stanje",
                         "current_entities": "Trenutne entitete",
                         "description1": "Nastavite predstavitev naprave v programu Home Assistant.",
                         "description2": "To ne bo komuniciralo z dejansko napravo.",
@@ -1861,6 +1883,7 @@
                 "menu": {
                     "close": "Zapri",
                     "configure_ui": "Konfiguriraj UI",
+                    "exit_edit_mode": "Zapustite način urejanja iz uporabniškega vmesnika",
                     "help": "Pomoč",
                     "refresh": "Osveži",
                     "unused_entities": "Neuporabljene entitete"
@@ -2127,7 +2150,7 @@
                 "refresh_tokens": {
                     "confirm_delete": "Ali ste prepričani, da želite izbrisati žeton za osveževanje za {name} ?",
                     "created_at": "Ustvarjen na {date}",
-                    "current_token_tooltip": "Trenutni  žeton ni mogoče izbrisati",
+                    "current_token_tooltip": "Trenutni žeton ni mogoče izbrisati",
                     "delete_failed": "Žetonov za osveževanje ni bilo mogoče izbrisati.",
                     "description": "Vsak osvežilni žeton predstavlja sejo za prijavo. Osvežilni žetoni se samodejno odstranijo, ko kliknete odjava. Za vaš račun so trenutno aktivni naslednji žetoni za osveževanje.",
                     "header": "Osvežilni žetoni",

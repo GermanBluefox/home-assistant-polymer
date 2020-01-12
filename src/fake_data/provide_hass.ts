@@ -74,20 +74,23 @@ export const provideHass = (
     restResponses.push([path, callback]);
   }
 
-  mockAPI(new RegExp("states/.+"), (
-    // @ts-ignore
-    method,
-    path,
-    parameters
-  ) => {
-    const [domain, objectId] = path.substr(7).split(".", 2);
-    if (!domain || !objectId) {
-      return;
+  mockAPI(
+    new RegExp("states/.+"),
+    (
+      // @ts-ignore
+      method,
+      path,
+      parameters
+    ) => {
+      const [domain, objectId] = path.substr(7).split(".", 2);
+      if (!domain || !objectId) {
+        return;
+      }
+      addEntities(
+        getEntity(domain, objectId, parameters.state, parameters.attributes)
+      );
     }
-    addEntities(
-      getEntity(domain, objectId, parameters.state, parameters.attributes)
-    );
-  });
+  );
 
   const localLanguage = getLocalLanguage();
 

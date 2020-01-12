@@ -574,9 +574,9 @@
         },
         "dialogs": {
             "config_entry_system_options": {
-                "enable_new_entities_description": "Neu erkannte Entitäten werden nicht automatisch in Home Assistant hinzugefügt wenn sie deaktiviert sind.",
+                "enable_new_entities_description": "Wenn deaktiviert werden neu erkannte Entitäten für {integration} nicht automatisch zu Home Assistant hinzugefügt.",
                 "enable_new_entities_label": "Neu hinzugefügte Entitäten aktivieren.",
-                "title": "Systemoptionen"
+                "title": "Einstellungen für {integration}"
             },
             "confirmation": {
                 "cancel": "Abbrechen",
@@ -587,9 +587,11 @@
                 "title": "Domänen umschalten"
             },
             "more_info_control": {
+                "dismiss": "Dialog ausblenden",
                 "script": {
                     "last_action": "Letzte Aktion"
                 },
+                "settings": "Entitätseinstellungen",
                 "sun": {
                     "elevation": "Höhe",
                     "rising": "Aufgang",
@@ -600,6 +602,7 @@
                 }
             },
             "more_info_settings": {
+                "back": "Zurück",
                 "entity_id": "Entitäts-ID",
                 "name": "Name",
                 "save": "Speichern"
@@ -617,7 +620,8 @@
                 "error": "Ups, ein Fehler ist aufgetreten.",
                 "found": "Ich habe folgendes für dich gefunden:",
                 "how_can_i_help": "Wie kann ich helfen?",
-                "label": "Gib eine Frage ein und klicke auf 'Enter'."
+                "label": "Gib eine Frage ein und klicke auf 'Enter'.",
+                "label_voice": "Schreib und drück die Eingabetaste oder tippe auf das Mikrofon um zu sprechen"
             },
             "zha_device_info": {
                 "buttons": {
@@ -632,13 +636,13 @@
                 "quirk": "Eigenart",
                 "services": {
                     "reconfigure": "Konfigurieren Sie das ZHA-Gerät neu (Gerät heilen). Verwenden Sie diese Option, wenn Sie Probleme mit dem Gerät haben. Wenn es sich bei dem fraglichen Gerät um ein batteriebetriebenes Gerät handelt, vergewissern Sie sich, dass es wach ist und Befehle akzeptiert, wenn Sie diesen Dienst nutzen.",
-                    "remove": "Entfernen Sie ein Gerät aus dem ZigBee-Netzwerk.",
+                    "remove": "Ein Gerät aus dem ZigBee-Netzwerk entfernen.",
                     "updateDeviceName": "Lege einen benutzerdefinierten Namen für dieses Gerät in der Geräteregistrierung fest."
                 },
                 "unknown": "Unbekannt",
                 "zha_device_card": {
                     "area_picker_label": "Bereich",
-                    "device_name_placeholder": "Vorname des Benutzers",
+                    "device_name_placeholder": "Benutzerdefinierter Name",
                     "update_name_button": "Aktualisierung Name"
                 }
             }
@@ -657,6 +661,7 @@
         },
         "notification_drawer": {
             "click_to_configure": "Klicke auf die Schaltfläche, um {entity} zu konfigurieren.",
+            "close": "Schließen",
             "empty": "Keine Benachrichtigungen",
             "title": "Benachrichtigungen"
         },
@@ -683,7 +688,7 @@
                     "no_areas": "Sieht aus, als hättest du noch keine Bereiche!",
                     "picker": {
                         "create_area": "BEREICH ERSTELLEN",
-                        "header": "Bereichsregister",
+                        "header": "Bereiche",
                         "integrations_page": "Integrationsseite",
                         "introduction": "In Bereichen wird festgelegt, wo sich Geräte befinden. Diese Informationen werden in Home Assistant verwendet, um dich bei der Organisation deiner Benutzeroberfläche, Berechtigungen und Integrationen mit anderen Systemen zu unterstützen.",
                         "introduction2": "Um Geräte in einem Bereich zu platzieren, navigieren Sie mit dem Link unten zur Integrationsseite und klicken Sie dann auf eine konfigurierte Integration, um zu den Gerätekarten zu gelangen.",
@@ -805,6 +810,8 @@
                             "label": "Beschreibung",
                             "placeholder": "Optionale Beschreibung"
                         },
+                        "edit_ui": "Bearbeiten Sie mit der Benutzeroberfläche",
+                        "edit_yaml": "Als YAML bearbeiten",
                         "introduction": "Benutze Automatisierungen, um deinem Zuhause Leben einzuhauchen",
                         "load_error_not_editable": "Nur Automatisierungen in automations.yaml sind editierbar.",
                         "load_error_unknown": "Fehler beim Laden der Automatisierung ({err_no}).",
@@ -911,6 +918,7 @@
                         "introduction": "Mit dem Automationseditor können Automatisierungen erstellt und bearbeitet werden. Bitte folge dem nachfolgenden Link, um die Anleitung zu lesen, um sicherzustellen, dass du Home Assistant richtig konfiguriert hast.",
                         "learn_more": "Erfahre mehr über Automatisierungen",
                         "no_automations": "Wir konnten keine editierbaren Automatisierungen finden",
+                        "only_editable": "Nur Automatisierungen in automations.yaml sind editierbar.",
                         "pick_automation": "Wähle eine Automatisierung zum Bearbeiten",
                         "show_info_automation": "Informationen über die Automatisierung anzeigen"
                     }
@@ -969,7 +977,7 @@
                         "thank_you_note": "Vielen Dank, dass Sie Teil der Home Assistant Cloud sind. Es ist wegen Menschen wie Ihnen, dass wir in der Lage sind, eine großartige Home Automation Erfahrung für alle zu machen. Danke!",
                         "webhooks": {
                             "disable_hook_error_msg": "Fehler beim Deaktivieren des Webhooks:",
-                            "info": "Alles, was so konfiguriert ist, dass es durch einen Webhook ausgelöst wird, kann mit einer öffentlich zugänglichen URL versehen werden, damit Daten von überall an Home Assistant gesenden werden können, ohne deine Installation dem Internet zu öffnen.",
+                            "info": "Alles, was so konfiguriert ist, dass es durch einen Webhook ausgelöst wird, kann mit einer öffentlich zugänglichen URL versehen werden, damit Daten von überall an Home Assistant gesendet werden können, ohne deine Installation dem Internet zu öffnen.",
                             "link_learn_more": "Weitere Informationen zum Erstellen webhookgestützter Automatisierungen.",
                             "loading": "Wird geladen ...",
                             "manage": "Verwalten",
@@ -1124,11 +1132,23 @@
                     }
                 },
                 "customize": {
+                    "attributes_customize": "Folgende Attribute sind bereits in customize.yaml gesetzt",
+                    "attributes_not_set": "Die folgenden Attribute wurden nicht gesetzt. Setze sie, wenn Du möchtest.",
+                    "attributes_outside": "Die folgenden Attribute werden außerhalb von customize.yaml angepasst.",
+                    "attributes_override": "Du kannst sie überschreiben, wenn du möchtest.",
+                    "attributes_set": "Die folgenden Attribute der Entität sind programmatisch festgelegt.",
                     "caption": "Anpassung",
                     "description": "Elemente anpassen",
+                    "different_include": "Möglich über eine Domain, einen Glob oder einen anderen Include.",
+                    "pick_attribute": "Wähle ein Attribut zum Überschreiben aus.",
                     "picker": {
-                        "header": "Anpassung",
+                        "header": "Anpassungen",
                         "introduction": "Optimieren Sie die Entitätenattribute. Hinzugefügte / bearbeitete Anpassungen werden sofort wirksam. Entfernte Anpassungen werden wirksam, wenn die Entität aktualisiert wird."
+                    },
+                    "warning": {
+                        "include_link": "binde customize.yaml ein",
+                        "include_sentence": "Es scheint, dass Ihre configuration.yaml nicht korrekt ist.",
+                        "not_applied": "Die hier vorgenommenen Änderungen werden eingetragen, aber erst nach einem erneuten Laden der Konfiguration angewendet, wenn das Include vorhanden ist."
                     }
                 },
                 "devices": {
@@ -1158,13 +1178,12 @@
                     "description": "Verwalte verbundene Geräte",
                     "details": "Hier sind alle Details deines Geräts.",
                     "device_not_found": "Gerät nicht gefunden.",
-                    "entities": "Entitäten",
                     "info": "Geräteinformationen",
                     "unknown_error": "Unbekannter Fehler",
                     "unnamed_device": "Unbenanntes Gerät"
                 },
                 "entity_registry": {
-                    "caption": "Entitätsregister",
+                    "caption": "Entitäten",
                     "description": "Überblick aller bekannten Elemente.",
                     "editor": {
                         "confirm_delete": "Möchten Sie diesen Eintrag wirklich löschen?",
@@ -1179,7 +1198,7 @@
                         "update": "UPDATE"
                     },
                     "picker": {
-                        "header": "Entitätsregister",
+                        "header": "Entitäten",
                         "headers": {
                             "enabled": "Aktiviert",
                             "entity_id": "Entitäts-ID",
@@ -1232,9 +1251,21 @@
                     },
                     "configure": "Konfigurieren",
                     "configured": "Konfiguriert",
-                    "description": "Verwalte verbundene Geräte und Dienste",
+                    "description": "Verwalte verbundene Integrationen",
+                    "details": "Details zur Integration",
                     "discovered": "Entdeckt",
                     "home_assistant_website": "Home Assistant Website",
+                    "ignore": {
+                        "confirm_delete_ignore": "Dies wird die Integration in deinen entdeckten Integrationen wieder erscheinen lassen, wenn sie entdeckt wird. Dies kann einen Neustart erfordern oder einige Zeit dauern.",
+                        "confirm_delete_ignore_title": "{name} nicht mehr ignorieren?",
+                        "confirm_ignore": "Bist du sicher, dass du diese Integration nicht einrichten willst? Du kannst dies rückgängig machen, indem du im Kontextmenü oben rechts auf 'Ignorierte Integrationen anzeigen' klickst.",
+                        "confirm_ignore_title": "Ignoriere die Entdeckung von {name}?",
+                        "hide_ignored": "Ignorierte Integrationen ausblenden",
+                        "ignore": "Ignorieren",
+                        "ignored": "Ignoriert",
+                        "show_ignored": "Ignorierte Integrationen anzeigen",
+                        "stop_ignore": "Nicht mehr ignorieren"
+                    },
                     "integration_not_found": "Integration nicht gefunden.",
                     "new": "Richte eine neue Integration ein",
                     "none": "Noch nichts konfiguriert",
@@ -1277,12 +1308,15 @@
                         "devices": {
                             "add": "Ein Gerät hinzufügen",
                             "delete": "Gerät löschen",
-                            "header": "Geräte"
+                            "header": "Geräte",
+                            "introduction": "Füge die Geräte hinzu, die in deine Szene aufgenommen werden sollen. Stelle alle Geräte so ein, wie sie in der Szene sein sollen."
                         },
                         "entities": {
                             "add": "Eine Entität hinzufügen",
                             "delete": "Entität löschen",
+                            "device_entities": "Wenn du eine Entität hinzufügst, die zu einem Gerät gehört, wird das Gerät hinzugefügt.",
                             "header": "Entitäten",
+                            "introduction": "Entitäten, die nicht zu einem Gerät gehören, können hier festgelegt werden.",
                             "without_device": "Entitäten ohne Gerät"
                         },
                         "introduction": "Benutze Szenen, um deinem Zuhause Leben einzuhauchen",
@@ -1298,8 +1332,10 @@
                         "delete_scene": "Szene löschen",
                         "edit_scene": "Szene bearbeiten",
                         "header": "Szenen-Editor",
+                        "introduction": "Mit dem Szeneneditor können Szenen erstellt und bearbeitet werden. Bitte folgen Sie dem untenstehenden Link, um die Anleitung zu finden. Dies stellt sicher, dass Home Assistant korrekt konfiguriert ist.",
                         "learn_more": "Erfahre mehr über Szenen.",
                         "no_scenes": "Wir konnten keine editierbaren Szenen finden",
+                        "only_editable": "Nur Szenen in der scenes.yaml sind editierbar.",
                         "pick_scene": "Wähle eine Szene zum Bearbeiten aus.",
                         "show_info_scene": "Informationen über die Szene anzeigen"
                     }
@@ -1308,12 +1344,16 @@
                     "caption": "Skript",
                     "description": "Skripte erstellen und bearbeiten",
                     "editor": {
+                        "alias": "Name",
                         "default_name": "Neues Skript",
                         "delete_confirm": "Möchten Sie dieses Skript wirklich löschen?",
                         "delete_script": "Skript löschen",
                         "header": "Skript: {name}",
+                        "introduction": "Verwende Skripte, um eine Abfolge von Aktionen auszuführen.",
+                        "link_available_actions": "Erfahre mehr über verfügbare Aktionen.",
                         "load_error_not_editable": "Nur Skripte in scripts.yaml können bearbeitet werden.",
-                        "sequence": "Sequenz"
+                        "sequence": "Sequenz",
+                        "sequence_sentence": "Die Abfolge der Aktionen dieses Skripts."
                     },
                     "picker": {
                         "add_script": "Skript hinzufügen",
@@ -1331,7 +1371,7 @@
                     "section": {
                         "reloading": {
                             "automation": "Automatisierungen neu laden",
-                            "core": "Hauptsystem neu laden",
+                            "core": "Ort & Anpassungen neu laden",
                             "group": "Gruppen neu laden",
                             "heading": "Konfiguration neu laden",
                             "introduction": "Einige Komponenten von Home Assistant können ohne einen Neustart neu geladen werden. \"Neu laden\" entlädt dabei die aktuelle Konfiguration und lädt die neue Konfiguration.",
@@ -1427,7 +1467,7 @@
                     "description": "Zigbee Home Automation Netzwerkmanagement",
                     "device_card": {
                         "area_picker_label": "Bereich",
-                        "device_name_placeholder": "Benutzername",
+                        "device_name_placeholder": "Benutzerdefinierter Name",
                         "update_name_button": "Name aktualisieren"
                     },
                     "network_management": {
@@ -1438,7 +1478,7 @@
                         "header": "Geräteverwaltung",
                         "help_node_dropdown": "Wähle ein Gerät aus, um die Geräteoptionen anzuzeigen.",
                         "hint_battery_devices": "Hinweis: Schlafende (batteriebetriebene) Geräte müssen wach sein, wenn Befehle für sie ausgeführt werden. Ein schlafendes Gerät kann meist durch eine Aktion am Gerät aufgeweckt werden.",
-                        "hint_wakeup": "Einige Geräte, z. B. Xiaomi-Sensoren, verfügen über eine Wecktaste, die in Intervallen von ~5 Sekunden gedrückt werden können, um die Geräte wach zu halten, während mit ihnen interagiert wird.",
+                        "hint_wakeup": "Einige Geräte, z. B. Xiaomi-Sensoren, verfügen über eine Wecktaste, die in Intervallen von ~5 Sekunden gedrückt werden kann, um die Geräte wach zu halten, während mit ihnen interagiert wird.",
                         "introduction": "Führe ZHA-Befehle aus, die sich auf ein einzelnes Gerät auswirken. Wähle ein Gerät aus, um eine Liste der verfügbaren Befehle anzuzeigen."
                     },
                     "services": {
@@ -1482,7 +1522,7 @@
                     },
                     "ozw_log": {
                         "header": "OZW Log",
-                        "introduction": "Zeigen Sie das Protokoll an. 0 ist das Minimum (lädt das gesamte Protokoll) und 1000 ist das Maximum. Beim Laden wird ein statisches Protokoll angezeigt, und das Ende wird automatisch mit der zuletzt angegebenen Anzahl von Zeilen des Protokolls aktualisiert."
+                        "introduction": "Sehen Sie sich das Protokoll an. 0 ist das Minimum (lädt das gesamte Protokoll) und 1000 ist das Maximum. Beim Laden wird ein statisches Protokoll angezeigt und das Ende wird automatisch mit der zuletzt angegebenen Anzahl von Zeilen des Protokolls aktualisiert."
                     },
                     "services": {
                         "add_node": "Knoten hinzufügen",
@@ -1504,7 +1544,8 @@
             "custom": {
                 "external_panel": {
                     "complete_access": "Es wird Zugriff auf alle Daten in Home Assistant haben.",
-                    "hide_message": "Überprüfe die Dokumentation für die panel_custom Komponente, um diese Meldung auszublenden."
+                    "hide_message": "Überprüfe die Dokumentation für die panel_custom Komponente, um diese Meldung auszublenden.",
+                    "question_trust": "Vertraust du dem externen Panel {name} unter {link}?"
                 }
             },
             "developer-tools": {
@@ -1523,6 +1564,7 @@
                         "notification_event_fired": "Ereignis {type} erfolgreich ausgelöst!",
                         "start_listening": "Anfangen zuzuhören",
                         "stop_listening": "Aufhören zuzuhören",
+                        "subscribe_to": "Ereignis, welches abboniert werden soll",
                         "title": "Ereignisse",
                         "type": "Ereignistyp"
                     },
@@ -1550,7 +1592,7 @@
                         "clear": "Leeren",
                         "details": "Protokolldetails ( {level} )",
                         "load_full_log": "Vollständiges Home Assistant-Protokoll laden",
-                        "loading_log": "Fehlerprotokoll wird geladen ...",
+                        "loading_log": "Fehlerprotokoll wird geladen...",
                         "multiple_messages": "Die Nachricht ist zum ersten Mal um {time} aufgetreten und erscheint {counter} mal",
                         "no_errors": "Es wurden keine Fehler gemeldet.",
                         "no_issues": "Es gibt keine neuen Probleme!",
@@ -1558,6 +1600,7 @@
                         "title": "Logs"
                     },
                     "mqtt": {
+                        "description_listen": "Auf ein Thema lauschen",
                         "description_publish": "Ein Paket veröffentlichen",
                         "listening_to": "Anhören von",
                         "message_received": "Nachricht {id} empfangen auf {topic} um {time} :",
@@ -1576,6 +1619,7 @@
                         "column_example": "Beispiel",
                         "column_parameter": "Parameter",
                         "data": "Servicedaten (YAML, optional)",
+                        "description": "Mit dem Dienstentwicklungstool können Sie jeden verfügbaren Dienst in Home Assistant aufrufen.",
                         "fill_example_data": "Mit Beispieldaten füllen",
                         "no_description": "Es ist keine Beschreibung verfügbar",
                         "no_parameters": "Dieser Dienst benötigt keine Parameter.",
@@ -1585,6 +1629,10 @@
                     "states": {
                         "alert_entity_field": "Die Entität ist ein Pflichtfeld",
                         "attributes": "Attribute",
+                        "copied": "In die Zwischenablage kopiert",
+                        "copy_entity_attribute": "Attribute in die Zwischenablage kopieren",
+                        "copy_entity_id": "ID in die Zwischenablage kopieren",
+                        "copy_entity_state": "Status in die Zwischenablage kopieren",
                         "current_entities": "Aktuelle Entitäten",
                         "description1": "Stellen Sie die Darstellung eines Geräts in Home Assistant ein.",
                         "description2": "Dies führt nicht zur Kommunikation mit dem eigentlichen Gerät.",
@@ -1663,7 +1711,7 @@
                         },
                         "entities": {
                             "name": "Elemente",
-                            "show_header_toggle": "Namen anzeigen?",
+                            "show_header_toggle": "Schalter anzeigen?",
                             "toggle": "Entitäten umschalten"
                         },
                         "entity-button": {
@@ -1773,7 +1821,7 @@
                         "delete": "Löschen",
                         "edit": "Bearbeiten",
                         "header": "Kartenkonfiguration",
-                        "move": "Bewegen",
+                        "move": "Zur Ansicht Bewegen",
                         "options": "Mehr Optionen",
                         "pick_card": "Karte auswählen, die hinzugefügt werden soll.",
                         "pick_card_view_title": "Welche Karte möchten Sie Ihrer {name} -Ansicht hinzufügen?",
@@ -1835,16 +1883,19 @@
                 "menu": {
                     "close": "Schließen",
                     "configure_ui": "Benutzeroberfläche konfigurieren",
+                    "exit_edit_mode": "Schließe den UI-Bearbeitungsmodus",
                     "help": "Hilfe",
                     "refresh": "Aktualisieren",
                     "unused_entities": "Ungenutzte Elemente"
                 },
                 "reload_lovelace": "Lovelace neu laden",
                 "unused_entities": {
+                    "available_entities": "Dies sind die Entitäten, die du zur Verfügung hast, die aber noch nicht in deiner Lovelace-Benutzeroberfläche enthalten sind.",
                     "domain": "Domain",
                     "entity": "Entität",
                     "entity_id": "Entitäts-ID",
                     "last_changed": "Zuletzt geändert",
+                    "select_to_add": "Wähle die Entitäten aus, die Du zur Karte hinzufügen möchtest und klicke auf den Karte hinzufügen Button.",
                     "title": "Nicht verwendete Entitäten"
                 },
                 "views": {
@@ -2121,7 +2172,7 @@
             "shopping-list": {
                 "add_item": "Artikel hinzufügen",
                 "clear_completed": "Erledigte entfernen",
-                "microphone_tip": "Tippe oben rechts auf das Mikrofon und sage “Add candy to my shopping list”"
+                "microphone_tip": "Tippe oben rechts auf das Mikrofon und sage oder schreibe “Süßigkeiten zu meiner Einkaufsliste hinzufügen”"
             }
         },
         "sidebar": {

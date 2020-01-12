@@ -64,8 +64,8 @@ class HUIRoot extends LitElement {
   @property() public route?: { path: string; prefix: string };
   @property() private _routeData?: { view: string };
   @property() private _curView?: number | "hass-unused-entities";
-  @property() private _persistentNotifications?: number; // IoB
 
+  @property() private _persistentNotifications?: number; // IoB
   private _unsubNotifications?: () => void; // IoB
 
   private _viewCache?: { [viewId: string]: HUIView };
@@ -132,6 +132,9 @@ class HUIRoot extends LitElement {
             ? html`
                 <app-toolbar class="edit-mode">
                   <paper-icon-button
+                    aria-label="${this.hass!.localize(
+                      "ui.panel.lovelace.menu.exit_edit_mode"
+                    )}"
                     title="${this.hass!.localize(
                       "ui.panel.lovelace.menu.close"
                     )}"
@@ -142,6 +145,9 @@ class HUIRoot extends LitElement {
                     ${this.config.title ||
                       this.hass!.localize("ui.panel.lovelace.editor.header")}
                     <paper-icon-button
+                      aria-label="${this.hass!.localize(
+                        "ui.panel.lovelace.editor.edit_lovelace.edit_title"
+                      )}"
                       title="${this.hass!.localize(
                         "ui.panel.lovelace.editor.edit_lovelace.edit_title"
                       )}"
@@ -227,6 +233,12 @@ class HUIRoot extends LitElement {
                     horizontal-offset="-5"
                   >
                     <paper-icon-button
+                      aria-label=${this.hass!.localize(
+                        "ui.panel.lovelace.editor.menu.open"
+                      )}
+                      title="${this.hass!.localize(
+                        "ui.panel.lovelace.editor.menu.open"
+                      )}"
                       icon="hass:dots-vertical"
                       slot="dropdown-trigger"
                     ></paper-icon-button>

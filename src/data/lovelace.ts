@@ -70,6 +70,10 @@ export interface NoActionConfig extends BaseActionConfig {
   action: "none";
 }
 
+export interface CustomActionConfig extends BaseActionConfig {
+  action: "fire-dom-event";
+}
+
 export interface BaseActionConfig {
   confirmation?: ConfirmationRestrictionConfig;
 }
@@ -89,7 +93,8 @@ export type ActionConfig =
   | NavigateActionConfig
   | UrlActionConfig
   | MoreInfoActionConfig
-  | NoActionConfig;
+  | NoActionConfig
+  | CustomActionConfig;
 
 export const fetchConfig = (
   conn: Connection,
@@ -107,6 +112,11 @@ export const saveConfig = (
   hass.callWS({
     type: "lovelace/config/save",
     config,
+  });
+
+export const deleteConfig = (hass: HomeAssistant): Promise<void> =>
+  hass.callWS({
+    type: "lovelace/config/delete",
   });
 
 export const subscribeLovelaceUpdates = (

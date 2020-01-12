@@ -22,9 +22,11 @@ declare global {
     hassConnection: Promise<{ auth: Auth; conn: Connection }>;
     hassNoAuth: string; // IoB
   }
-}
 
-const isExternal = location.search.includes("external_auth=1");
+const isExternal =
+  window.externalApp ||
+  window.webkit?.messageHandlers?.getExternalAuth ||
+  location.search.includes("external_auth=1");
 
 const authProm = isExternal
   ? () =>

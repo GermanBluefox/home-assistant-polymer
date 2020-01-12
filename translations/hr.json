@@ -621,8 +621,8 @@
         },
         "duration": {
             "day": "{count} {count, plural,\n  one {dan}\n  other {dani}\n}",
-            "hour": "{broj} {broj, množina, jedan {sat} drugi {sati}}",
-            "minute": "{broj} {broj, množina, jedna {minuta}, druge {minute}}",
+            "hour": "{count} {count, plural,\n  one {sat}\n  other {sati}\n }",
+            "minute": "{count} {count, plural,\n  one {minuta}\n  other {minute}\n }",
             "second": "{count} {count, plural,\n  one {sekunde}\n  other {sekunde}\n}",
             "week": "{count} {count, plural,\n  one {tjedan}\n  other {tjedni}\n}"
         },
@@ -975,7 +975,11 @@
                     }
                 },
                 "customize": {
+                    "attributes_customize": "Sljedeći su atributi već postavljeni u customize.yaml",
+                    "attributes_not_set": "Sljedeći atributi nisu postavljeni. Postavite ih ako želite.",
+                    "attributes_outside": "Sljedeći su atributi prilagođeni izvan customize.yaml",
                     "attributes_override": "Možete ih premostiti ako želite.",
+                    "attributes_set": "Sljedeći atributi entiteta postavljaju se programski.",
                     "caption": "Prilagodba",
                     "description": "Prilagodite entitete",
                     "pick_attribute": "Odaberite atribut za premošćenje",
@@ -1011,7 +1015,6 @@
                     "description": "Upravljanje povezanim uređajima",
                     "details": "Ovdje su sve pojedinosti vašeg uređaja.",
                     "device_not_found": "Uređaj nije pronađen.",
-                    "entities": "Entiteti",
                     "info": "Informacije o uređaju",
                     "unknown_error": "Nepoznata pogreška",
                     "unnamed_device": "Neimenovani uređaj"
@@ -1290,6 +1293,10 @@
                         "title": "Događaji"
                     },
                     "info": {
+                        "home_assistant_logo": "Logotip Home Assistanta",
+                        "license": "Objavljeno pod licencom Apache 2.0",
+                        "path_configuration": "Put do configuration.yaml: {path}",
+                        "source": "Izvorni kod:",
                         "title": "Informacije"
                     },
                     "logs": {

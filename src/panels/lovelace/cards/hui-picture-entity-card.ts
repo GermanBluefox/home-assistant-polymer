@@ -60,7 +60,9 @@ class HuiPictureEntityCard extends LitElement implements LovelaceCard {
 
     if (
       computeDomain(config.entity) !== "camera" &&
-      (!config.image && !config.state_image && !config.camera_image)
+      !config.image &&
+      !config.state_image &&
+      !config.camera_image
     ) {
       throw new Error("No image source configured.");
     }
@@ -154,6 +156,7 @@ class HuiPictureEntityCard extends LitElement implements LovelaceCard {
             hasHold: hasAction(this._config!.hold_action),
             hasDoubleClick: hasAction(this._config!.double_tap_action),
           })}
+          tabindex="0"
           class=${classMap({
             clickable: stateObj.state !== UNAVAILABLE,
           })}

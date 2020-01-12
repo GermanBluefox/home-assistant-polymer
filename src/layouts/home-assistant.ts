@@ -57,9 +57,10 @@ export class HomeAssistantAppEl extends HassElement {
       this._updateHass({ panelUrl: this._panelUrl });
     }
     if (changedProps.has("hass")) {
-      this.hassChanged(this.hass!, changedProps.get("hass") as
-        | HomeAssistant
-        | undefined);
+      this.hassChanged(
+        this.hass!,
+        changedProps.get("hass") as HomeAssistant | undefined
+      );
     }
   }
 

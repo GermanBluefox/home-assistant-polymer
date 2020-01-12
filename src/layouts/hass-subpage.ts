@@ -9,12 +9,14 @@ import {
 } from "lit-element";
 import "../components/ha-menu-button";
 import "../components/ha-paper-icon-button-arrow-prev";
+import { classMap } from "lit-html/directives/class-map";
 
 @customElement("hass-subpage")
 class HassSubpage extends LitElement {
   @property()
   public header?: string;
-
+  @property({ type: Boolean })
+  public showBackButton = true;
   @property({ type: Boolean })
   public hassio = false;
 
@@ -25,6 +27,7 @@ class HassSubpage extends LitElement {
           aria-label="Back"
           .hassio=${this.hassio}
           @click=${this._backTapped}
+          class=${classMap({ hidden: !this.showBackButton })}
         ></ha-paper-icon-button-arrow-prev>
 
         <div main-title>${this.header}</div>
@@ -53,15 +56,19 @@ class HassSubpage extends LitElement {
         height: 64px;
         padding: 0 16px;
         pointer-events: none;
-        background-color: var(--primary-color);
+        background-color: var(--app-header-background-color);
         font-weight: 400;
-        color: var(--text-primary-color, white);
+        color: var(--app-header-text-color, white);
       }
 
       ha-menu-button,
       ha-paper-icon-button-arrow-prev,
       ::slotted([slot="toolbar-icon"]) {
         pointer-events: auto;
+      }
+
+      ha-paper-icon-button-arrow-prev.hidden {
+        visibility: hidden;
       }
 
       [main-title] {

@@ -105,6 +105,14 @@ class HuiGenericEntityRow extends LitElement {
                     .datetime=${stateObj.last_changed}
                   ></ha-relative-time>
                 `
+              : this.config.secondary_info === "last-triggered" &&
+                stateObj.attributes.last_triggered
+              ? html`
+                  <ha-relative-time
+                    .hass=${this.hass}
+                    .datetime=${stateObj.attributes.last_triggered}
+                  ></ha-relative-time>
+                `
               : ""}
           </div>
         </div>
@@ -162,6 +170,11 @@ class HuiGenericEntityRow extends LitElement {
       }
       state-badge {
         flex: 0 0 40px;
+      }
+      state-badge:focus {
+        outline: none;
+        background: var(--divider-color);
+        border-radius: 100%;
       }
       :host([rtl]) .flex {
         margin-left: 0;
