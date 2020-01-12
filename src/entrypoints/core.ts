@@ -22,6 +22,7 @@ declare global {
     hassConnection: Promise<{ auth: Auth; conn: Connection }>;
     hassNoAuth: string; // IoB
   }
+}
 
 const isExternal =
   window.externalApp ||
@@ -30,16 +31,16 @@ const isExternal =
 
 const authProm = isExternal
   ? () =>
-      import(
-        /* webpackChunkName: "external_auth" */ "../external_app/external_auth"
+    import(
+      /* webpackChunkName: "external_auth" */ "../external_app/external_auth"
       ).then(({ createExternalAuth }) => createExternalAuth(hassUrl))
   : () =>
-      getAuth({
-        hassUrl,
-        saveTokens,
-        loadTokens: () => Promise.resolve(loadTokens()),
-        authCode: window.hassNoAuth, // for IoB
-      });
+    getAuth({
+      hassUrl,
+      saveTokens,
+      loadTokens: () => Promise.resolve(loadTokens()),
+      authCode: window.hassNoAuth, // for IoB
+    });
 
 const connProm = async (auth) => {
   try {
