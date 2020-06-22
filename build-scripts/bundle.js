@@ -19,7 +19,7 @@ module.exports.emptyPackages = ({ latestBuild }) =>
     require.resolve("@polymer/paper-styles/default-theme.js"),
     // Loads stuff from a CDN
     require.resolve("@polymer/font-roboto/roboto.js"),
-    require.resolve("@vaadin/vaadin-material-styles/font-roboto.js"),
+    // require.resolve("@vaadin/vaadin-material-styles/font-roboto.js"), -> somehow not found on my device?
     // Compatibility not needed for latest builds
     latestBuild &&
       // wrapped in require.resolve so it blows up if file no longer exists

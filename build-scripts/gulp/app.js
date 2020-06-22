@@ -62,10 +62,10 @@ gulp.task(
     "clean",
     gulp.parallel(
       "gen-service-worker-app-dev",
-      gulp.parallel("gen-icons-json"),
+      "gen-icons-json",
       "gen-pages-dev",
       "gen-index-app-dev",
-      gulp.series("create-test-translation", "build-translations")
+      "build-translations"
     ),
     "copy-static-app",
     "webpack-dev-app"
