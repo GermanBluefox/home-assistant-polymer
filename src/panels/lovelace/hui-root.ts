@@ -103,7 +103,6 @@ class HUIRoot extends LitElement {
     );
   }
 
-  protected render(): TemplateResult {
   // IoB
   public connectedCallback(): void {
     super.connectedCallback();
@@ -128,10 +127,8 @@ class HUIRoot extends LitElement {
   protected render(): TemplateResult | void {
     return html`
       <!-- Inserted for IoB -->
-    <notification-drawer
-      .hass="${this.hass}"
-    ></notification-drawer>
-    
+      <notification-drawer .hass="${this.hass}"></notification-drawer>
+
       <ha-app-layout id="layout">
         <app-header
           slot="header"

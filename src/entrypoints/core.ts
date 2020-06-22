@@ -33,11 +33,6 @@ declare global {
   }
 }
 
-const isExternal =
-  window.externalApp ||
-  window.webkit?.messageHandlers?.getExternalAuth ||
-  location.search.includes("external_auth=1");
-
 const authProm = isExternal
   ? () =>
       import(
@@ -48,7 +43,7 @@ const authProm = isExternal
         hassUrl,
         saveTokens,
         loadTokens: () => Promise.resolve(loadTokens()),
-      authCode: window.hassNoAuth, // for IoB
+        authCode: window.hassNoAuth, // for IoB
       });
 
 const connProm = async (auth) => {
