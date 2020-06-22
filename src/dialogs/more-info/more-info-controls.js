@@ -86,13 +86,14 @@ class MoreInfoControls extends LocalizeMixin(EventsMixin(PolymerElement)) {
         <div class="main-title" main-title="" on-click="enlarge">
           [[_computeStateName(stateObj)]]
         </div>
-        <template is="dom-if" if="[[hass.user.is_admin]]">
+        <!-- //IoB -> we do not have entity settings/registry - so disable them here. -->
+        <!-- template is="dom-if" if="[[hass.user.is_admin]]">
           <ha-icon-button
             aria-label$="[[localize('ui.dialogs.more_info_control.settings')]]"
             icon="hass:settings"
             on-click="_gotoSettings"
           ></ha-icon-button>
-        </template>
+        </template -->
         <template is="dom-if" if="[[_computeEdit(hass, stateObj)]]">
           <ha-icon-button
             aria-label$="[[localize('ui.dialogs.more_info_control.edit')]]"
