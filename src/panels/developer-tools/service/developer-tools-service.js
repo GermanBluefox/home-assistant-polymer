@@ -1,16 +1,16 @@
 import "@material/mwc-button";
 import { html } from "@polymer/polymer/lib/utils/html-tag";
+/* eslint-plugin-disable lit */
 import { PolymerElement } from "@polymer/polymer/polymer-element";
-
 import { safeDump, safeLoad } from "js-yaml";
-
-import { ENTITY_COMPONENT_DOMAINS } from "../../../data/entity";
 import "../../../components/entity/ha-entity-picker";
 import "../../../components/ha-code-editor";
 import "../../../components/ha-service-picker";
-import "../../../resources/ha-style";
-import "../../../util/app-localstorage-document";
+import { ENTITY_COMPONENT_DOMAINS } from "../../../data/entity";
+import { showAlertDialog } from "../../../dialogs/generic/show-dialog-box";
 import LocalizeMixin from "../../../mixins/localize-mixin";
+import "../../../styles/polymer-ha-style";
+import "../../../util/app-localstorage-document";
 
 const ERROR_SENTINEL = {};
 /*
@@ -240,7 +240,7 @@ class HaPanelDevService extends LocalizeMixin(PolymerElement) {
     if (!(service in serviceDomains[domain])) return [];
 
     const fields = serviceDomains[domain][service].fields;
-    return Object.keys(fields).map(function(field) {
+    return Object.keys(fields).map(function (field) {
       return { key: field, ...fields[field] };
     });
   }
@@ -290,14 +290,13 @@ class HaPanelDevService extends LocalizeMixin(PolymerElement) {
 
   _callService() {
     if (this.parsedJSON === ERROR_SENTINEL) {
-      // eslint-disable-next-line
-      alert(
-        this.hass.localize(
+      showAlertDialog(this, {
+        text: this.hass.localize(
           "ui.panel.developer-tools.tabs.services.alert_parsing_yaml",
           "data",
           this.serviceData
-        )
-      );
+        ),
+      });
       return;
     }
 

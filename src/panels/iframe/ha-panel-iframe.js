@@ -1,9 +1,9 @@
 import "@polymer/app-layout/app-toolbar/app-toolbar";
 import { html } from "@polymer/polymer/lib/utils/html-tag";
+/* eslint-plugin-disable lit */
 import { PolymerElement } from "@polymer/polymer/polymer-element";
-
 import "../../components/ha-menu-button";
-import "../../resources/ha-style";
+import "../../styles/polymer-ha-style";
 
 class HaPanelIframe extends PolymerElement {
   static get template() {
@@ -12,6 +12,7 @@ class HaPanelIframe extends PolymerElement {
         iframe {
           border: 0;
           width: 100%;
+          position: absolute;
           height: calc(100% - 64px);
           background-color: var(--primary-background-color);
         }

@@ -1,18 +1,18 @@
 import "@polymer/paper-input/paper-input";
-import "../../../../../components/ha-yaml-editor";
-
-import { LitElement, property, customElement } from "lit-element";
-import {
-  TriggerElement,
-  handleChangeEvent,
-} from "../ha-automation-trigger-row";
-import { HomeAssistant } from "../../../../../types";
+import { customElement, LitElement, property } from "lit-element";
 import { html } from "lit-html";
+import "../../../../../components/ha-yaml-editor";
 import { EventTrigger } from "../../../../../data/automation";
+import { HomeAssistant } from "../../../../../types";
+import {
+  handleChangeEvent,
+  TriggerElement,
+} from "../ha-automation-trigger-row";
 
 @customElement("ha-automation-trigger-event")
 export class HaEventTrigger extends LitElement implements TriggerElement {
   @property() public hass!: HomeAssistant;
+
   @property() public trigger!: EventTrigger;
 
   public static get defaultConfig() {
@@ -35,13 +35,22 @@ export class HaEventTrigger extends LitElement implements TriggerElement {
           "ui.panel.config.automation.editor.triggers.type.event.event_data"
         )}
         .name=${"event_data"}
-        .value=${event_data}
-        @value-changed=${this._valueChanged}
+        .defaultValue=${event_data}
+        @value-changed=${this._dataChanged}
       ></ha-yaml-editor>
     `;
   }
 
   private _valueChanged(ev: CustomEvent): void {
+    ev.stopPropagation();
+    handleChangeEvent(this, ev);
+  }
+
+  private _dataChanged(ev: CustomEvent): void {
+    ev.stopPropagation();
+    if (!ev.detail.isValid) {
+      return;
+    }
     handleChangeEvent(this, ev);
   }
 }

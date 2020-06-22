@@ -1,22 +1,25 @@
+import { customElement, html, LitElement, property } from "lit-element";
+import { fireEvent } from "../../../../../common/dom/fire_event";
 import "../../../../../components/device/ha-device-picker";
 import "../../../../../components/device/ha-device-trigger-picker";
 import "../../../../../components/ha-form/ha-form";
-
 import {
-  fetchDeviceTriggerCapabilities,
   deviceAutomationsEqual,
   DeviceTrigger,
+  fetchDeviceTriggerCapabilities,
 } from "../../../../../data/device_automation";
-import { LitElement, customElement, property, html } from "lit-element";
-import { fireEvent } from "../../../../../common/dom/fire_event";
 import { HomeAssistant } from "../../../../../types";
 
 @customElement("ha-automation-trigger-device")
 export class HaDeviceTrigger extends LitElement {
   @property() public hass!: HomeAssistant;
+
   @property() public trigger!: DeviceTrigger;
+
   @property() private _deviceId?: string;
+
   @property() private _capabilities?;
+
   private _origTrigger?: DeviceTrigger;
 
   public static get defaultConfig() {
@@ -42,14 +45,18 @@ export class HaDeviceTrigger extends LitElement {
         .value=${deviceId}
         @value-changed=${this._devicePicked}
         .hass=${this.hass}
-        label="Device"
+        label=${this.hass.localize(
+          "ui.panel.config.automation.editor.triggers.type.device.label"
+        )}
       ></ha-device-picker>
       <ha-device-trigger-picker
         .value=${this.trigger}
         .deviceId=${deviceId}
         @value-changed=${this._deviceTriggerPicked}
         .hass=${this.hass}
-        label="Trigger"
+        label=${this.hass.localize(
+          "ui.panel.config.automation.editor.triggers.type.device.trigger"
+        )}
       ></ha-device-trigger-picker>
       ${extraFieldsData
         ? html`

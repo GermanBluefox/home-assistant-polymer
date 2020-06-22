@@ -1,36 +1,39 @@
-import {
-  LitElement,
-  TemplateResult,
-  html,
-  CSSResultArray,
-  css,
-  customElement,
-  property,
-} from "lit-element";
 import "@polymer/app-layout/app-header-layout/app-header-layout";
 import "@polymer/app-layout/app-header/app-header";
 import "@polymer/app-layout/app-toolbar/app-toolbar";
-import "@polymer/paper-icon-button/paper-icon-button";
+import "../../components/ha-icon-button";
 import "@polymer/paper-tabs/paper-tab";
 import "@polymer/paper-tabs/paper-tabs";
-
-import "../../components/ha-menu-button";
-import "./developer-tools-router";
-
+import {
+  css,
+  CSSResultArray,
+  customElement,
+  html,
+  LitElement,
+  property,
+  TemplateResult,
+} from "lit-element";
 import scrollToTarget from "../../common/dom/scroll-to-target";
-
+import { navigate } from "../../common/navigate";
+import "../../components/ha-menu-button";
 import { haStyle } from "../../resources/styles";
 import { HomeAssistant, Route } from "../../types";
-import { navigate } from "../../common/navigate";
-import { isComponentLoaded } from "../../common/config/is_component_loaded";
+import "./developer-tools-router";
 
 @customElement("ha-panel-developer-tools")
 class PanelDeveloperTools extends LitElement {
   @property() public hass!: HomeAssistant;
+
   @property() public route!: Route;
+
   @property() public narrow!: boolean;
 
-  protected render(): TemplateResult | void {
+  protected firstUpdated(changedProps) {
+    super.firstUpdated(changedProps);
+    this.hass.loadBackendTranslation("title");
+  }
+
+  protected render(): TemplateResult {
     const page = this._page;
     return html`
       <app-header-layout has-scrolling-region>
@@ -58,9 +61,6 @@ class PanelDeveloperTools extends LitElement {
                 "ui.panel.developer-tools.tabs.services.title"
               )}
             </paper-tab>
-            <paper-tab page-name="logs">
-              ${this.hass.localize("ui.panel.developer-tools.tabs.logs.title")}
-            </paper-tab>
             <paper-tab page-name="template">
               ${this.hass.localize(
                 "ui.panel.developer-tools.tabs.templates.title"
@@ -70,18 +70,6 @@ class PanelDeveloperTools extends LitElement {
               ${this.hass.localize(
                 "ui.panel.developer-tools.tabs.events.title"
               )}
-            </paper-tab>
-            ${isComponentLoaded(this.hass, "mqtt")
-              ? html`
-                  <paper-tab page-name="mqtt">
-                    ${this.hass.localize(
-                      "ui.panel.developer-tools.tabs.mqtt.title"
-                    )}
-                  </paper-tab>
-                `
-              : ""}
-            <paper-tab page-name="info">
-              ${this.hass.localize("ui.panel.developer-tools.tabs.info.title")}
             </paper-tab>
           </paper-tabs>
         </app-header>

@@ -1,20 +1,27 @@
-import "@polymer/app-layout/app-toolbar/app-toolbar";
 import "@material/mwc-button";
-import "@polymer/paper-checkbox/paper-checkbox";
-import "@polymer/paper-dialog-scrollable/paper-dialog-scrollable";
-import "@polymer/paper-icon-button/paper-icon-button";
-import "@polymer/iron-icon/iron-icon";
+import { mdiDelete, mdiDownload, mdiHistory } from "@mdi/js";
+import { PaperCheckboxElement } from "@polymer/paper-checkbox/paper-checkbox";
 import "@polymer/paper-input/paper-input";
-import { html } from "@polymer/polymer/lib/utils/html-tag";
-import { PolymerElement } from "@polymer/polymer/polymer-element";
+import {
+  css,
+  CSSResult,
+  customElement,
+  html,
+  LitElement,
+  property,
+  TemplateResult,
+} from "lit-element";
+import { createCloseHeading } from "../../../../src/components/ha-dialog";
+import "../../../../src/components/ha-svg-icon";
 import { getSignedPath } from "../../../../src/data/auth";
-
-import "../../../../src/resources/ha-style";
-import "../../../../src/components/dialog/ha-paper-dialog";
-import { customElement } from "lit-element";
-import { PaperDialogElement } from "@polymer/paper-dialog";
+import {
+  fetchHassioSnapshotInfo,
+  HassioSnapshotDetail,
+} from "../../../../src/data/hassio/snapshot";
+import { PolymerChangedEvent } from "../../../../src/polymer-types";
+import { haStyleDialog } from "../../../../src/resources/styles";
+import { HomeAssistant } from "../../../../src/types";
 import { HassioSnapshotDialogParams } from "./show-dialog-hassio-snapshot";
-import { fetchHassioSnapshotInfo } from "../../../../src/data/hassio";
 
 const _computeFolders = (folders) => {
   const list: Array<{ slug: string; name: string; checked: boolean }> = [];
@@ -46,51 +53,171 @@ const _computeAddons = (addons) => {
   }));
 };
 
-@customElement("dialog-hassio-snapshot")
-class HassioSnapshotDialog extends PolymerElement {
-  // Commented out because it breaks Polymer! Kept around for when we migrate
-  // to Lit. Now just putting ts-ignore everywhere because we need this out.
-  // Sorry future developer.
-  // public hass!: HomeAssistant;
-  // protected error?: string;
-  // private snapshot?: any;
-  // private dialogParams?: HassioSnapshotDialogParams;
-  // private restoreHass!: boolean;
-  // private snapshotPassword!: string;
+interface AddonItem {
+  slug: string;
+  name: string;
+  version: string;
+  checked: boolean | null | undefined;
+}
 
-  static get template() {
+interface FolderItem {
+  slug: string;
+  name: string;
+  checked: boolean | null | undefined;
+}
+
+@customElement("dialog-hassio-snapshot")
+class HassioSnapshotDialog extends LitElement {
+  @property() public hass!: HomeAssistant;
+
+  @property() private _error?: string;
+
+  @property() private _snapshot?: HassioSnapshotDetail;
+
+  @property() private _folders!: FolderItem[];
+
+  @property() private _addons!: AddonItem[];
+
+  @property() private _dialogParams?: HassioSnapshotDialogParams;
+
+  @property() private _snapshotPassword!: string;
+
+  @property() private _restoreHass: boolean | null | undefined = true;
+
+  public async showDialog(params: HassioSnapshotDialogParams) {
+    this._snapshot = await fetchHassioSnapshotInfo(this.hass, params.slug);
+    this._folders = _computeFolders(
+      this._snapshot.folders
+    ).sort((a: FolderItem, b: FolderItem) => (a.name > b.name ? 1 : -1));
+    this._addons = _computeAddons(
+      this._snapshot.addons
+    ).sort((a: AddonItem, b: AddonItem) => (a.name > b.name ? 1 : -1));
+
+    this._dialogParams = params;
+  }
+
+  protected render(): TemplateResult {
+    if (!this._dialogParams || !this._snapshot) {
+      return html``;
+    }
     return html`
-      <style include="ha-style-dialog">
-        ha-paper-dialog {
-          min-width: 350px;
-          font-size: 14px;
-          border-radius: 2px;
-        }
-        app-toolbar {
-          margin: 0;
-          padding: 0 16px;
-          color: var(--primary-text-color);
-          background-color: var(--secondary-background-color);
-        }
-        app-toolbar [main-title] {
-          margin-left: 16px;
-        }
-        ha-paper-dialog-scrollable {
-          margin: 0;
-        }
+      <ha-dialog
+        open
+        stacked
+        @closing=${this._closeDialog}
+        .heading=${createCloseHeading(this.hass, this._computeName)}
+      >
+        <div class="details">
+          ${this._snapshot.type === "full"
+            ? "Full snapshot"
+            : "Partial snapshot"}
+          (${this._computeSize})<br />
+          ${this._formatDatetime(this._snapshot.date)}
+        </div>
+        <div>Home Assistant:</div>
+        <paper-checkbox
+          .checked=${this._restoreHass}
+          @change="${(ev: Event) => {
+            this._restoreHass = (ev.target as PaperCheckboxElement).checked;
+          }}"
+        >
+          Home Assistant ${this._snapshot.homeassistant}
+        </paper-checkbox>
+        ${this._folders.length
+          ? html`
+              <div>Folders:</div>
+              <paper-dialog-scrollable class="no-margin-top">
+                ${this._folders.map((item) => {
+                  return html`
+                    <paper-checkbox
+                      .checked=${item.checked}
+                      @change="${(ev: Event) =>
+                        this._updateFolders(
+                          item,
+                          (ev.target as PaperCheckboxElement).checked
+                        )}"
+                    >
+                      ${item.name}
+                    </paper-checkbox>
+                  `;
+                })}
+              </paper-dialog-scrollable>
+            `
+          : ""}
+        ${this._addons.length
+          ? html`
+              <div>Add-on:</div>
+              <paper-dialog-scrollable class="no-margin-top">
+                ${this._addons.map((item) => {
+                  return html`
+                    <paper-checkbox
+                      .checked=${item.checked}
+                      @change="${(ev: Event) =>
+                        this._updateAddons(
+                          item,
+                          (ev.target as PaperCheckboxElement).checked
+                        )}"
+                    >
+                      ${item.name}
+                    </paper-checkbox>
+                  `;
+                })}
+              </paper-dialog-scrollable>
+            `
+          : ""}
+        ${this._snapshot.protected
+          ? html`
+              <paper-input
+                autofocus=""
+                label="Password"
+                type="password"
+                @value-changed=${this._passwordInput}
+                .value=${this._snapshotPassword}
+              ></paper-input>
+            `
+          : ""}
+        ${this._error ? html` <p class="error">Error: ${this._error}</p> ` : ""}
+
+        <div>Actions:</div>
+
+        <mwc-button @click=${this._downloadClicked} slot="primaryAction">
+          <ha-svg-icon path=${mdiDownload} class="icon"></ha-svg-icon>
+          Download Snapshot
+        </mwc-button>
+
+        <mwc-button
+          @click=${this._partialRestoreClicked}
+          slot="secondaryAction"
+        >
+          <ha-svg-icon path=${mdiHistory} class="icon"></ha-svg-icon>
+          Restore Selected
+        </mwc-button>
+        ${this._snapshot.type === "full"
+          ? html`
+              <mwc-button
+                @click=${this._fullRestoreClicked}
+                slot="secondaryAction"
+              >
+                <ha-svg-icon path=${mdiHistory} class="icon"></ha-svg-icon>
+                Wipe &amp; restore
+              </mwc-button>
+            `
+          : ""}
+        <mwc-button @click=${this._deleteClicked} slot="secondaryAction">
+          <ha-svg-icon path=${mdiDelete} class="icon warning"></ha-svg-icon>
+          <span class="warning">Delete Snapshot</span>
+        </mwc-button>
+      </ha-dialog>
+    `;
+  }
+
+  static get styles(): CSSResult[] {
+    return [
+      haStyleDialog,
+      css`
         paper-checkbox {
           display: block;
           margin: 4px;
-        }
-        @media all and (max-width: 450px), all and (max-height: 500px) {
-          ha-paper-dialog {
-            max-height: 100%;
-            height: 100%;
-          }
-          app-toolbar {
-            color: var(--text-primary-color);
-            background-color: var(--primary-color);
-          }
         }
         .details {
           color: var(--secondary-text-color);
@@ -112,259 +239,155 @@ class HassioSnapshotDialog extends PolymerElement {
         .no-margin-top {
           margin-top: 0;
         }
-      </style>
-      <ha-paper-dialog
-        id="dialog"
-        with-backdrop=""
-        on-iron-overlay-closed="_dialogClosed"
-      >
-        <app-toolbar>
-          <paper-icon-button
-            icon="hassio:close"
-            dialog-dismiss=""
-          ></paper-icon-button>
-          <div main-title="">[[_computeName(snapshot)]]</div>
-        </app-toolbar>
-        <div class="details">
-          [[_computeType(snapshot.type)]] ([[_computeSize(snapshot.size)]])<br />
-          [[_formatDatetime(snapshot.date)]]
-        </div>
-        <div>Home Assistant:</div>
-        <paper-checkbox checked="{{restoreHass}}">
-          Home Assistant [[snapshot.homeassistant]]
-        </paper-checkbox>
-        <template is="dom-if" if="[[_folders.length]]">
-          <div>Folders:</div>
-          <template is="dom-repeat" items="[[_folders]]">
-            <paper-checkbox checked="{{item.checked}}">
-              [[item.name]]
-            </paper-checkbox>
-          </template>
-        </template>
-        <template is="dom-if" if="[[_addons.length]]">
-          <div>Add-ons:</div>
-          <paper-dialog-scrollable class="no-margin-top">
-            <template is="dom-repeat" items="[[_addons]]" sort="_sortAddons">
-              <paper-checkbox checked="{{item.checked}}">
-                [[item.name]] <span class="details">([[item.version]])</span>
-              </paper-checkbox>
-            </template>
-          </paper-dialog-scrollable>
-        </template>
-        <template is="dom-if" if="[[snapshot.protected]]">
-          <paper-input
-            autofocus=""
-            label="Password"
-            type="password"
-            value="{{snapshotPassword}}"
-          ></paper-input>
-        </template>
-        <template is="dom-if" if="[[error]]">
-          <p class="error">Error: [[error]]</p>
-        </template>
-        <div>Actions:</div>
-        <ul class="buttons">
-          <li>
-            <mwc-button on-click="_downloadClicked">
-              <iron-icon icon="hassio:download" class="icon"></iron-icon>
-              Download Snapshot
-            </mwc-button>
-          </li>
-          <li>
-            <mwc-button on-click="_partialRestoreClicked">
-              <iron-icon icon="hassio:history" class="icon"> </iron-icon>
-              Restore Selected
-            </mwc-button>
-          </li>
-          <template is="dom-if" if="[[_isFullSnapshot(snapshot.type)]]">
-            <li>
-              <mwc-button on-click="_fullRestoreClicked">
-                <iron-icon icon="hassio:history" class="icon"> </iron-icon>
-                Wipe &amp; restore
-              </mwc-button>
-            </li>
-          </template>
-          <li>
-            <mwc-button on-click="_deleteClicked">
-              <iron-icon icon="hassio:delete" class="icon warning"> </iron-icon>
-              <span class="warning">Delete Snapshot</span>
-            </mwc-button>
-          </li>
-        </ul>
-      </ha-paper-dialog>
-    `;
+      `,
+    ];
   }
 
-  static get properties() {
-    return {
-      hass: Object,
-      dialogParams: Object,
-      snapshot: Object,
-      _folders: Object,
-      _addons: Object,
-      restoreHass: {
-        type: Boolean,
-        value: true,
-      },
-      snapshotPassword: String,
-      error: String,
-    };
-  }
-
-  public async showDialog(params: HassioSnapshotDialogParams) {
-    // @ts-ignore
-    const snapshot = await fetchHassioSnapshotInfo(this.hass, params.slug);
-    this.setProperties({
-      dialogParams: params,
-      snapshot,
-      _folders: _computeFolders(snapshot.folders),
-      _addons: _computeAddons(snapshot.addons),
+  private _updateFolders(item: FolderItem, value: boolean | null | undefined) {
+    this._folders = this._folders.map((folder) => {
+      if (folder.slug === item.slug) {
+        folder.checked = value;
+      }
+      return folder;
     });
-    (this.$.dialog as PaperDialogElement).open();
   }
 
-  protected _isFullSnapshot(type) {
-    return type === "full";
+  private _updateAddons(item: AddonItem, value: boolean | null | undefined) {
+    this._addons = this._addons.map((addon) => {
+      if (addon.slug === item.slug) {
+        addon.checked = value;
+      }
+      return addon;
+    });
   }
 
-  protected _partialRestoreClicked() {
+  private _passwordInput(ev: PolymerChangedEvent<string>) {
+    this._snapshotPassword = ev.detail.value;
+  }
+
+  private _partialRestoreClicked() {
     if (!confirm("Are you sure you want to restore this snapshot?")) {
       return;
     }
-    // @ts-ignore
+
     const addons = this._addons
       .filter((addon) => addon.checked)
       .map((addon) => addon.slug);
-    // @ts-ignore
+
     const folders = this._folders
       .filter((folder) => folder.checked)
       .map((folder) => folder.slug);
 
-    const data = {
-      // @ts-ignore
-      homeassistant: this.restoreHass,
+    const data: {
+      homeassistant: boolean | null | undefined;
+      addons: any;
+      folders: any;
+      password?: string;
+    } = {
+      homeassistant: this._restoreHass,
       addons,
       folders,
     };
-    // @ts-ignore
-    if (this.snapshot.protected) {
-      // @ts-ignore
-      data.password = this.snapshotPassword;
+
+    if (this._snapshot!.protected) {
+      data.password = this._snapshotPassword;
     }
 
-    // @ts-ignore
     this.hass
       .callApi(
         "POST",
-        // @ts-ignore
-        `hassio/snapshots/${this.dialogParams!.slug}/restore/partial`,
+
+        `hassio/snapshots/${this._snapshot!.slug}/restore/partial`,
         data
       )
       .then(
         () => {
           alert("Snapshot restored!");
-          (this.$.dialog as PaperDialogElement).close();
+          this._closeDialog();
         },
         (error) => {
-          // @ts-ignore
-          this.error = error.body.message;
+          this._error = error.body.message;
         }
       );
   }
 
-  protected _fullRestoreClicked() {
+  private _fullRestoreClicked() {
     if (!confirm("Are you sure you want to restore this snapshot?")) {
       return;
     }
-    // @ts-ignore
-    const data = this.snapshot.protected
-      ? {
-          password:
-            // @ts-ignore
-            this.snapshotPassword,
-        }
+
+    const data = this._snapshot!.protected
+      ? { password: this._snapshotPassword }
       : undefined;
-    // @ts-ignore
+
     this.hass
       .callApi(
         "POST",
-        // @ts-ignore
-        `hassio/snapshots/${this.dialogParams!.slug}/restore/full`,
+        `hassio/snapshots/${this._snapshot!.slug}/restore/full`,
         data
       )
       .then(
         () => {
           alert("Snapshot restored!");
-          (this.$.dialog as PaperDialogElement).close();
+          this._closeDialog();
         },
         (error) => {
-          // @ts-ignore
-          this.error = error.body.message;
+          this._error = error.body.message;
         }
       );
   }
 
-  protected _deleteClicked() {
+  private _deleteClicked() {
     if (!confirm("Are you sure you want to delete this snapshot?")) {
       return;
     }
-    // @ts-ignore
+
     this.hass
-      // @ts-ignore
-      .callApi("POST", `hassio/snapshots/${this.dialogParams!.slug}/remove`)
+
+      .callApi("POST", `hassio/snapshots/${this._snapshot!.slug}/remove`)
       .then(
         () => {
-          (this.$.dialog as PaperDialogElement).close();
-          // @ts-ignore
-          this.dialogParams!.onDelete();
+          this._dialogParams!.onDelete();
+          this._closeDialog();
         },
         (error) => {
-          // @ts-ignore
-          this.error = error.body.message;
+          this._error = error.body.message;
         }
       );
   }
 
-  protected async _downloadClicked() {
-    let signedPath;
+  private async _downloadClicked() {
+    let signedPath: { path: string };
     try {
       signedPath = await getSignedPath(
-        // @ts-ignore
         this.hass,
-        // @ts-ignore
-        `/api/hassio/snapshots/${this.dialogParams!.slug}/download`
+        `/api/hassio/snapshots/${this._snapshot!.slug}/download`
       );
     } catch (err) {
       alert(`Error: ${err.message}`);
       return;
     }
-    // @ts-ignore
-    const name = this._computeName(this.snapshot).replace(/[^a-z0-9]+/gi, "_");
+
+    const name = this._computeName.replace(/[^a-z0-9]+/gi, "_");
     const a = document.createElement("a");
     a.href = signedPath.path;
     a.download = `Hass_io_${name}.tar`;
-    this.$.dialog.appendChild(a);
+    this.shadowRoot!.appendChild(a);
     a.click();
-    this.$.dialog.removeChild(a);
+    this.shadowRoot!.removeChild(a);
   }
 
-  protected _computeName(snapshot) {
-    return snapshot ? snapshot.name || snapshot.slug : "Unnamed snapshot";
+  private get _computeName() {
+    return this._snapshot
+      ? this._snapshot.name || this._snapshot.slug
+      : "Unnamed snapshot";
   }
 
-  protected _computeType(type) {
-    return type === "full" ? "Full snapshot" : "Partial snapshot";
+  private get _computeSize() {
+    return Math.ceil(this._snapshot!.size * 10) / 10 + " MB";
   }
 
-  protected _computeSize(size) {
-    return Math.ceil(size * 10) / 10 + " MB";
-  }
-
-  protected _sortAddons(a, b) {
-    return a.name < b.name ? -1 : 1;
-  }
-
-  protected _formatDatetime(datetime) {
+  private _formatDatetime(datetime) {
     return new Date(datetime).toLocaleDateString(navigator.language, {
       weekday: "long",
       year: "numeric",
@@ -375,13 +398,12 @@ class HassioSnapshotDialog extends PolymerElement {
     });
   }
 
-  protected _dialogClosed() {
-    this.setProperties({
-      dialogParams: undefined,
-      snapshot: undefined,
-      _addons: [],
-      _folders: [],
-    });
+  private _closeDialog() {
+    this._dialogParams = undefined;
+    this._snapshot = undefined;
+    this._snapshotPassword = "";
+    this._folders = [];
+    this._addons = [];
   }
 }
 

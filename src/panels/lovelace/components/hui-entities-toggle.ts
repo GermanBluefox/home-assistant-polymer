@@ -1,22 +1,19 @@
 import {
-  html,
-  LitElement,
-  PropertyValues,
-  TemplateResult,
-  customElement,
-  property,
   css,
   CSSResult,
+  customElement,
+  html,
+  LitElement,
+  property,
+  PropertyValues,
+  TemplateResult,
 } from "lit-element";
-
-import "../../../components/ha-switch";
-
-// tslint:disable-next-line: no-duplicate-imports
-import { HaSwitch } from "../../../components/ha-switch";
 import { DOMAINS_TOGGLE } from "../../../common/const";
-import { turnOnOffEntities } from "../common/entity/turn-on-off-entities";
-import { HomeAssistant } from "../../../types";
+import "../../../components/ha-switch";
+import type { HaSwitch } from "../../../components/ha-switch";
 import { forwardHaptic } from "../../../data/haptics";
+import type { HomeAssistant } from "../../../types";
+import { turnOnOffEntities } from "../common/entity/turn-on-off-entities";
 
 @customElement("hui-entities-toggle")
 class HuiEntitiesToggle extends LitElement {
@@ -37,7 +34,7 @@ class HuiEntitiesToggle extends LitElement {
     }
   }
 
-  protected render(): TemplateResult | void {
+  protected render(): TemplateResult {
     if (!this._toggleEntities) {
       return html``;
     }
@@ -47,7 +44,7 @@ class HuiEntitiesToggle extends LitElement {
         aria-label=${this.hass!.localize(
           "ui.panel.lovelace.card.entities.toggle"
         )}
-        ?checked="${this._toggleEntities!.some((entityId) => {
+        .checked="${this._toggleEntities!.some((entityId) => {
           const stateObj = this.hass!.states[entityId];
           return stateObj && stateObj.state === "on";
         })}"

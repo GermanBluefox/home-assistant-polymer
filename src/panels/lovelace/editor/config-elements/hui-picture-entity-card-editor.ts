@@ -1,32 +1,31 @@
-import {
-  html,
-  LitElement,
-  TemplateResult,
-  customElement,
-  property,
-} from "lit-element";
-import "@polymer/paper-input/paper-input";
 import "@polymer/paper-dropdown-menu/paper-dropdown-menu";
+import "@polymer/paper-input/paper-input";
 import "@polymer/paper-item/paper-item";
 import "@polymer/paper-listbox/paper-listbox";
-
+import {
+  customElement,
+  html,
+  LitElement,
+  property,
+  TemplateResult,
+} from "lit-element";
+import { fireEvent } from "../../../../common/dom/fire_event";
+import "../../../../components/ha-switch";
+import "../../../../components/ha-formfield";
+import { ActionConfig } from "../../../../data/lovelace";
+import { HomeAssistant } from "../../../../types";
+import { PictureEntityCardConfig } from "../../cards/types";
+import { struct } from "../../common/structs/struct";
 import "../../components/hui-action-editor";
 import "../../components/hui-entity-editor";
-import "../../../../components/ha-switch";
 import "../../components/hui-theme-select-editor";
-
-import { struct } from "../../common/structs/struct";
-import {
-  EntitiesEditorEvent,
-  EditorTarget,
-  actionConfigStruct,
-} from "../types";
-import { HomeAssistant } from "../../../../types";
 import { LovelaceCardEditor } from "../../types";
-import { fireEvent } from "../../../../common/dom/fire_event";
+import {
+  actionConfigStruct,
+  EditorTarget,
+  EntitiesEditorEvent,
+} from "../types";
 import { configElementStyle } from "./config-elements-style";
-import { ActionConfig } from "../../../../data/lovelace";
-import { PictureEntityCardConfig } from "../../cards/types";
 
 const cardConfigStruct = struct({
   type: "string",
@@ -42,6 +41,8 @@ const cardConfigStruct = struct({
   show_state: "boolean?",
   theme: "string?",
 });
+
+const includeDomains = ["camera"];
 
 @customElement("hui-picture-entity-card-editor")
 export class HuiPictureEntityCardEditor extends LitElement
@@ -96,11 +97,11 @@ export class HuiPictureEntityCardEditor extends LitElement
   }
 
   get _theme(): string {
-    return this._config!.theme || "Backend-selected";
+    return this._config!.theme || "";
   }
 
-  protected render(): TemplateResult | void {
-    if (!this.hass) {
+  protected render(): TemplateResult {
+    if (!this.hass || !this._config) {
       return html``;
     }
 
@@ -116,7 +117,7 @@ export class HuiPictureEntityCardEditor extends LitElement
           )} (${this.hass.localize(
             "ui.panel.lovelace.editor.card.config.required"
           )})"
-          .hass="${this.hass}"
+          .hass=${this.hass}
           .value="${this._entity}"
           .configValue=${"entity"}
           @change="${this._valueChanged}"
@@ -148,11 +149,11 @@ export class HuiPictureEntityCardEditor extends LitElement
           )} (${this.hass.localize(
             "ui.panel.lovelace.editor.card.config.optional"
           )})"
-          .hass="${this.hass}"
+          .hass=${this.hass}
           .value="${this._camera_image}"
           .configValue=${"camera_image"}
           @change="${this._valueChanged}"
-          include-domains='["camera"]'
+          .includeDomains=${includeDomains}
           allow-custom-entity
         ></ha-entity-picker>
         <div class="side-by-side">
@@ -170,9 +171,7 @@ export class HuiPictureEntityCardEditor extends LitElement
               .selected="${views.indexOf(this._camera_view)}"
             >
               ${views.map((view) => {
-                return html`
-                  <paper-item>${view}</paper-item>
-                `;
+                return html` <paper-item>${view}</paper-item> `;
               })}
             </paper-listbox>
           </paper-dropdown-menu>
@@ -189,22 +188,28 @@ export class HuiPictureEntityCardEditor extends LitElement
           ></paper-input>
         </div>
         <div class="side-by-side">
-          <ha-switch
-            ?checked="${this._show_name !== false}"
-            .configValue="${"show_name"}"
-            @change="${this._valueChanged}"
-            >${this.hass.localize(
+          <ha-formfield
+            .label=${this.hass.localize(
               "ui.panel.lovelace.editor.card.generic.show_name"
-            )}</ha-switch
+            )}
           >
-          <ha-switch
-            ?checked="${this._show_state !== false}"
-            .configValue="${"show_state"}"
-            @change="${this._valueChanged}"
-            >${this.hass.localize(
+            <ha-switch
+              .checked="${this._config!.show_name !== false}"
+              .configValue="${"show_name"}"
+              @change="${this._valueChanged}"
+            ></ha-switch
+          ></ha-formfield>
+          <ha-formfield
+            .label=${this.hass.localize(
               "ui.panel.lovelace.editor.card.generic.show_state"
-            )}</ha-switch
+            )}
           >
+            <ha-switch
+              .checked="${this._config!.show_state !== false}"
+              .configValue="${"show_state"}"
+              @change="${this._valueChanged}"
+            ></ha-switch
+          ></ha-formfield>
         </div>
         <div class="side-by-side">
           <hui-action-editor
@@ -213,7 +218,7 @@ export class HuiPictureEntityCardEditor extends LitElement
             )} (${this.hass.localize(
               "ui.panel.lovelace.editor.card.config.optional"
             )})"
-            .hass="${this.hass}"
+            .hass=${this.hass}
             .config="${this._tap_action}"
             .actions="${actions}"
             .configValue="${"tap_action"}"
@@ -225,17 +230,17 @@ export class HuiPictureEntityCardEditor extends LitElement
             )} (${this.hass.localize(
               "ui.panel.lovelace.editor.card.config.optional"
             )})"
-            .hass="${this.hass}"
+            .hass=${this.hass}
             .config="${this._hold_action}"
             .actions="${actions}"
             .configValue="${"hold_action"}"
             @action-changed="${this._valueChanged}"
           ></hui-action-editor>
           <hui-theme-select-editor
-            .hass="${this.hass}"
+            .hass=${this.hass}
             .value="${this._theme}"
             .configValue="${"theme"}"
-            @theme-changed="${this._valueChanged}"
+            @value-changed="${this._valueChanged}"
           ></hui-theme-select-editor>
         </div>
       </div>
@@ -268,9 +273,7 @@ export class HuiPictureEntityCardEditor extends LitElement
           [target.configValue!]:
             target.checked !== undefined
               ? target.checked
-              : value
-              ? value
-              : target.config,
+              : value || target.config,
         };
       }
     }

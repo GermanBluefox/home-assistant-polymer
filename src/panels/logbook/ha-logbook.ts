@@ -1,68 +1,92 @@
-import "@polymer/iron-icon/iron-icon";
-
-import formatTime from "../../common/datetime/format_time";
-import formatDate from "../../common/datetime/format_date";
-import { domainIcon } from "../../common/entity/domain_icon";
-import { computeRTL } from "../../common/util/compute_rtl";
 import {
-  LitElement,
-  html,
-  property,
-  TemplateResult,
-  CSSResult,
   css,
+  CSSResult,
+  html,
+  LitElement,
+  property,
   PropertyValues,
+  TemplateResult,
 } from "lit-element";
-import { HomeAssistant } from "../../types";
+import { scroll } from "lit-virtualizer";
+import { formatDate } from "../../common/datetime/format_date";
+import { fetchUsers } from "../../data/user";
+import { formatTimeWithSeconds } from "../../common/datetime/format_time";
 import { fireEvent } from "../../common/dom/fire_event";
-import "lit-virtualizer";
+import { domainIcon } from "../../common/entity/domain_icon";
+import { stateIcon } from "../../common/entity/state_icon";
+import { computeRTL } from "../../common/util/compute_rtl";
+import "../../components/ha-icon";
 import { LogbookEntry } from "../../data/logbook";
+import { HomeAssistant } from "../../types";
 
 class HaLogbook extends LitElement {
   @property() public hass!: HomeAssistant;
+
+  @property({ attribute: false })
+  private _userid_to_name = {};
+
   @property() public entries: LogbookEntry[] = [];
+
   @property({ attribute: "rtl", type: Boolean, reflect: true })
   // @ts-ignore
   private _rtl = false;
 
-  protected updated(changedProps: PropertyValues) {
-    super.updated(changedProps);
-    if (!changedProps.has("hass")) {
-      return;
-    }
+  protected shouldUpdate(changedProps: PropertyValues) {
     const oldHass = changedProps.get("hass") as HomeAssistant | undefined;
-    if (oldHass && oldHass.language !== this.hass.language) {
-      this._rtl = computeRTL(this.hass);
-    }
+    const languageChanged =
+      oldHass === undefined || oldHass.language !== this.hass.language;
+    return changedProps.has("entries") || languageChanged;
   }
 
-  protected firstUpdated(changedProps: PropertyValues) {
-    super.firstUpdated(changedProps);
+  protected updated(_changedProps: PropertyValues) {
     this._rtl = computeRTL(this.hass);
   }
 
-  protected render(): TemplateResult | void {
+  protected render(): TemplateResult {
     if (!this.entries?.length) {
       return html`
-        ${this.hass.localize("ui.panel.logbook.entries_not_found")}
+        <div class="container">
+          ${this.hass.localize("ui.panel.logbook.entries_not_found")}
+        </div>
       `;
     }
 
     return html`
-      <lit-virtualizer
-        .items=${this.entries}
-        .renderItem=${(item: LogbookEntry, index: number) =>
-          this._renderLogbookItem(item, index)}
-        style="height: 100%;"
-      ></lit-virtualizer>
+      <div class="container">
+        ${scroll({
+          items: this.entries,
+          renderItem: (item: LogbookEntry, index?: number) =>
+            this._renderLogbookItem(item, index),
+        })}
+      </div>
     `;
+  }
+
+  private async _fetchUsers() {
+    const users = await fetchUsers(this.hass);
+    const userid_to_name = {};
+    users.forEach((user) => {
+      userid_to_name[user.id] = user.name;
+    });
+    this._userid_to_name = userid_to_name;
+  }
+
+  protected firstUpdated(changedProperties: PropertyValues) {
+    super.firstUpdated(changedProperties);
+    this._fetchUsers();
   }
 
   private _renderLogbookItem(
     item: LogbookEntry,
-    index: number
+    index?: number
   ): TemplateResult {
+    if (index === undefined) {
+      return html``;
+    }
     const previous = this.entries[index - 1];
+    const state = item.entity_id ? this.hass.states[item.entity_id] : undefined;
+    const item_username =
+      item.context_user_id && this._userid_to_name[item.context_user_id];
     return html`
       <div>
         ${index === 0 ||
@@ -79,14 +103,14 @@ class HaLogbook extends LitElement {
 
         <div class="entry">
           <div class="time">
-            ${formatTime(new Date(item.when), this.hass.language)}
+            ${formatTimeWithSeconds(new Date(item.when), this.hass.language)}
           </div>
-          <iron-icon .icon="${domainIcon(item.domain)}"></iron-icon>
+          <ha-icon
+            .icon=${state ? stateIcon(state) : domainIcon(item.domain)}
+          ></ha-icon>
           <div class="message">
             ${!item.entity_id
-              ? html`
-                  <span class="name">${item.name}</span>
-                `
+              ? html` <span class="name">${item.name}</span> `
               : html`
                   <a
                     href="#"
@@ -97,7 +121,11 @@ class HaLogbook extends LitElement {
                     ${item.name}
                   </a>
                 `}
-            <span>${item.message}</span>
+            <span
+              >${item.message}${item_username
+                ? ` (${item_username})`
+                : ``}</span
+            >
           </div>
         </div>
       </div>
@@ -128,7 +156,8 @@ class HaLogbook extends LitElement {
       }
 
       .time {
-        width: 55px;
+        width: 65px;
+        flex-shrink: 0;
         font-size: 0.8em;
         color: var(--secondary-text-color);
       }
@@ -137,8 +166,9 @@ class HaLogbook extends LitElement {
         direction: rtl;
       }
 
-      iron-icon {
+      ha-icon {
         margin: 0 8px 0 16px;
+        flex-shrink: 0;
         color: var(--primary-text-color);
       }
 
@@ -148,6 +178,22 @@ class HaLogbook extends LitElement {
 
       a {
         color: var(--primary-color);
+      }
+
+      .container {
+        padding: 0 16px;
+      }
+
+      .uni-virtualizer-host {
+        display: block;
+        position: relative;
+        contain: strict;
+        height: 100%;
+        overflow: auto;
+      }
+
+      .uni-virtualizer-host > * {
+        box-sizing: border-box;
       }
     `;
   }

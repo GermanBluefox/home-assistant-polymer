@@ -1,27 +1,26 @@
+import { HassEntity } from "home-assistant-js-websocket";
 import {
-  html,
-  LitElement,
-  TemplateResult,
   css,
   CSSResult,
-  property,
   customElement,
+  html,
+  LitElement,
+  property,
   PropertyValues,
+  TemplateResult,
 } from "lit-element";
-import { HassEntity } from "home-assistant-js-websocket";
-
+import { applyThemesOnElement } from "../../../common/dom/apply_themes_on_element";
+import { fireEvent } from "../../../common/dom/fire_event";
+import { computeStateName } from "../../../common/entity/compute_state_name";
 import "../../../components/ha-card";
 import "../../../components/ha-icon";
-
-import { computeStateName } from "../../../common/entity/compute_state_name";
-
-import { LovelaceCardEditor, LovelaceCard } from "../types";
 import { HomeAssistant } from "../../../types";
-import { fireEvent } from "../../../common/dom/fire_event";
-import { hasConfigOrEntityChanged } from "../common/has-changed";
-import { PlantStatusCardConfig, PlantAttributeTarget } from "./types";
-import { applyThemesOnElement } from "../../../common/dom/apply_themes_on_element";
 import { actionHandler } from "../common/directives/action-handler-directive";
+import { findEntities } from "../common/find-entites";
+import { hasConfigOrEntityChanged } from "../common/has-changed";
+import { LovelaceCard, LovelaceCardEditor } from "../types";
+import { PlantAttributeTarget, PlantStatusCardConfig } from "./types";
+import { createEntityNotFoundWarning } from "../components/hui-warning";
 
 const SENSORS = {
   moisture: "hass:water",
@@ -40,8 +39,22 @@ class HuiPlantStatusCard extends LitElement implements LovelaceCard {
     return document.createElement("hui-plant-status-card-editor");
   }
 
-  public static getStubConfig(): object {
-    return { entity: "" };
+  public static getStubConfig(
+    hass: HomeAssistant,
+    entities: string[],
+    entitiesFallback: string[]
+  ): PlantStatusCardConfig {
+    const includeDomains = ["plant"];
+    const maxEntities = 1;
+    const foundEntities = findEntities(
+      hass,
+      maxEntities,
+      entities,
+      entitiesFallback,
+      includeDomains
+    );
+
+    return { type: "plant-status", entity: foundEntities[0] || "" };
   }
 
   @property() public hass?: HomeAssistant;
@@ -84,7 +97,7 @@ class HuiPlantStatusCard extends LitElement implements LovelaceCard {
     }
   }
 
-  protected render(): TemplateResult | void {
+  protected render(): TemplateResult {
     if (!this.hass || !this._config) {
       return html``;
     }
@@ -93,13 +106,9 @@ class HuiPlantStatusCard extends LitElement implements LovelaceCard {
 
     if (!stateObj) {
       return html`
-        <hui-warning
-          >${this.hass.localize(
-            "ui.panel.lovelace.warning.entity_not_found",
-            "entity",
-            this._config.entity
-          )}</hui-warning
-        >
+        <hui-warning>
+          ${createEntityNotFoundWarning(this.hass, this._config.entity)}
+        </hui-warning>
       `;
     }
 

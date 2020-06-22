@@ -1,29 +1,29 @@
+import "@material/mwc-button/mwc-button";
 import {
+  css,
+  CSSResult,
+  customElement,
   html,
   LitElement,
-  TemplateResult,
   property,
-  CSSResult,
-  css,
-  customElement,
   PropertyValues,
+  TemplateResult,
 } from "lit-element";
-
-import "../components/hui-generic-entity-row";
 import "../../../components/entity/ha-entity-toggle";
-import "../components/hui-warning";
-
+import { UNAVAILABLE_STATES } from "../../../data/entity";
 import { HomeAssistant } from "../../../types";
-import { EntityRow, EntityConfig } from "./types";
 import { hasConfigOrEntityChanged } from "../common/has-changed";
+import "../components/hui-generic-entity-row";
+import { createEntityNotFoundWarning } from "../components/hui-warning";
+import { ActionRowConfig, LovelaceRow } from "./types";
 
 @customElement("hui-script-entity-row")
-class HuiScriptEntityRow extends LitElement implements EntityRow {
+class HuiScriptEntityRow extends LitElement implements LovelaceRow {
   public hass?: HomeAssistant;
 
-  @property() private _config?: EntityConfig;
+  @property() private _config?: ActionRowConfig;
 
-  public setConfig(config: EntityConfig): void {
+  public setConfig(config: ActionRowConfig): void {
     if (!config) {
       throw new Error("Configuration error");
     }
@@ -34,7 +34,7 @@ class HuiScriptEntityRow extends LitElement implements EntityRow {
     return hasConfigOrEntityChanged(this, changedProps);
   }
 
-  protected render(): TemplateResult | void {
+  protected render(): TemplateResult {
     if (!this._config || !this.hass) {
       return html``;
     }
@@ -43,28 +43,30 @@ class HuiScriptEntityRow extends LitElement implements EntityRow {
 
     if (!stateObj) {
       return html`
-        <hui-warning
-          >${this.hass.localize(
-            "ui.panel.lovelace.warning.entity_not_found",
-            "entity",
-            this._config.entity
-          )}</hui-warning
-        >
+        <hui-warning>
+          ${createEntityNotFoundWarning(this.hass, this._config.entity)}
+        </hui-warning>
       `;
     }
 
     return html`
-      <hui-generic-entity-row .hass="${this.hass}" .config="${this._config}">
+      <hui-generic-entity-row .hass=${this.hass} .config=${this._config}>
         ${stateObj.attributes.can_cancel
           ? html`
               <ha-entity-toggle
-                .hass="${this.hass}"
-                .stateObj="${stateObj}"
+                .disabled=${UNAVAILABLE_STATES.includes(stateObj.state)}
+                .hass=${this.hass}
+                .stateObj=${stateObj}
               ></ha-entity-toggle>
             `
           : html`
-              <mwc-button @click="${this._callService}">
-                ${this.hass!.localize("ui.card.script.execute")}
+              <mwc-button
+                @click=${this._callService}
+                .disabled=${UNAVAILABLE_STATES.includes(stateObj.state)}
+                class="text-content"
+              >
+                ${this._config.action_name ||
+                this.hass!.localize("ui.card.script.execute")}
               </mwc-button>
             `}
       </hui-generic-entity-row>

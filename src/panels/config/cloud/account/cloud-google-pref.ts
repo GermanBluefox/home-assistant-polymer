@@ -1,30 +1,28 @@
+import "@material/mwc-button";
+import "@polymer/paper-input/paper-input";
+import type { PaperInputElement } from "@polymer/paper-input/paper-input";
 import {
+  css,
+  CSSResult,
   html,
   LitElement,
-  TemplateResult,
-  CSSResult,
-  css,
   property,
+  TemplateResult,
 } from "lit-element";
-import "@material/mwc-button";
-import "../../../../components/buttons/ha-call-api-button";
-
-import "../../../../components/ha-card";
-import "../../../../components/ha-switch";
-
-// tslint:disable-next-line
-import { HaSwitch } from "../../../../components/ha-switch";
 import { fireEvent } from "../../../../common/dom/fire_event";
-import { HomeAssistant } from "../../../../types";
+import "../../../../components/buttons/ha-call-api-button";
+import "../../../../components/ha-card";
+import type { HaSwitch } from "../../../../components/ha-switch";
 import { CloudStatusLoggedIn, updateCloudPref } from "../../../../data/cloud";
-import { PaperInputElement } from "@polymer/paper-input/paper-input";
+import type { HomeAssistant } from "../../../../types";
 import { showSaveSuccessToast } from "../../../../util/toast-saved-success";
 
 export class CloudGooglePref extends LitElement {
   @property() public hass?: HomeAssistant;
+
   @property() public cloudStatus?: CloudStatusLoggedIn;
 
-  protected render(): TemplateResult | void {
+  protected render(): TemplateResult {
     if (!this.cloudStatus) {
       return html``;
     }
@@ -55,6 +53,7 @@ export class CloudGooglePref extends LitElement {
               <a
                 href="https://assistant.google.com/services/a/uid/00000091fd5fb875?hl=en-US"
                 target="_blank"
+                rel="noreferrer"
               >
                 ${this.hass!.localize(
                   "ui.panel.config.cloud.account.google.enable_ha_skill"
@@ -65,6 +64,7 @@ export class CloudGooglePref extends LitElement {
               <a
                 href="https://www.nabucasa.com/config/google_assistant/"
                 target="_blank"
+                rel="noreferrer"
               >
                 ${this.hass!.localize(
                   "ui.panel.config.cloud.account.google.config_documentation"
@@ -118,7 +118,7 @@ export class CloudGooglePref extends LitElement {
         </div>
         <div class="card-actions">
           <ha-call-api-button
-            .hass="${this.hass}"
+            .hass=${this.hass}
             .disabled="${!google_enabled}"
             @hass-api-called=${this._syncEntitiesCalled}
             path="cloud/google_actions/sync"

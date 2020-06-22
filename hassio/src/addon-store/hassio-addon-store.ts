@@ -1,22 +1,29 @@
-import "./hassio-addon-repository";
-import "./hassio-repositories-editor";
-import { TemplateResult, html } from "lit-html";
+import "@material/mwc-icon-button/mwc-icon-button";
+import "@material/mwc-list/mwc-list-item";
+import { mdiDotsVertical } from "@mdi/js";
 import {
-  LitElement,
-  CSSResult,
   css,
+  CSSResult,
+  LitElement,
   property,
   PropertyValues,
 } from "lit-element";
-import { HomeAssistant } from "../../../src/types";
+import { html, TemplateResult } from "lit-html";
+import "../../../src/common/search/search-input";
+import "../../../src/components/ha-button-menu";
+import "../../../src/components/ha-svg-icon";
 import {
-  HassioAddonRepository,
-  HassioAddonInfo,
   fetchHassioAddonsInfo,
+  HassioAddonInfo,
+  HassioAddonRepository,
   reloadHassioAddons,
-} from "../../../src/data/hassio";
+} from "../../../src/data/hassio/addon";
+import "../../../src/layouts/hass-tabs-subpage";
 import "../../../src/layouts/loading-screen";
-import "../components/hassio-search-input";
+import { HomeAssistant, Route } from "../../../src/types";
+import { showRepositoriesDialog } from "../dialogs/repositories/show-dialog-repositories";
+import { supervisorTabs } from "../hassio-panel";
+import "./hassio-addon-repository";
 
 const sortRepos = (a: HassioAddonRepository, b: HassioAddonRepository) => {
   if (a.slug === "local") {
@@ -35,9 +42,16 @@ const sortRepos = (a: HassioAddonRepository, b: HassioAddonRepository) => {
 };
 
 class HassioAddonStore extends LitElement {
-  @property() public hass!: HomeAssistant;
-  @property() private _addons?: HassioAddonInfo[];
-  @property() private _repos?: HassioAddonRepository[];
+  @property({ attribute: false }) public hass!: HomeAssistant;
+
+  @property({ type: Boolean }) public narrow!: boolean;
+
+  @property({ attribute: false }) public route!: Route;
+
+  @property({ attribute: false }) private _addons?: HassioAddonInfo[];
+
+  @property({ attribute: false }) private _repos?: HassioAddonRepository[];
+
   @property() private _filter?: string;
 
   public async refreshData() {
@@ -48,45 +62,77 @@ class HassioAddonStore extends LitElement {
     await this._loadData();
   }
 
-  protected render(): TemplateResult | void {
-    if (!this._addons || !this._repos) {
-      return html`
-        <loading-screen></loading-screen>
-      `;
-    }
+  protected render(): TemplateResult {
     const repos: TemplateResult[] = [];
 
-    for (const repo of this._repos) {
-      const addons = this._addons!.filter(
-        (addon) => addon.repository === repo.slug
-      );
+    if (this._repos) {
+      for (const repo of this._repos) {
+        const addons = this._addons!.filter(
+          (addon) => addon.repository === repo.slug
+        );
 
-      if (addons.length === 0) {
-        continue;
+        if (addons.length === 0) {
+          continue;
+        }
+
+        repos.push(html`
+          <hassio-addon-repository
+            .hass=${this.hass}
+            .repo=${repo}
+            .addons=${addons}
+            .filter=${this._filter!}
+          ></hassio-addon-repository>
+        `);
       }
-
-      repos.push(html`
-        <hassio-addon-repository
-          .hass=${this.hass}
-          .repo=${repo}
-          .addons=${addons}
-          .filter=${this._filter}
-        ></hassio-addon-repository>
-      `);
     }
 
     return html`
-      <hassio-repositories-editor
+      <hass-tabs-subpage
         .hass=${this.hass}
-        .repos=${this._repos}
-      ></hassio-repositories-editor>
+        .narrow=${this.narrow}
+        .route=${this.route}
+        hassio
+        main-page
+        .tabs=${supervisorTabs}
+      >
+        <span slot="header">Add-on store</span>
+        <ha-button-menu corner="BOTTOM_START" slot="toolbar-icon">
+          <mwc-icon-button slot="trigger" alt="menu">
+            <ha-svg-icon path=${mdiDotsVertical}></ha-svg-icon>
+          </mwc-icon-button>
+          <mwc-list-item @tap=${this._manageRepositories}>
+            Repositories
+          </mwc-list-item>
+          <mwc-list-item @tap=${this.refreshData}>
+            Reload
+          </mwc-list-item>
+        </ha-button-menu>
+        ${repos.length === 0
+          ? html`<loading-screen></loading-screen>`
+          : html`
+              <div class="search">
+                <search-input
+                  no-label-float
+                  no-underline
+                  .filter=${this._filter}
+                  @value-changed=${this._filterChanged}
+                ></search-input>
+              </div>
 
-      <hassio-search-input
-        .filter=${this._filter}
-        @value-changed=${this._filterChanged}
-      ></hassio-search-input>
-
-      ${repos}
+              ${repos}
+            `}
+        ${!this.hass.userData?.showAdvanced
+          ? html`
+              <div class="advanced">
+                Missing add-ons? Enable advanced mode on
+                <a href="/profile" target="_top">
+                  your profile page
+                </a>
+                .
+              </div>
+            `
+          : ""}
+      </hass-tabs-subpage>
     `;
   }
 
@@ -100,6 +146,13 @@ class HassioAddonStore extends LitElement {
     if (ev.detail.success) {
       this._loadData();
     }
+  }
+
+  private async _manageRepositories() {
+    showRepositoriesDialog(this, {
+      repos: this._repos!,
+      loadData: () => this._loadData(),
+    });
   }
 
   private async _loadData() {
@@ -121,6 +174,25 @@ class HassioAddonStore extends LitElement {
     return css`
       hassio-addon-repository {
         margin-top: 24px;
+      }
+      .search {
+        padding: 0 16px;
+        background: var(--sidebar-background-color);
+        border-bottom: 1px solid var(--divider-color);
+      }
+      .search search-input {
+        position: relative;
+        top: 2px;
+      }
+      .advanced {
+        padding: 12px;
+        display: flex;
+        flex-wrap: wrap;
+        color: var(--primary-text-color);
+      }
+      .advanced a {
+        margin-left: 0.5em;
+        color: var(--primary-color);
       }
     `;
   }

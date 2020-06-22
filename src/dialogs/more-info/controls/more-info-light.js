@@ -1,18 +1,17 @@
 import "@polymer/iron-flex-layout/iron-flex-layout-classes";
 import "@polymer/paper-item/paper-item";
 import "@polymer/paper-listbox/paper-listbox";
-
 import { html } from "@polymer/polymer/lib/utils/html-tag";
+/* eslint-plugin-disable lit */
 import { PolymerElement } from "@polymer/polymer/polymer-element";
-
+import { featureClassNames } from "../../../common/entity/feature_class_names";
 import "../../../components/ha-attributes";
 import "../../../components/ha-color-picker";
 import "../../../components/ha-labeled-slider";
 import "../../../components/ha-paper-dropdown-menu";
-
-import { featureClassNames } from "../../../common/entity/feature_class_names";
 import { EventsMixin } from "../../../mixins/events-mixin";
 import LocalizeMixin from "../../../mixins/localize-mixin";
+import "../../../components/ha-icon-button";
 
 const FEATURE_CLASS_NAMES = {
   1: "has-brightness",
@@ -170,11 +169,11 @@ class MoreInfoLight extends LocalizeMixin(EventsMixin(PolymerElement)) {
             saturation-segments="{{saturationSegments}}"
           >
           </ha-color-picker>
-          <paper-icon-button
+          <ha-icon-button
             icon="mdi:palette"
             on-click="segmentClick"
             class="control segmentationButton"
-          ></paper-icon-button>
+          ></ha-icon-button>
         </div>
 
         <div class="control effect_list">

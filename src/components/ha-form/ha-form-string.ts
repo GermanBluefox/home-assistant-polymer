@@ -1,31 +1,36 @@
+import "../ha-icon-button";
+import "@polymer/paper-input/paper-input";
+import type { PaperInputElement } from "@polymer/paper-input/paper-input";
 import {
   customElement,
-  LitElement,
   html,
+  LitElement,
   property,
-  TemplateResult,
   query,
+  TemplateResult,
 } from "lit-element";
-
-import { HaFormElement, HaFormStringData, HaFormStringSchema } from "./ha-form";
 import { fireEvent } from "../../common/dom/fire_event";
-
-import "@polymer/paper-input/paper-input";
-import "@polymer/paper-icon-button/paper-icon-button";
-// Not duplicate, is for typing
-// tslint:disable-next-line
-import { PaperInputElement } from "@polymer/paper-input/paper-input";
+import type {
+  HaFormElement,
+  HaFormStringData,
+  HaFormStringSchema,
+} from "./ha-form";
 
 @customElement("ha-form-string")
 export class HaFormString extends LitElement implements HaFormElement {
   @property() public schema!: HaFormStringSchema;
+
   @property() public data!: HaFormStringData;
+
   @property() public label!: string;
+
   @property() public suffix!: string;
+
   @property() private _unmaskedPassword = false;
+
   @query("paper-input") private _input?: HTMLElement;
 
-  public focus() {
+  public focus(): void {
     if (this._input) {
       this._input.focus();
     }
@@ -42,16 +47,15 @@ export class HaFormString extends LitElement implements HaFormElement {
             .autoValidate=${this.schema.required}
             @value-changed=${this._valueChanged}
           >
-            <paper-icon-button
+            <ha-icon-button
               toggles
-              .active=${this._unmaskedPassword}
               slot="suffix"
               .icon=${this._unmaskedPassword ? "hass:eye-off" : "hass:eye"}
               id="iconButton"
               title="Click to toggle between masked and clear password"
               @click=${this._toggleUnmaskedPassword}
             >
-            </paper-icon-button>
+            </ha-icon-button>
           </paper-input>
         `
       : html`
@@ -67,11 +71,11 @@ export class HaFormString extends LitElement implements HaFormElement {
         `;
   }
 
-  private _toggleUnmaskedPassword(ev: Event) {
-    this._unmaskedPassword = (ev.target as any).active;
+  private _toggleUnmaskedPassword(): void {
+    this._unmaskedPassword = !this._unmaskedPassword;
   }
 
-  private _valueChanged(ev: Event) {
+  private _valueChanged(ev: Event): void {
     const value = (ev.target as PaperInputElement).value;
     if (this.data === value) {
       return;
@@ -81,7 +85,7 @@ export class HaFormString extends LitElement implements HaFormElement {
     });
   }
 
-  private _stringType() {
+  private get _stringType(): string {
     if (this.schema.format) {
       if (["email", "url"].includes(this.schema.format)) {
         return this.schema.format;

@@ -1,20 +1,20 @@
 import {
-  customElement,
-  LitElement,
-  html,
-  property,
-  CSSResult,
   css,
+  CSSResult,
+  customElement,
+  html,
+  LitElement,
+  property,
 } from "lit-element";
-
-import "./ha-form-string";
-import "./ha-form-integer";
-import "./ha-form-float";
-import "./ha-form-boolean";
-import "./ha-form-select";
-import "./ha-form-positive_time_period_dict";
-import { fireEvent } from "../../common/dom/fire_event";
 import { dynamicElement } from "../../common/dom/dynamic-element-directive";
+import { fireEvent } from "../../common/dom/fire_event";
+import "./ha-form-boolean";
+import "./ha-form-float";
+import "./ha-form-integer";
+import "./ha-form-multi_select";
+import "./ha-form-positive_time_period_dict";
+import "./ha-form-select";
+import "./ha-form-string";
 
 export type HaFormSchema =
   | HaFormStringSchema
@@ -22,6 +22,7 @@ export type HaFormSchema =
   | HaFormFloatSchema
   | HaFormBooleanSchema
   | HaFormSelectSchema
+  | HaFormMultiSelectSchema
   | HaFormTimeSchema;
 
 export interface HaFormBaseSchema {
@@ -29,7 +30,7 @@ export interface HaFormBaseSchema {
   default?: HaFormData;
   required?: boolean;
   optional?: boolean;
-  description?: { suffix?: string };
+  description?: { suffix?: string; suggested_value?: HaFormData };
 }
 
 export interface HaFormIntegerSchema extends HaFormBaseSchema {
@@ -41,7 +42,12 @@ export interface HaFormIntegerSchema extends HaFormBaseSchema {
 
 export interface HaFormSelectSchema extends HaFormBaseSchema {
   type: "select";
-  options?: string[];
+  options?: string[] | Array<[string, string]>;
+}
+
+export interface HaFormMultiSelectSchema extends HaFormBaseSchema {
+  type: "multi_select";
+  options?: { [key: string]: string } | string[] | Array<[string, string]>;
 }
 
 export interface HaFormFloatSchema extends HaFormBaseSchema {
@@ -71,6 +77,7 @@ export type HaFormData =
   | HaFormFloatData
   | HaFormBooleanData
   | HaFormSelectData
+  | HaFormMultiSelectData
   | HaFormTimeData;
 
 export type HaFormStringData = string;
@@ -78,6 +85,7 @@ export type HaFormIntegerData = number;
 export type HaFormFloatData = number;
 export type HaFormBooleanData = boolean;
 export type HaFormSelectData = string;
+export type HaFormMultiSelectData = string[];
 export interface HaFormTimeData {
   hours?: number;
   minutes?: number;
@@ -86,7 +94,7 @@ export interface HaFormTimeData {
 
 export interface HaFormElement extends LitElement {
   schema: HaFormSchema;
-  data: HaFormDataContainer | HaFormData;
+  data?: HaFormDataContainer | HaFormData;
   label?: string;
   suffix?: string;
 }
@@ -94,10 +102,15 @@ export interface HaFormElement extends LitElement {
 @customElement("ha-form")
 export class HaForm extends LitElement implements HaFormElement {
   @property() public data!: HaFormDataContainer | HaFormData;
+
   @property() public schema!: HaFormSchema;
+
   @property() public error;
+
   @property() public computeError?: (schema: HaFormSchema, error) => string;
+
   @property() public computeLabel?: (schema: HaFormSchema) => string;
+
   @property() public computeSuffix?: (schema: HaFormSchema) => string;
 
   public focus() {

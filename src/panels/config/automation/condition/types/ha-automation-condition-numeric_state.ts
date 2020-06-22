@@ -1,16 +1,16 @@
 import "@polymer/paper-input/paper-input";
-import "../../../../../components/ha-textarea";
-
-import "../../../../../components/entity/ha-entity-picker";
-import { LitElement, html, customElement, property } from "lit-element";
-import { HomeAssistant } from "../../../../../types";
+import { customElement, html, LitElement, property } from "lit-element";
 import { fireEvent } from "../../../../../common/dom/fire_event";
-import { handleChangeEvent } from "../ha-automation-condition-row";
+import "../../../../../components/entity/ha-entity-picker";
+import "@polymer/paper-input/paper-textarea";
 import { NumericStateCondition } from "../../../../../data/automation";
+import { HomeAssistant } from "../../../../../types";
+import { handleChangeEvent } from "../ha-automation-condition-row";
 
 @customElement("ha-automation-condition-numeric_state")
 export default class HaNumericStateCondition extends LitElement {
   @property() public hass!: HomeAssistant;
+
   @property() public condition!: NumericStateCondition;
 
   public static get defaultConfig() {
@@ -26,7 +26,7 @@ export default class HaNumericStateCondition extends LitElement {
       <ha-entity-picker
         .value="${entity_id}"
         @value-changed="${this._entityPicked}"
-        .hass="${this.hass}"
+        .hass=${this.hass}
         allow-custom-entity
       ></ha-entity-picker>
       <paper-input
@@ -45,7 +45,7 @@ export default class HaNumericStateCondition extends LitElement {
         .value=${below}
         @value-changed=${this._valueChanged}
       ></paper-input>
-      <ha-textarea
+      <paper-textarea
         .label=${this.hass.localize(
           "ui.panel.config.automation.editor.conditions.type.numeric_state.value_template"
         )}
@@ -53,7 +53,7 @@ export default class HaNumericStateCondition extends LitElement {
         .value=${value_template}
         @value-changed=${this._valueChanged}
         dir="ltr"
-      ></ha-textarea>
+      ></paper-textarea>
     `;
   }
 

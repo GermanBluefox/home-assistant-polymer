@@ -1,24 +1,23 @@
+import "@material/mwc-button";
 import {
-  LitElement,
+  css,
+  CSSResult,
   customElement,
   html,
+  LitElement,
   property,
-  CSSResult,
-  css,
 } from "lit-element";
-import "@material/mwc-button";
-import "../../../../components/ha-card";
-
 import { fireEvent } from "../../../../common/dom/fire_event";
-import { HomeAssistant } from "../../../../types";
-
-import "./ha-automation-trigger-row";
-import { HaStateTrigger } from "./types/ha-automation-trigger-state";
+import "../../../../components/ha-card";
 import { Trigger } from "../../../../data/automation";
+import { HomeAssistant } from "../../../../types";
+import "./ha-automation-trigger-row";
+import { HaDeviceTrigger } from "./types/ha-automation-trigger-device";
 
 @customElement("ha-automation-trigger")
 export default class HaAutomationTrigger extends LitElement {
   @property() public hass!: HomeAssistant;
+
   @property() public triggers!: Trigger[];
 
   protected render() {
@@ -47,8 +46,8 @@ export default class HaAutomationTrigger extends LitElement {
 
   private _addTrigger() {
     const triggers = this.triggers.concat({
-      platform: "state",
-      ...HaStateTrigger.defaultConfig,
+      platform: "device",
+      ...HaDeviceTrigger.defaultConfig,
     });
 
     fireEvent(this, "value-changed", { value: triggers });

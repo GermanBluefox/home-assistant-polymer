@@ -3,7 +3,7 @@
     "target": "es2017",
     "module": "esnext",
     "moduleResolution": "node",
-    "lib": ["es2017", "dom", "dom.iterable"],
+    "lib": ["es2017", "dom", "dom.iterable", "WebWorker"],
     "noEmit": true,
     "noUnusedLocals": true,
     "noUnusedParameters": true,
@@ -14,6 +14,18 @@
     "skipLibCheck": true,
     "resolveJsonModule": true,
     "experimentalDecorators": true,
-    "importHelpers": true
+    "plugins": [
+      {
+        "name": "ts-lit-plugin",
+        "strict": false,
+        "rules": {
+          "no-unknown-tag-name": "error",
+          "no-missing-import": "error",
+          "no-unclosed-tag": "error",
+          "no-incompatible-type-binding": "warning",
+          "no-invalid-css": "warning"
+        }
+      }
+    ]
   }
 }

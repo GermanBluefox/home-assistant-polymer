@@ -1,22 +1,21 @@
-import {
-  LitElement,
-  TemplateResult,
-  html,
-  customElement,
-  property,
-  CSSResultArray,
-  css,
-} from "lit-element";
 import "@material/mwc-button";
-
-import { HomeAssistant } from "../../types";
-import { fireEvent } from "../../common/dom/fire_event";
-import { configFlowContentStyles } from "./styles";
 import {
-  DataEntryFlowStepExternal,
+  css,
+  CSSResultArray,
+  customElement,
+  html,
+  LitElement,
+  property,
+  TemplateResult,
+} from "lit-element";
+import { fireEvent } from "../../common/dom/fire_event";
+import {
   DataEntryFlowProgressedEvent,
+  DataEntryFlowStepExternal,
 } from "../../data/data_entry_flow";
+import { HomeAssistant } from "../../types";
 import { FlowConfig } from "./show-dialog-data-entry-flow";
+import { configFlowContentStyles } from "./styles";
 
 @customElement("step-flow-external")
 class StepFlowExternal extends LitElement {
@@ -28,7 +27,7 @@ class StepFlowExternal extends LitElement {
   @property()
   private step!: DataEntryFlowStepExternal;
 
-  protected render(): TemplateResult | void {
+  protected render(): TemplateResult {
     const localize = this.hass.localize;
 
     return html`
@@ -38,7 +37,7 @@ class StepFlowExternal extends LitElement {
       <div class="content">
         ${this.flowConfig.renderExternalStepDescription(this.hass, this.step)}
         <div class="open-button">
-          <a href=${this.step.url} target="_blank">
+          <a href=${this.step.url} target="_blank" rel="noreferrer">
             <mwc-button raised>
               ${localize(
                 "ui.panel.config.integrations.config_flow.external_step.open_site"

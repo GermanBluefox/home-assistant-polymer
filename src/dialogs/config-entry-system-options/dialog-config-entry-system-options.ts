@@ -1,36 +1,39 @@
-import {
-  LitElement,
-  html,
-  css,
-  CSSResult,
-  TemplateResult,
-  customElement,
-  property,
-} from "lit-element";
 import "@polymer/paper-dialog-scrollable/paper-dialog-scrollable";
 import "@polymer/paper-input/paper-input";
-
+import {
+  css,
+  CSSResult,
+  customElement,
+  html,
+  LitElement,
+  property,
+  TemplateResult,
+} from "lit-element";
 import "../../components/dialog/ha-paper-dialog";
 import "../../components/ha-switch";
-
-import { HomeAssistant } from "../../types";
-import { ConfigEntrySystemOptionsDialogParams } from "./show-dialog-config-entry-system-options";
+import "../../components/ha-formfield";
+import type { HaSwitch } from "../../components/ha-switch";
 import {
   getConfigEntrySystemOptions,
   updateConfigEntrySystemOptions,
 } from "../../data/config_entries";
-import { PolymerChangedEvent } from "../../polymer-types";
+import type { PolymerChangedEvent } from "../../polymer-types";
 import { haStyleDialog } from "../../resources/styles";
-// tslint:disable-next-line: no-duplicate-imports
-import { HaSwitch } from "../../components/ha-switch";
+import type { HomeAssistant } from "../../types";
+import { ConfigEntrySystemOptionsDialogParams } from "./show-dialog-config-entry-system-options";
 
 @customElement("dialog-config-entry-system-options")
 class DialogConfigEntrySystemOptions extends LitElement {
   @property() public hass!: HomeAssistant;
+
   @property() private _disableNewEntities!: boolean;
+
   @property() private _error?: string;
+
   @property() private _params?: ConfigEntrySystemOptionsDialogParams;
+
   @property() private _loading?: boolean;
+
   @property() private _submitting?: boolean;
 
   public async showDialog(
@@ -48,7 +51,7 @@ class DialogConfigEntrySystemOptions extends LitElement {
     await this.updateComplete;
   }
 
-  protected render(): TemplateResult | void {
+  protected render(): TemplateResult {
     if (!this._params) {
       return html``;
     }
@@ -64,7 +67,7 @@ class DialogConfigEntrySystemOptions extends LitElement {
             "ui.dialogs.config_entry_system_options.title",
             "integration",
             this.hass.localize(
-              `component.${this._params.entry.domain}.config.title`
+              `component.${this._params.entry.domain}.title`
             ) || this._params.entry.domain
           )}
         </h2>
@@ -77,18 +80,11 @@ class DialogConfigEntrySystemOptions extends LitElement {
               `
             : html`
                 ${this._error
-                  ? html`
-                      <div class="error">${this._error}</div>
-                    `
+                  ? html` <div class="error">${this._error}</div> `
                   : ""}
                 <div class="form">
-                  <ha-switch
-                    .checked=${!this._disableNewEntities}
-                    @change=${this._disableNewEntitiesChanged}
-                    .disabled=${this._submitting}
-                  >
-                    <div>
-                      <p>
+                  <ha-formfield
+                    .label=${html`<p>
                         ${this.hass.localize(
                           "ui.dialogs.config_entry_system_options.enable_new_entities_label"
                         )}
@@ -98,12 +94,18 @@ class DialogConfigEntrySystemOptions extends LitElement {
                           "ui.dialogs.config_entry_system_options.enable_new_entities_description",
                           "integration",
                           this.hass.localize(
-                            `component.${this._params.entry.domain}.config.title`
+                            `component.${this._params.entry.domain}.title`
                           ) || this._params.entry.domain
                         )}
-                      </p>
-                    </div>
-                  </ha-switch>
+                      </p>`}
+                  >
+                    <ha-switch
+                      .checked=${!this._disableNewEntities}
+                      @change=${this._disableNewEntitiesChanged}
+                      .disabled=${this._submitting}
+                    >
+                    </ha-switch>
+                  </ha-formfield>
                 </div>
               `}
         </paper-dialog-scrollable>
@@ -115,7 +117,7 @@ class DialogConfigEntrySystemOptions extends LitElement {
                   .disabled=${this._submitting}
                 >
                   ${this.hass.localize(
-                    "ui.panel.config.entity_registry.editor.update"
+                    "ui.dialogs.config_entry_system_options.update"
                   )}
                 </mwc-button>
               </div>
@@ -171,9 +173,6 @@ class DialogConfigEntrySystemOptions extends LitElement {
           padding-top: 6px;
           padding-bottom: 24px;
           color: var(--primary-text-color);
-        }
-        p {
-          margin: 0;
         }
         .secondary {
           color: var(--secondary-text-color);

@@ -1,4 +1,4 @@
-import { HassConfig } from "home-assistant-js-websocket";
+import { HassConfig, STATE_RUNNING } from "home-assistant-js-websocket";
 
 export const demoConfig: HassConfig = {
   location_name: "Home",
@@ -11,10 +11,14 @@ export const demoConfig: HassConfig = {
     temperature: "°C",
     volume: "L",
   },
-  components: ["notify.html5", "history"],
+  components: ["notify.html5", "history", "shopping_list"],
   time_zone: "America/Los_Angeles",
   config_dir: "/config",
   version: "DEMO",
   whitelist_external_dirs: [],
   config_source: "storage",
+  safe_mode: false,
+  state: STATE_RUNNING,
+  internal_url: "http://homeassistant.local:8123",
+  external_url: null,
 };

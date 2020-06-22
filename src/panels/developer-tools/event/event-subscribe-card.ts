@@ -1,19 +1,19 @@
-import {
-  LitElement,
-  customElement,
-  TemplateResult,
-  html,
-  property,
-  CSSResult,
-  css,
-} from "lit-element";
 import "@material/mwc-button";
 import "@polymer/paper-input/paper-input";
 import { HassEvent } from "home-assistant-js-websocket";
-import { HomeAssistant } from "../../../types";
-import { PolymerChangedEvent } from "../../../polymer-types";
+import {
+  css,
+  CSSResult,
+  customElement,
+  html,
+  LitElement,
+  property,
+  TemplateResult,
+} from "lit-element";
+import { formatTime } from "../../../common/datetime/format_time";
 import "../../../components/ha-card";
-import format_time from "../../../common/datetime/format_time";
+import { PolymerChangedEvent } from "../../../polymer-types";
+import { HomeAssistant } from "../../../types";
 
 @customElement("event-subscribe-card")
 class EventSubscribeCard extends LitElement {
@@ -78,7 +78,7 @@ class EventSubscribeCard extends LitElement {
                   "name",
                   ev.id
                 )}
-                ${format_time(
+                ${formatTime(
                   new Date(ev.event.time_fired),
                   this.hass!.language
                 )}:

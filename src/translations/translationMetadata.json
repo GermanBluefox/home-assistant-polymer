@@ -33,8 +33,11 @@
   "en": {
     "nativeName": "English"
   },
+  "en-GB": {
+    "nativeName": "English (GB)"
+  },
   "eo": {
-    "navtiveName": "Esperanto"
+    "nativeName": "Esperanto"
   },
   "es": {
     "nativeName": "Español"
@@ -55,8 +58,14 @@
   "fi": {
     "nativeName": "Suomi"
   },
+  "fy": {
+    "nativeName": "Frysk"
+  },
   "fr": {
     "nativeName": "Français"
+  },
+  "gl": {
+    "nativeName": "Galego"
   },
   "gsw": {
     "nativeName": "Schwiizerdütsch"
@@ -76,9 +85,6 @@
   },
   "hy": {
     "nativeName": "Հայերեն"
-  },
-  "iba": {
-    "nativeName": "Jaku Iban"
   },
   "id": {
     "nativeName": "Indonesia"

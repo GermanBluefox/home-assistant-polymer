@@ -1,47 +1,44 @@
+import "../../../../components/ha-icon-button";
 import {
-  LitElement,
-  TemplateResult,
-  html,
-  CSSResult,
   css,
+  CSSResult,
   customElement,
+  html,
+  LitElement,
   property,
+  TemplateResult,
 } from "lit-element";
 import memoizeOne from "memoize-one";
-import "@polymer/paper-icon-button";
-
-import "../../../../layouts/hass-subpage";
-import "../../../../layouts/hass-loading-screen";
-import "../../../../components/ha-card";
-import "../../../../components/entity/state-info";
-import "../../../../components/ha-switch";
-
-import { HomeAssistant } from "../../../../types";
+import { fireEvent } from "../../../../common/dom/fire_event";
+import { computeDomain } from "../../../../common/entity/compute_domain";
+import { computeStateName } from "../../../../common/entity/compute_state_name";
 import {
-  CloudStatusLoggedIn,
-  CloudPreferences,
-  updateCloudGoogleEntityConfig,
-  cloudSyncGoogleAssistant,
-  GoogleEntityConfig,
-} from "../../../../data/cloud";
-import {
+  EntityFilter,
   generateFilter,
   isEmptyFilter,
-  EntityFilter,
 } from "../../../../common/entity/entity_filter";
 import { compare } from "../../../../common/string/compare";
-import { fireEvent } from "../../../../common/dom/fire_event";
-import { showToast } from "../../../../util/toast";
-import { showDomainTogglerDialog } from "../../../../dialogs/domain-toggler/show-dialog-domain-toggler";
+import "../../../../components/entity/state-info";
+import "../../../../components/ha-card";
+import "../../../../components/ha-switch";
+import type { HaSwitch } from "../../../../components/ha-switch";
 import {
-  GoogleEntity,
+  CloudPreferences,
+  CloudStatusLoggedIn,
+  cloudSyncGoogleAssistant,
+  GoogleEntityConfig,
+  updateCloudGoogleEntityConfig,
+} from "../../../../data/cloud";
+import {
   fetchCloudGoogleEntities,
+  GoogleEntity,
 } from "../../../../data/google_assistant";
-// tslint:disable-next-line: no-duplicate-imports
-import { HaSwitch } from "../../../../components/ha-switch";
-
-import { computeStateName } from "../../../../common/entity/compute_state_name";
-import { computeDomain } from "../../../../common/entity/compute_domain";
+import { showDomainTogglerDialog } from "../../../../dialogs/domain-toggler/show-dialog-domain-toggler";
+import "../../../../layouts/hass-loading-screen";
+import "../../../../layouts/hass-subpage";
+import type { HomeAssistant } from "../../../../types";
+import { showToast } from "../../../../util/toast";
+import "../../../../components/ha-formfield";
 
 const DEFAULT_CONFIG_EXPOSE = true;
 
@@ -53,13 +50,20 @@ const configIsExposed = (config: GoogleEntityConfig) =>
 @customElement("cloud-google-assistant")
 class CloudGoogleAssistant extends LitElement {
   @property() public hass!: HomeAssistant;
+
   @property() public cloudStatus!: CloudStatusLoggedIn;
+
   @property() public narrow!: boolean;
+
   @property() private _entities?: GoogleEntity[];
+
   @property()
   private _entityConfigs: CloudPreferences["google_entity_configs"] = {};
+
   private _popstateSyncAttached = false;
+
   private _popstateReloadStatusAttached = false;
+
   private _isInitialExposed?: Set<string>;
 
   private _getEntityFilterFunc = memoizeOne((filter: EntityFilter) =>
@@ -71,11 +75,9 @@ class CloudGoogleAssistant extends LitElement {
     )
   );
 
-  protected render(): TemplateResult | void {
+  protected render(): TemplateResult {
     if (this._entities === undefined) {
-      return html`
-        <hass-loading-screen></hass-loading-screen>
-      `;
+      return html` <hass-loading-screen></hass-loading-screen> `;
     }
     const emptyFilter = isEmptyFilter(this.cloudStatus.google_entities);
     const filterFunc = this._getEntityFilterFunc(
@@ -126,14 +128,19 @@ class CloudGoogleAssistant extends LitElement {
                 .map((trait) => trait.substr(trait.lastIndexOf(".") + 1))
                 .join(", ")}
             </state-info>
-            <ha-switch
-              .entityId=${entity.entity_id}
-              .disabled=${!emptyFilter}
-              .checked=${isExposed}
-              @change=${this._exposeChanged}
+            <ha-formfield
+              .label=${this.hass!.localize(
+                "ui.panel.config.cloud.google.expose"
+              )}
             >
-              ${this.hass!.localize("ui.panel.config.cloud.google.expose")}
-            </ha-switch>
+              <ha-switch
+                .entityId=${entity.entity_id}
+                .disabled=${!emptyFilter}
+                .checked=${isExposed}
+                @change=${this._exposeChanged}
+              >
+              </ha-switch>
+            </ha-formfield>
             ${entity.might_2fa
               ? html`
                   <ha-switch
@@ -161,22 +168,16 @@ class CloudGoogleAssistant extends LitElement {
         "ui.panel.config.cloud.google.title"
       )}">
         <span slot="toolbar-icon">
-          ${selected}${
-      !this.narrow
-        ? html`
-            selected
-          `
-        : ""
-    }
+          ${selected}${!this.narrow ? html` selected ` : ""}
         </span>
         ${
           emptyFilter
             ? html`
-                <paper-icon-button
+                <ha-icon-button
                   slot="toolbar-icon"
                   icon="hass:tune"
                   @click=${this._openDomainToggler}
-                ></paper-icon-button>
+                ></ha-icon-button>
               `
             : ""
         }
@@ -363,14 +364,10 @@ class CloudGoogleAssistant extends LitElement {
         padding: 0 8px;
       }
       .content {
-        display: flex;
-        flex-wrap: wrap;
-        padding: 4px;
-      }
-      ha-card {
-        margin: 4px;
-        width: 100%;
-        max-width: 300px;
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        grid-gap: 8px 8px;
+        padding: 8px;
       }
       .card-content {
         padding-bottom: 12px;

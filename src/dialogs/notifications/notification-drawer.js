@@ -1,18 +1,16 @@
-import "@polymer/app-layout/app-drawer/app-drawer";
 import "@material/mwc-button";
-import "@polymer/paper-icon-button/paper-icon-button";
+import "@polymer/app-layout/app-drawer/app-drawer";
 import "@polymer/app-layout/app-toolbar/app-toolbar";
-
 import { html } from "@polymer/polymer/lib/utils/html-tag";
+/* eslint-plugin-disable lit */
 import { PolymerElement } from "@polymer/polymer/polymer-element";
-
-import "./notification-item";
-import "../../components/ha-paper-icon-button-prev";
-
+import { computeDomain } from "../../common/entity/compute_domain";
+import "../../components/ha-icon-button-prev";
+import { subscribeNotifications } from "../../data/persistent_notification";
 import { EventsMixin } from "../../mixins/events-mixin";
 import LocalizeMixin from "../../mixins/localize-mixin";
-import { subscribeNotifications } from "../../data/persistent_notification";
-import { computeDomain } from "../../common/entity/compute_domain";
+import "./notification-item";
+
 /*
  * @appliesMixin EventsMixin
  * @appliesMixin LocalizeMixin
@@ -60,7 +58,7 @@ export class HuiNotificationDrawer extends EventsMixin(
             title="[[localize('ui.notification_drawer.ack_all')]]"
           ></paper-icon-button>
         </template>
-        <ha-paper-icon-button-prev on-click="_closeDrawer" aria-label$="[[localize('ui.notification_drawer.close')]]"></paper-icon-button>
+        <ha-icon-button-prev on-click="_closeDrawer" aria-label$="[[localize('ui.notification_drawer.close')]]"></ha-icon-button-prev>
       </app-toolbar>
       <div class="notifications">
         <template is="dom-if" if="[[!_empty(notifications)]]">

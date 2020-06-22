@@ -1,25 +1,26 @@
 import {
-  ERR_INVALID_AUTH,
-  subscribeEntities,
-  subscribeConfig,
-  subscribeServices,
-  callService,
   Auth,
+  callService,
   Connection,
+  ERR_INVALID_AUTH,
+  subscribeConfig,
+  subscribeEntities,
+  subscribeServices,
+  HassConfig,
 } from "home-assistant-js-websocket";
-
-import { translationMetadata } from "../resources/translations-metadata";
-
-import { getState } from "../util/ha-pref-storage";
-import { getLocalLanguage } from "../util/hass-translation";
-import { fetchWithAuth } from "../util/fetch-with-auth";
-import hassCallApi from "../util/hass-call-api";
-import { subscribePanels } from "../data/ws-panels";
-import { forwardHaptic } from "../data/haptics";
 import { fireEvent } from "../common/dom/fire_event";
-import { Constructor, ServiceCallResponse } from "../types";
-import { HassBaseEl } from "./hass-base-mixin";
 import { broadcastConnectionStatus } from "../data/connection-status";
+import { subscribeFrontendUserData } from "../data/frontend";
+import { forwardHaptic } from "../data/haptics";
+import { DEFAULT_PANEL } from "../data/panel";
+import { subscribePanels } from "../data/ws-panels";
+import { translationMetadata } from "../resources/translations-metadata";
+import { Constructor, ServiceCallResponse } from "../types";
+import { fetchWithAuth } from "../util/fetch-with-auth";
+import { getState } from "../util/ha-pref-storage";
+import hassCallApi from "../util/hass-call-api";
+import { getLocalLanguage } from "../util/hass-translation";
+import { HassBaseEl } from "./hass-base-mixin";
 
 export const connectionMixin = <T extends Constructor<HassBaseEl>>(
   superClass: T
@@ -37,7 +38,7 @@ export const connectionMixin = <T extends Constructor<HassBaseEl>>(
         services: null as any,
         user: null as any,
         panelUrl: (this as any)._panelUrl,
-
+        defaultPanel: DEFAULT_PANEL,
         language: getLocalLanguage(),
         selectedLanguage: null,
         resources: null as any,
@@ -50,7 +51,7 @@ export const connectionMixin = <T extends Constructor<HassBaseEl>>(
         hassUrl: (path = "") => new URL(path, auth.data.hassUrl).toString(),
         callService: async (domain, service, serviceData = {}) => {
           if (__DEV__) {
-            // tslint:disable-next-line: no-console
+            // eslint-disable-next-line no-console
             console.log("Calling service", domain, service, serviceData);
           }
           try {
@@ -62,7 +63,7 @@ export const connectionMixin = <T extends Constructor<HassBaseEl>>(
             )) as Promise<ServiceCallResponse>;
           } catch (err) {
             if (__DEV__) {
-              // tslint:disable-next-line: no-console
+              // eslint-disable-next-line no-console
               console.error(
                 "Error calling service",
                 domain,
@@ -89,7 +90,7 @@ export const connectionMixin = <T extends Constructor<HassBaseEl>>(
         // For messages that do not get a response
         sendWS: (msg) => {
           if (__DEV__) {
-            // tslint:disable-next-line: no-console
+            // eslint-disable-next-line no-console
             console.log("Sending", msg);
           }
           conn.sendMessage(msg);
@@ -97,7 +98,7 @@ export const connectionMixin = <T extends Constructor<HassBaseEl>>(
         // For messages that expect a response
         callWS: <R>(msg) => {
           if (__DEV__) {
-            // tslint:disable-next-line: no-console
+            // eslint-disable-next-line no-console
             console.log("Sending", msg);
           }
 
@@ -105,14 +106,22 @@ export const connectionMixin = <T extends Constructor<HassBaseEl>>(
 
           if (__DEV__) {
             resp.then(
-              // tslint:disable-next-line: no-console
+              // eslint-disable-next-line no-console
               (result) => console.log("Received", result),
-              // tslint:disable-next-line: no-console
+              // eslint-disable-next-line no-console
               (err) => console.error("Error", err)
             );
           }
           return resp;
         },
+        loadBackendTranslation: (category, integration?, configFlow?) =>
+          // @ts-ignore
+          this._loadHassTranslations(
+            this.hass?.language,
+            category,
+            integration,
+            configFlow
+          ),
         ...getState(),
         ...this._pendingHass,
       };
@@ -141,12 +150,22 @@ export const connectionMixin = <T extends Constructor<HassBaseEl>>(
       subscribeConfig(conn, (config) => this._updateHass({ config }));
       subscribeServices(conn, (services) => this._updateHass({ services }));
       subscribePanels(conn, (panels) => this._updateHass({ panels }));
+      subscribeFrontendUserData(conn, "core", (userData) =>
+        this._updateHass({ userData })
+      );
     }
 
     protected hassReconnected() {
       super.hassReconnected();
+
       this._updateHass({ connected: true });
       broadcastConnectionStatus("connected");
+
+      // on reconnect always fetch config as we might miss an update while we were disconnected
+      // @ts-ignore
+      this.hass!.callWS({ type: "get_config" }).then((config: HassConfig) => {
+        this._updateHass({ config });
+      });
     }
 
     protected hassDisconnected() {

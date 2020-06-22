@@ -1,10 +1,10 @@
-import { directive, Part, NodePart } from "lit-html";
+import { directive, NodePart, Part } from "lit-html";
 
 export const dynamicElement = directive(
   (tag: string, properties?: { [key: string]: any }) => (part: Part): void => {
     if (!(part instanceof NodePart)) {
       throw new Error(
-        "dynamicContentDirective can only be used in content bindings"
+        "dynamicElementDirective can only be used in content bindings"
       );
     }
 

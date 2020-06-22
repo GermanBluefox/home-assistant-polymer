@@ -1,12 +1,13 @@
-import "../../../../../components/ha-textarea";
-import { LitElement, property, html, customElement } from "lit-element";
+import { customElement, html, LitElement, property } from "lit-element";
+import "@polymer/paper-input/paper-textarea";
+import { TemplateCondition } from "../../../../../data/automation";
 import { HomeAssistant } from "../../../../../types";
 import { handleChangeEvent } from "../ha-automation-condition-row";
-import { TemplateCondition } from "../../../../../data/automation";
 
 @customElement("ha-automation-condition-template")
 export class HaTemplateCondition extends LitElement {
   @property() public hass!: HomeAssistant;
+
   @property() public condition!: TemplateCondition;
 
   public static get defaultConfig() {
@@ -16,7 +17,7 @@ export class HaTemplateCondition extends LitElement {
   protected render() {
     const { value_template } = this.condition;
     return html`
-      <ha-textarea
+      <paper-textarea
         .label=${this.hass.localize(
           "ui.panel.config.automation.editor.conditions.type.template.value_template"
         )}
@@ -24,7 +25,7 @@ export class HaTemplateCondition extends LitElement {
         .value=${value_template}
         @value-changed=${this._valueChanged}
         dir="ltr"
-      ></ha-textarea>
+      ></paper-textarea>
     `;
   }
 

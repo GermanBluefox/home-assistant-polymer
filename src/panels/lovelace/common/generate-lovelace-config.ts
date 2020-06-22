@@ -1,55 +1,64 @@
-import { HomeAssistant, GroupEntity } from "../../../types";
 import {
-  LovelaceConfig,
-  LovelaceCardConfig,
-  LovelaceViewConfig,
-} from "../../../data/lovelace";
-import {
-  HassEntity,
-  HassEntities,
   HassConfig,
+  HassEntities,
+  HassEntity,
+  STATE_NOT_RUNNING,
 } from "home-assistant-js-websocket";
-
-import { extractViews } from "../../../common/entity/extract_views";
-import { getViewEntities } from "../../../common/entity/get_view_entities";
-import { computeStateName } from "../../../common/entity/compute_state_name";
-import { splitByGroups } from "../../../common/entity/split_by_groups";
+import { computeDomain } from "../../../common/entity/compute_domain";
 import { computeObjectId } from "../../../common/entity/compute_object_id";
 import { computeStateDomain } from "../../../common/entity/compute_state_domain";
-import { computeDomain } from "../../../common/entity/compute_domain";
-
-import { EntityRowConfig, WeblinkConfig } from "../entity-rows/types";
+import { computeStateName } from "../../../common/entity/compute_state_name";
+import { extractViews } from "../../../common/entity/extract_views";
+import { getViewEntities } from "../../../common/entity/get_view_entities";
+import { splitByGroups } from "../../../common/entity/split_by_groups";
+import { compare } from "../../../common/string/compare";
 import { LocalizeFunc } from "../../../common/translations/localize";
-import { EntitiesCardConfig } from "../cards/types";
-import {
-  subscribeAreaRegistry,
-  AreaRegistryEntry,
-} from "../../../data/area_registry";
 import { subscribeOne } from "../../../common/util/subscribe-one";
 import {
-  subscribeDeviceRegistry,
+  AreaRegistryEntry,
+  subscribeAreaRegistry,
+} from "../../../data/area_registry";
+import {
   DeviceRegistryEntry,
+  subscribeDeviceRegistry,
 } from "../../../data/device_registry";
 import {
-  subscribeEntityRegistry,
   EntityRegistryEntry,
+  subscribeEntityRegistry,
 } from "../../../data/entity_registry";
+import { domainToName } from "../../../data/integration";
+import {
+  LovelaceCardConfig,
+  LovelaceConfig,
+  LovelaceViewConfig,
+} from "../../../data/lovelace";
+import { SENSOR_DEVICE_CLASS_BATTERY } from "../../../data/sensor";
+import { GroupEntity, HomeAssistant } from "../../../types";
+import {
+  AlarmPanelCardConfig,
+  EntitiesCardConfig,
+  LightCardConfig,
+  PictureEntityCardConfig,
+  ThermostatCardConfig,
+} from "../cards/types";
 import { processEditorEntities } from "../editor/process-editor-entities";
+import { LovelaceRowConfig, WeblinkConfig } from "../entity-rows/types";
 
 const DEFAULT_VIEW_ENTITY_ID = "group.default_view";
 const DOMAINS_BADGES = [
   "binary_sensor",
-  "person",
-  "device_tracker",
   "mailbox",
+  "person",
   "sensor",
   "sun",
   "timer",
 ];
 const HIDE_DOMAIN = new Set([
-  "persistent_notification",
+  "automation",
   "configurator",
+  "device_tracker",
   "geo_location",
+  "persistent_notification",
 ]);
 
 let subscribedRegistries = false;
@@ -99,71 +108,100 @@ const splitByAreas = (
 
 export const computeCards = (
   states: Array<[string, HassEntity?]>,
-  entityCardOptions: Partial<EntitiesCardConfig>
+  entityCardOptions: Partial<EntitiesCardConfig>,
+  single = false
 ): LovelaceCardConfig[] => {
   const cards: LovelaceCardConfig[] = [];
 
   // For entity card
-  const entities: Array<string | EntityRowConfig> = [];
+  const entities: Array<string | LovelaceRowConfig> = [];
+
+  const titlePrefix = entityCardOptions.title
+    ? `${entityCardOptions.title} `
+    : undefined;
 
   for (const [entityId, stateObj] of states) {
     const domain = computeDomain(entityId);
 
     if (domain === "alarm_control_panel") {
-      cards.push({
+      const cardConfig: AlarmPanelCardConfig = {
         type: "alarm-panel",
         entity: entityId,
-      });
+      };
+      cards.push(cardConfig);
     } else if (domain === "camera") {
-      cards.push({
+      const cardConfig: PictureEntityCardConfig = {
         type: "picture-entity",
         entity: entityId,
-      });
+      };
+      cards.push(cardConfig);
     } else if (domain === "climate") {
-      cards.push({
+      const cardConfig: ThermostatCardConfig = {
         type: "thermostat",
         entity: entityId,
-      });
+      };
+      cards.push(cardConfig);
     } else if (domain === "history_graph" && stateObj) {
-      cards.push({
+      const cardConfig = {
         type: "history-graph",
         entities: stateObj.attributes.entity_id,
         hours_to_show: stateObj.attributes.hours_to_show,
         title: stateObj.attributes.friendly_name,
         refresh_interval: stateObj.attributes.refresh,
-      });
-    } else if (domain === "light") {
-      cards.push({
+      };
+      cards.push(cardConfig);
+    } else if (domain === "light" && single) {
+      const cardConfig: LightCardConfig = {
         type: "light",
         entity: entityId,
-      });
+      };
+      cards.push(cardConfig);
     } else if (domain === "media_player") {
-      cards.push({
+      const cardConfig = {
         type: "media-control",
         entity: entityId,
-      });
+      };
+      cards.push(cardConfig);
     } else if (domain === "plant") {
-      cards.push({
+      const cardConfig = {
         type: "plant-status",
         entity: entityId,
-      });
+      };
+      cards.push(cardConfig);
     } else if (domain === "weather") {
-      cards.push({
+      const cardConfig = {
         type: "weather-forecast",
         entity: entityId,
-      });
+      };
+      cards.push(cardConfig);
     } else if (domain === "weblink" && stateObj) {
       const conf: WeblinkConfig = {
         type: "weblink",
         url: stateObj.state,
-        name: computeStateName(stateObj),
       };
       if ("icon" in stateObj.attributes) {
         conf.icon = stateObj.attributes.icon;
       }
       entities.push(conf);
+    } else if (
+      domain === "sensor" &&
+      stateObj?.attributes.device_class === SENSOR_DEVICE_CLASS_BATTERY
+    ) {
+      // Do nothing.
     } else {
-      entities.push(entityId);
+      let name: string;
+      const entityConf =
+        titlePrefix &&
+        stateObj &&
+        // eslint-disable-next-line no-cond-assign
+        (name = computeStateName(stateObj)).startsWith(titlePrefix)
+          ? {
+              entity: entityId,
+              name: name.substr(titlePrefix.length),
+            }
+          : entityId;
+
+      entities.push(entityConf);
     }
   }
 
@@ -190,62 +228,6 @@ const computeDefaultViewStates = (entities: HassEntities): HassEntities => {
     }
   });
   return states;
-};
-
-export const generateDefaultViewConfig = (
-  areaEntries: AreaRegistryEntry[],
-  deviceEntries: DeviceRegistryEntry[],
-  entityEntries: EntityRegistryEntry[],
-  entities: HassEntities,
-  localize: LocalizeFunc
-): LovelaceViewConfig => {
-  const states = computeDefaultViewStates(entities);
-  const path = "default_view";
-  const title = "Home";
-  const icon = undefined;
-
-  // In the case of a default view, we want to use the group order attribute
-  const groupOrders = {};
-  Object.keys(states).forEach((entityId) => {
-    const stateObj = states[entityId];
-    if (stateObj.attributes.order) {
-      groupOrders[entityId] = stateObj.attributes.order;
-    }
-  });
-
-  const splittedByAreas = splitByAreas(
-    areaEntries,
-    deviceEntries,
-    entityEntries,
-    states
-  );
-
-  const config = generateViewConfig(
-    localize,
-    path,
-    title,
-    icon,
-    splittedByAreas.otherEntities,
-    groupOrders
-  );
-
-  const areaCards: LovelaceCardConfig[] = [];
-
-  splittedByAreas.areasWithEntities.forEach(([area, areaEntities]) => {
-    areaCards.push(
-      ...computeCards(
-        areaEntities.map((entity) => [entity.entity_id, entity]),
-        {
-          title: area.name,
-          show_header_toggle: true,
-        }
-      )
-    );
-  });
-
-  config.cards!.unshift(...areaCards);
-
-  return config;
 };
 
 const generateViewConfig = (
@@ -309,12 +291,19 @@ const generateViewConfig = (
     .forEach((domain) => {
       cards = cards.concat(
         computeCards(
-          ungroupedEntitites[domain].map((entityId): [string, HassEntity] => [
-            entityId,
-            entities[entityId],
-          ]),
+          ungroupedEntitites[domain]
+            .sort((a, b) =>
+              compare(
+                computeStateName(entities[a]),
+                computeStateName(entities[b])
+              )
+            )
+            .map((entityId): [string, HassEntity] => [
+              entityId,
+              entities[entityId],
+            ]),
           {
-            title: localize(`domain.${domain}`),
+            title: domainToName(localize, domain),
           }
         )
       );
@@ -334,30 +323,59 @@ const generateViewConfig = (
   return view;
 };
 
-export const generateLovelaceConfigFromHass = async (hass: HomeAssistant) => {
-  // We want to keep the registry subscriptions alive after generating the UI
-  // so that we don't serve up stale data after changing areas.
-  if (!subscribedRegistries) {
-    subscribedRegistries = true;
-    subscribeAreaRegistry(hass.connection, () => undefined);
-    subscribeDeviceRegistry(hass.connection, () => undefined);
-    subscribeEntityRegistry(hass.connection, () => undefined);
-  }
+export const generateDefaultViewConfig = (
+  areaEntries: AreaRegistryEntry[],
+  deviceEntries: DeviceRegistryEntry[],
+  entityEntries: EntityRegistryEntry[],
+  entities: HassEntities,
+  localize: LocalizeFunc
+): LovelaceViewConfig => {
+  const states = computeDefaultViewStates(entities);
+  const path = "default_view";
+  const title = "Home";
+  const icon = undefined;
 
-  const [areaEntries, deviceEntries, entityEntries] = await Promise.all([
-    subscribeOne(hass.connection, subscribeAreaRegistry),
-    subscribeOne(hass.connection, subscribeDeviceRegistry),
-    subscribeOne(hass.connection, subscribeEntityRegistry),
-  ]);
+  // In the case of a default view, we want to use the group order attribute
+  const groupOrders = {};
+  Object.keys(states).forEach((entityId) => {
+    const stateObj = states[entityId];
+    if (stateObj.attributes.order) {
+      groupOrders[entityId] = stateObj.attributes.order;
+    }
+  });
 
-  return generateLovelaceConfigFromData(
-    hass.config,
+  const splittedByAreas = splitByAreas(
     areaEntries,
     deviceEntries,
     entityEntries,
-    hass.states,
-    hass.localize
+    states
   );
+
+  const config = generateViewConfig(
+    localize,
+    path,
+    title,
+    icon,
+    splittedByAreas.otherEntities,
+    groupOrders
+  );
+
+  const areaCards: LovelaceCardConfig[] = [];
+
+  splittedByAreas.areasWithEntities.forEach(([area, areaEntities]) => {
+    areaCards.push(
+      ...computeCards(
+        areaEntities.map((entity) => [entity.entity_id, entity]),
+        {
+          title: area.name,
+        }
+      )
+    );
+  });
+
+  config.cards!.unshift(...areaCards);
+
+  return config;
 };
 
 export const generateLovelaceConfigFromData = async (
@@ -368,6 +386,17 @@ export const generateLovelaceConfigFromData = async (
   entities: HassEntities,
   localize: LocalizeFunc
 ): Promise<LovelaceConfig> => {
+  if (config.safe_mode) {
+    return {
+      title: config.location_name,
+      views: [
+        {
+          cards: [{ type: "safe-mode" }],
+        },
+      ],
+    };
+  }
+
   const viewEntities = extractViews(entities);
 
   const views = viewEntities.map((viewEntity: GroupEntity) => {
@@ -425,11 +454,8 @@ export const generateLovelaceConfigFromData = async (
 
   // User has no entities
   if (views.length === 1 && views[0].cards!.length === 0) {
-    import(
-      /* webpackChunkName: "hui-empty-state-card" */ "../cards/hui-empty-state-card"
-    );
     views[0].cards!.push({
-      type: "custom:hui-empty-state-card",
+      type: "empty-state",
     });
   }
 
@@ -437,4 +463,55 @@ export const generateLovelaceConfigFromData = async (
     title,
     views,
   };
+};
+
+export const generateLovelaceConfigFromHass = async (
+  hass: HomeAssistant,
+  localize?: LocalizeFunc
+): Promise<LovelaceConfig> => {
+  if (hass.config.state === STATE_NOT_RUNNING) {
+    return {
+      title: hass.config.location_name,
+      views: [
+        {
+          cards: [{ type: "starting" }],
+        },
+      ],
+    };
+  }
+
+  if (hass.config.safe_mode) {
+    return {
+      title: hass.config.location_name,
+      views: [
+        {
+          cards: [{ type: "safe-mode" }],
+        },
+      ],
+    };
+  }
+
+  // We want to keep the registry subscriptions alive after generating the UI
+  // so that we don't serve up stale data after changing areas.
+  if (!subscribedRegistries) {
+    subscribedRegistries = true;
+    subscribeAreaRegistry(hass.connection, () => undefined);
+    subscribeDeviceRegistry(hass.connection, () => undefined);
+    subscribeEntityRegistry(hass.connection, () => undefined);
+  }
+
+  const [areaEntries, deviceEntries, entityEntries] = await Promise.all([
+    subscribeOne(hass.connection, subscribeAreaRegistry),
+    subscribeOne(hass.connection, subscribeDeviceRegistry),
+    subscribeOne(hass.connection, subscribeEntityRegistry),
+  ]);
+
+  return generateLovelaceConfigFromData(
+    hass.config,
+    areaEntries,
+    deviceEntries,
+    entityEntries,
+    hass.states,
+    localize || hass.localize
+  );
 };

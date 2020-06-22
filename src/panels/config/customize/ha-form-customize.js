@@ -2,13 +2,14 @@ import "@polymer/paper-dropdown-menu/paper-dropdown-menu";
 import "@polymer/paper-item/paper-item";
 import "@polymer/paper-listbox/paper-listbox";
 import { html } from "@polymer/polymer/lib/utils/html-tag";
+/* eslint-plugin-disable lit */
 import { PolymerElement } from "@polymer/polymer/polymer-element";
+import { computeStateDomain } from "../../../common/entity/compute_state_domain";
 import LocalizeMixin from "../../../mixins/localize-mixin";
-
 import hassAttributeUtil from "../../../util/hass-attributes-util";
 import "./ha-form-customize-attributes";
-
-import { computeStateDomain } from "../../../common/entity/compute_state_domain";
+import "../ha-form-style";
+import "../../../styles/polymer-ha-style";
 
 class HaFormCustomize extends LocalizeMixin(PolymerElement) {
   static get template() {
@@ -31,6 +32,7 @@ class HaFormCustomize extends LocalizeMixin(PolymerElement) {
           <a
             href="https://www.home-assistant.io/docs/configuration/customizing-devices/#customization-using-the-ui"
             target="_blank"
+            rel="noreferrer"
             >[[localize('ui.panel.config.customize.warning.include_link')]]</a
           >.<br />
           [[localize('ui.panel.config.customize.warning.not_applied')]]

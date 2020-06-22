@@ -1,25 +1,24 @@
+import "@material/mwc-button";
+import "@polymer/paper-spinner/paper-spinner";
+import "@polymer/paper-tooltip/paper-tooltip";
 import {
-  LitElement,
-  TemplateResult,
-  html,
-  CSSResultArray,
   css,
+  CSSResultArray,
   customElement,
+  html,
+  LitElement,
   property,
   PropertyValues,
+  TemplateResult,
 } from "lit-element";
-import "@material/mwc-button";
-import "@polymer/paper-tooltip/paper-tooltip";
-import "@polymer/paper-spinner/paper-spinner";
-
-import "../../components/ha-form/ha-form";
-import "../../components/ha-markdown";
-import "../../resources/ha-style";
-import { HomeAssistant } from "../../types";
 import { fireEvent } from "../../common/dom/fire_event";
+import "../../components/ha-form/ha-form";
+import type { HaFormSchema } from "../../components/ha-form/ha-form";
+import "../../components/ha-markdown";
+import type { DataEntryFlowStepForm } from "../../data/data_entry_flow";
+import type { HomeAssistant } from "../../types";
+import type { FlowConfig } from "./show-dialog-data-entry-flow";
 import { configFlowContentStyles } from "./styles";
-import { DataEntryFlowStepForm, FieldSchema } from "../../data/data_entry_flow";
-import { FlowConfig } from "./show-dialog-data-entry-flow";
 
 @customElement("step-flow-form")
 class StepFlowForm extends LitElement {
@@ -40,7 +39,7 @@ class StepFlowForm extends LitElement {
   @property()
   private _errorMsg?: string;
 
-  protected render(): TemplateResult | void {
+  protected render(): TemplateResult {
     const step = this.step;
     const stepData = this._stepDataProcessed;
 
@@ -61,9 +60,7 @@ class StepFlowForm extends LitElement {
       </h2>
       <div class="content">
         ${this._errorMsg
-          ? html`
-              <div class="error">${this._errorMsg}</div>
-            `
+          ? html` <div class="error">${this._errorMsg}</div> `
           : ""}
         ${this.flowConfig.renderShowFormStepDescription(this.hass, this.step)}
         <ha-form
@@ -124,10 +121,14 @@ class StepFlowForm extends LitElement {
 
     const data = {};
     this.step.data_schema.forEach((field) => {
-      if ("default" in field) {
+      if (field.description?.suggested_value) {
+        data[field.name] = field.description.suggested_value;
+      } else if ("default" in field) {
         data[field.name] = field.default;
       }
     });
+
+    this._stepData = data;
     return data;
   }
 
@@ -176,7 +177,7 @@ class StepFlowForm extends LitElement {
     this._stepData = ev.detail.value;
   }
 
-  private _labelCallback = (field: FieldSchema): string =>
+  private _labelCallback = (field: HaFormSchema): string =>
     this.flowConfig.renderShowFormStepFieldLabel(this.hass, this.step, field);
 
   private _errorCallback = (error: string) =>

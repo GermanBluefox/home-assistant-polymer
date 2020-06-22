@@ -1,36 +1,36 @@
-import {
-  html,
-  LitElement,
-  TemplateResult,
-  customElement,
-  property,
-} from "lit-element";
 import "@polymer/paper-dropdown-menu/paper-dropdown-menu";
 import "@polymer/paper-item/paper-item";
 import "@polymer/paper-listbox/paper-listbox";
-
+import {
+  customElement,
+  html,
+  LitElement,
+  property,
+  TemplateResult,
+} from "lit-element";
+import { fireEvent } from "../../../../common/dom/fire_event";
 import "../../../../components/entity/state-badge";
-import "../../components/hui-theme-select-editor";
-import "../../components/hui-entity-editor";
 import "../../../../components/ha-card";
 import "../../../../components/ha-icon";
 import "../../../../components/ha-switch";
-
-import { processEditorEntities } from "../process-editor-entities";
-import { struct } from "../../common/structs/struct";
-import {
-  EntitiesEditorEvent,
-  EditorTarget,
-  entitiesConfigStruct,
-} from "../types";
+import "../../../../components/ha-formfield";
 import { HomeAssistant } from "../../../../types";
-import { LovelaceCardEditor } from "../../types";
-import { fireEvent } from "../../../../common/dom/fire_event";
-import { configElementStyle } from "./config-elements-style";
 import {
   EntitiesCardConfig,
   EntitiesCardEntityConfig,
 } from "../../cards/types";
+import { struct } from "../../common/structs/struct";
+import "../../components/hui-entity-editor";
+import "../../components/hui-theme-select-editor";
+import { headerFooterConfigStructs } from "../../header-footer/types";
+import { LovelaceCardEditor } from "../../types";
+import { processEditorEntities } from "../process-editor-entities";
+import {
+  EditorTarget,
+  entitiesConfigStruct,
+  EntitiesEditorEvent,
+} from "../types";
+import { configElementStyle } from "./config-elements-style";
 
 const cardConfigStruct = struct({
   type: "string",
@@ -38,6 +38,8 @@ const cardConfigStruct = struct({
   theme: "string?",
   show_header_toggle: "boolean?",
   entities: [entitiesConfigStruct],
+  header: struct.optional(headerFooterConfigStructs),
+  footer: struct.optional(headerFooterConfigStructs),
 });
 
 @customElement("hui-entities-card-editor")
@@ -60,11 +62,11 @@ export class HuiEntitiesCardEditor extends LitElement
   }
 
   get _theme(): string {
-    return this._config!.theme || "Backend-selected";
+    return this._config!.theme || "";
   }
 
-  protected render(): TemplateResult | void {
-    if (!this.hass) {
+  protected render(): TemplateResult {
+    if (!this.hass || !this._config) {
       return html``;
     }
 
@@ -82,22 +84,25 @@ export class HuiEntitiesCardEditor extends LitElement
           @value-changed="${this._valueChanged}"
         ></paper-input>
         <hui-theme-select-editor
-          .hass="${this.hass}"
+          .hass=${this.hass}
           .value="${this._theme}"
           .configValue="${"theme"}"
-          @theme-changed="${this._valueChanged}"
+          @value-changed="${this._valueChanged}"
         ></hui-theme-select-editor>
-        <ha-switch
-          ?checked="${this._config!.show_header_toggle !== false}"
-          .configValue="${"show_header_toggle"}"
-          @change="${this._valueChanged}"
-          >${this.hass.localize(
+        <ha-formfield
+          .label=${this.hass.localize(
             "ui.panel.lovelace.editor.card.entities.show_header_toggle"
-          )}</ha-switch
+          )}
         >
+          <ha-switch
+            .checked="${this._config!.show_header_toggle !== false}"
+            .configValue="${"show_header_toggle"}"
+            @change="${this._valueChanged}"
+          ></ha-switch>
+        </ha-formfield>
       </div>
       <hui-entity-editor
-        .hass="${this.hass}"
+        .hass=${this.hass}
         .entities="${this._configEntities}"
         @entities-changed="${this._valueChanged}"
       ></hui-entity-editor>

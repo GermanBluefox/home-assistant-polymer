@@ -1,27 +1,28 @@
 import "@polymer/paper-input/paper-input";
-import "../../../../../components/ha-service-picker";
-import "../../../../../components/entity/ha-entity-picker";
-import "../../../../../components/ha-yaml-editor";
-
 import {
+  customElement,
   LitElement,
   property,
-  customElement,
   PropertyValues,
   query,
 } from "lit-element";
-import { ActionElement, handleChangeEvent } from "../ha-automation-action-row";
-import { HomeAssistant } from "../../../../../types";
 import { html } from "lit-html";
-import { EventAction } from "../../../../../data/script";
-// tslint:disable-next-line
-import { HaYamlEditor } from "../../../../../components/ha-yaml-editor";
+import "../../../../../components/entity/ha-entity-picker";
+import "../../../../../components/ha-service-picker";
+import "../../../../../components/ha-yaml-editor";
+import type { HaYamlEditor } from "../../../../../components/ha-yaml-editor";
+import type { EventAction } from "../../../../../data/script";
+import type { HomeAssistant } from "../../../../../types";
+import { ActionElement, handleChangeEvent } from "../ha-automation-action-row";
 
 @customElement("ha-automation-action-event")
 export class HaEventAction extends LitElement implements ActionElement {
   @property() public hass!: HomeAssistant;
+
   @property() public action!: EventAction;
+
   @query("ha-yaml-editor") private _yamlEditor?: HaYamlEditor;
+
   private _actionData?: EventAction["event_data"];
 
   public static get defaultConfig(): EventAction {
@@ -57,13 +58,17 @@ export class HaEventAction extends LitElement implements ActionElement {
           "ui.panel.config.automation.editor.actions.type.event.service_data"
         )}
         .name=${"event_data"}
-        .value=${event_data}
+        .defaultValue=${event_data}
         @value-changed=${this._dataChanged}
       ></ha-yaml-editor>
     `;
   }
 
   private _dataChanged(ev: CustomEvent): void {
+    ev.stopPropagation();
+    if (!ev.detail.isValid) {
+      return;
+    }
     this._actionData = ev.detail.value;
     handleChangeEvent(this, ev);
   }

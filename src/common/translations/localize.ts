@@ -1,4 +1,4 @@
-import IntlMessageFormat from "intl-messageformat/src/main";
+import IntlMessageFormat from "intl-messageformat";
 import { Resources } from "../../types";
 
 export type LocalizeFunc = (key: string, ...args: any[]) => string;
@@ -10,6 +10,10 @@ export interface FormatsType {
   number: FormatType;
   date: FormatType;
   time: FormatType;
+}
+
+if (!Intl.PluralRules) {
+  import("@formatjs/intl-pluralrules/polyfill-locales");
 }
 
 /**
@@ -59,7 +63,7 @@ export const computeLocalize = (
     let translatedMessage = cache._localizationCache[messageKey];
 
     if (!translatedMessage) {
-      translatedMessage = new (IntlMessageFormat as any)(
+      translatedMessage = new IntlMessageFormat(
         translatedValue,
         language,
         formats

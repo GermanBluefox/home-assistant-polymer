@@ -1,7 +1,7 @@
-import { handleFetchPromise } from "../util/hass-call-api";
 import { HomeAssistant } from "../types";
+import { handleFetchPromise } from "../util/hass-call-api";
 
-// tslint:disable-next-line: no-empty-interface
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface OnboardingCoreConfigStepResponse {}
 
 export interface OnboardingUserStepResponse {
@@ -51,7 +51,7 @@ export const onboardCoreConfigStep = (hass: HomeAssistant) =>
 
 export const onboardIntegrationStep = (
   hass: HomeAssistant,
-  params: { client_id: string }
+  params: { client_id: string; redirect_uri: string }
 ) =>
   hass.callApi<OnboardingIntegrationStepResponse>(
     "POST",

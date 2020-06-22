@@ -1,7 +1,7 @@
 import "@polymer/iron-image/iron-image";
 import { html } from "@polymer/polymer/lib/utils/html-tag";
+/* eslint-plugin-disable lit */
 import { PolymerElement } from "@polymer/polymer/polymer-element";
-
 import { EventsMixin } from "../../mixins/events-mixin";
 
 /*
@@ -23,8 +23,7 @@ class HaEntityMarker extends EventsMixin(PolymerElement) {
           line-height: 2.5em;
           font-size: 1.5em;
           border-radius: 50%;
-          border: 0.1em solid
-            var(--ha-marker-color, var(--default-primary-color));
+          border: 0.1em solid var(--ha-marker-color, var(--primary-color));
           color: rgb(76, 76, 76);
           background-color: white;
         }
@@ -33,7 +32,7 @@ class HaEntityMarker extends EventsMixin(PolymerElement) {
         }
       </style>
 
-      <div class="marker">
+      <div class="marker" style$="border-color:{{entityColor}}">
         <template is="dom-if" if="[[entityName]]">[[entityName]]</template>
         <template is="dom-if" if="[[entityPicture]]">
           <iron-image
@@ -63,6 +62,11 @@ class HaEntityMarker extends EventsMixin(PolymerElement) {
       },
 
       entityPicture: {
+        type: String,
+        value: null,
+      },
+
+      entityColor: {
         type: String,
         value: null,
       },

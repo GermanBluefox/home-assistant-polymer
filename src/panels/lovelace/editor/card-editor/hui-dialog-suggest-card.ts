@@ -1,41 +1,42 @@
+import deepFreeze from "deep-freeze";
 import {
   css,
-  html,
-  LitElement,
-  TemplateResult,
   CSSResultArray,
   customElement,
+  html,
+  LitElement,
   property,
   query,
+  TemplateResult,
 } from "lit-element";
-
-import { HomeAssistant } from "../../../../types";
-import { LovelaceCardConfig } from "../../../../data/lovelace";
-import "./hui-card-editor";
-import "./hui-card-preview";
-import "./hui-card-picker";
-import { addCards } from "../config-util";
-
-import "../../../../components/ha-yaml-editor";
 import "../../../../components/dialog/ha-paper-dialog";
+import type { HaPaperDialog } from "../../../../components/dialog/ha-paper-dialog";
+import "../../../../components/ha-yaml-editor";
+import type { HaYamlEditor } from "../../../../components/ha-yaml-editor";
+import { LovelaceCardConfig } from "../../../../data/lovelace";
 import { haStyleDialog } from "../../../../resources/styles";
-import { showEditCardDialog } from "./show-edit-card-dialog";
-import { computeCards } from "../../common/generate-lovelace-config";
-import { SuggestCardDialogParams } from "./show-suggest-card-dialog";
+import { HomeAssistant } from "../../../../types";
 import { showSaveSuccessToast } from "../../../../util/toast-saved-success";
-// tslint:disable-next-line
-import { HaPaperDialog } from "../../../../components/dialog/ha-paper-dialog";
-// tslint:disable-next-line
-import { HaYamlEditor } from "../../../../components/ha-yaml-editor";
+import { computeCards } from "../../common/generate-lovelace-config";
+import { addCards } from "../config-util";
+import "./hui-card-preview";
+import { showEditCardDialog } from "./show-edit-card-dialog";
+import { SuggestCardDialogParams } from "./show-suggest-card-dialog";
 
 @customElement("hui-dialog-suggest-card")
 export class HuiDialogSuggestCard extends LitElement {
   @property() protected hass!: HomeAssistant;
+
   @property() private _params?: SuggestCardDialogParams;
+
   @property() private _cardConfig?: LovelaceCardConfig[];
-  @property() private _saving: boolean = false;
-  @property() private _yamlMode: boolean = false;
+
+  @property() private _saving = false;
+
+  @property() private _yamlMode = false;
+
   @query("ha-paper-dialog") private _dialog?: HaPaperDialog;
+
   @query("ha-yaml-editor") private _yamlEditor?: HaYamlEditor;
 
   public async showDialog(params: SuggestCardDialogParams): Promise<void> {
@@ -49,8 +50,12 @@ export class HuiDialogSuggestCard extends LitElement {
           entityId,
           this.hass.states[entityId],
         ]),
-        {}
+        {},
+        true
       );
+    if (!Object.isFrozen(this._cardConfig)) {
+      this._cardConfig = deepFreeze(this._cardConfig);
+    }
     if (this._dialog) {
       this._dialog.open();
     }
@@ -59,7 +64,7 @@ export class HuiDialogSuggestCard extends LitElement {
     }
   }
 
-  protected render(): TemplateResult | void {
+  protected render(): TemplateResult {
     return html`
       <ha-paper-dialog with-backdrop opened>
         <h2>
@@ -72,7 +77,7 @@ export class HuiDialogSuggestCard extends LitElement {
                   ${this._cardConfig.map(
                     (cardConfig) => html`
                       <hui-card-preview
-                        .hass="${this.hass}"
+                        .hass=${this.hass}
                         .config="${cardConfig}"
                       ></hui-card-preview>
                     `
@@ -83,7 +88,9 @@ export class HuiDialogSuggestCard extends LitElement {
           ${this._yamlMode && this._cardConfig
             ? html`
                 <div class="editor">
-                  <ha-yaml-editor .value=${this._cardConfig}></ha-yaml-editor>
+                  <ha-yaml-editor
+                    .defaultValue=${this._cardConfig}
+                  ></ha-yaml-editor>
                 </div>
               `
             : ""}

@@ -1,26 +1,28 @@
 import "@polymer/app-layout/app-toolbar/app-toolbar";
 import "@polymer/paper-spinner/paper-spinner-lite";
 import {
-  LitElement,
-  TemplateResult,
-  html,
-  CSSResultArray,
   css,
+  CSSResultArray,
   customElement,
+  html,
+  LitElement,
   property,
+  TemplateResult,
 } from "lit-element";
 import "../components/ha-menu-button";
-import "../components/ha-paper-icon-button-arrow-prev";
+import "../components/ha-icon-button-arrow-prev";
 import { haStyle } from "../resources/styles";
 import { HomeAssistant } from "../types";
 
 @customElement("hass-loading-screen")
 class HassLoadingScreen extends LitElement {
   @property({ type: Boolean }) public rootnav? = false;
+
   @property() public hass?: HomeAssistant;
+
   @property() public narrow?: boolean;
 
-  protected render(): TemplateResult | void {
+  protected render(): TemplateResult {
     return html`
       <app-toolbar>
         ${this.rootnav
@@ -31,9 +33,9 @@ class HassLoadingScreen extends LitElement {
               ></ha-menu-button>
             `
           : html`
-              <ha-paper-icon-button-arrow-prev
+              <ha-icon-button-arrow-prev
                 @click=${this._handleBack}
-              ></ha-paper-icon-button-arrow-prev>
+              ></ha-icon-button-arrow-prev>
             `}
       </app-toolbar>
       <div class="content">
@@ -50,6 +52,11 @@ class HassLoadingScreen extends LitElement {
     return [
       haStyle,
       css`
+        :host {
+          display: block;
+          height: 100%;
+          background-color: var(--primary-background-color);
+        }
         .content {
           height: calc(100% - 64px);
           display: flex;

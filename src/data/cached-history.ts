@@ -1,15 +1,15 @@
+import { HassEntity } from "home-assistant-js-websocket";
+import { LocalizeFunc } from "../common/translations/localize";
+import { HomeAssistant } from "../types";
 import {
   computeHistory,
   fetchRecent,
   HistoryResult,
-  TimelineEntity,
   LineChartUnit,
+  TimelineEntity,
 } from "./history";
-import { HomeAssistant } from "../types";
-import { HassEntity } from "home-assistant-js-websocket";
-import { LocalizeFunc } from "../common/translations/localize";
 
-interface CacheConfig {
+export interface CacheConfig {
   refresh: number;
   cacheKey: string;
   hoursToShow: number;

@@ -1,27 +1,25 @@
-import {
-  html,
-  LitElement,
-  TemplateResult,
-  customElement,
-  property,
-  CSSResult,
-  css,
-} from "lit-element";
 import "@polymer/paper-dropdown-menu/paper-dropdown-menu";
 import "@polymer/paper-item/paper-item";
 import "@polymer/paper-listbox/paper-listbox";
-
-import { struct } from "../../common/structs/struct";
-import { EntitiesEditorEvent, EditorTarget } from "../types";
-import { HomeAssistant } from "../../../../types";
-import { LovelaceCardEditor } from "../../types";
+import {
+  css,
+  CSSResult,
+  customElement,
+  html,
+  LitElement,
+  property,
+  TemplateResult,
+} from "lit-element";
 import { fireEvent } from "../../../../common/dom/fire_event";
-import { configElementStyle } from "./config-elements-style";
-import { AlarmPanelCardConfig } from "../../cards/types";
-
 import "../../../../components/entity/ha-entity-picker";
 import "../../../../components/ha-icon";
+import { HomeAssistant } from "../../../../types";
+import { AlarmPanelCardConfig } from "../../cards/types";
+import { struct } from "../../common/structs/struct";
 import "../../components/hui-theme-select-editor";
+import { LovelaceCardEditor } from "../../types";
+import { EditorTarget, EntitiesEditorEvent } from "../types";
+import { configElementStyle } from "./config-elements-style";
 
 const cardConfigStruct = struct({
   type: "string",
@@ -30,6 +28,8 @@ const cardConfigStruct = struct({
   states: "array?",
   theme: "string?",
 });
+
+const includeDomains = ["alarm_control_panel"];
 
 @customElement("hui-alarm-panel-card-editor")
 export class HuiAlarmPanelCardEditor extends LitElement
@@ -56,11 +56,11 @@ export class HuiAlarmPanelCardEditor extends LitElement
   }
 
   get _theme(): string {
-    return this._config!.theme || "Backend-selected";
+    return this._config!.theme || "";
   }
 
-  protected render(): TemplateResult | void {
-    if (!this.hass) {
+  protected render(): TemplateResult {
+    if (!this.hass || !this._config) {
       return html``;
     }
 
@@ -75,10 +75,10 @@ export class HuiAlarmPanelCardEditor extends LitElement
           )} (${this.hass.localize(
             "ui.panel.lovelace.editor.card.config.required"
           )})"
-          .hass="${this.hass}"
+          .hass=${this.hass}
           .value="${this._entity}"
           .configValue=${"entity"}
-          include-domains='["alarm_control_panel"]'
+          .includeDomains=${includeDomains}
           @change="${this._valueChanged}"
           allow-custom-entity
         ></ha-entity-picker>
@@ -113,17 +113,15 @@ export class HuiAlarmPanelCardEditor extends LitElement
         >
           <paper-listbox slot="dropdown-content">
             ${states.map((state) => {
-              return html`
-                <paper-item>${state}</paper-item>
-              `;
+              return html` <paper-item>${state}</paper-item> `;
             })}
           </paper-listbox>
         </paper-dropdown-menu>
         <hui-theme-select-editor
-          .hass="${this.hass}"
+          .hass=${this.hass}
           .value="${this._theme}"
           .configValue="${"theme"}"
-          @theme-changed="${this._valueChanged}"
+          @value-changed="${this._valueChanged}"
         ></hui-theme-select-editor>
       </div>
     `;
@@ -155,13 +153,14 @@ export class HuiAlarmPanelCardEditor extends LitElement
     const target = ev.target! as EditorTarget;
     const index = Number(target.value);
     if (index > -1) {
-      const newStates = this._states;
+      const newStates = [...this._states];
       newStates.splice(index, 1);
-      this._config = {
-        ...this._config,
-        states: newStates,
-      };
-      fireEvent(this, "config-changed", { config: this._config });
+      fireEvent(this, "config-changed", {
+        config: {
+          ...this._config,
+          states: newStates,
+        },
+      });
     }
   }
 
@@ -170,17 +169,18 @@ export class HuiAlarmPanelCardEditor extends LitElement
       return;
     }
     const target = ev.target! as EditorTarget;
-    if (!target.value || this._states.indexOf(target.value) >= 0) {
+    if (!target.value || this._states.indexOf(target.value) !== -1) {
       return;
     }
-    const newStates = this._states;
+    const newStates = [...this._states];
     newStates.push(target.value);
-    this._config = {
-      ...this._config,
-      states: newStates,
-    };
     target.value = "";
-    fireEvent(this, "config-changed", { config: this._config });
+    fireEvent(this, "config-changed", {
+      config: {
+        ...this._config,
+        states: newStates,
+      },
+    });
   }
 
   private _valueChanged(ev: EntitiesEditorEvent): void {

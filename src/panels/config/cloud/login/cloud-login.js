@@ -1,22 +1,22 @@
 import "@material/mwc-button";
-import "@polymer/paper-icon-button/paper-icon-button";
+import "../../../../components/ha-icon-button";
 import "@polymer/paper-input/paper-input";
-import "@polymer/paper-item/paper-item-body";
 import "@polymer/paper-item/paper-item";
+import "@polymer/paper-item/paper-item-body";
 import "@polymer/paper-ripple/paper-ripple";
 import { html } from "@polymer/polymer/lib/utils/html-tag";
+/* eslint-plugin-disable lit */
 import { PolymerElement } from "@polymer/polymer/polymer-element";
-
-import "../../../../components/ha-card";
 import "../../../../components/buttons/ha-progress-button";
-import "../../../../layouts/hass-subpage";
-import "../../../../resources/ha-style";
-
-import "../../ha-config-section";
-import { EventsMixin } from "../../../../mixins/events-mixin";
-import NavigateMixin from "../../../../mixins/navigate-mixin";
+import "../../../../components/ha-card";
 import "../../../../components/ha-icon-next";
+import "../../../../layouts/hass-subpage";
+import { EventsMixin } from "../../../../mixins/events-mixin";
 import LocalizeMixin from "../../../../mixins/localize-mixin";
+import NavigateMixin from "../../../../mixins/navigate-mixin";
+import "../../../../styles/polymer-ha-style";
+import "../../ha-config-section";
+
 /*
  * @appliesMixin NavigateMixin
  * @appliesMixin EventsMixin
@@ -65,7 +65,7 @@ class CloudLogin extends LocalizeMixin(
         .flash-msg {
           padding-right: 44px;
         }
-        .flash-msg paper-icon-button {
+        .flash-msg ha-icon-button {
           position: absolute;
           top: 8px;
           right: 8px;
@@ -87,26 +87,34 @@ class CloudLogin extends LocalizeMixin(
               </p>
               <p>
                 [[localize('ui.panel.config.cloud.login.introduction2')]]
-                <a href="https://www.nabucasa.com" target="_blank"
-                  >Nabu&nbsp;Casa,&nbsp;Inc</a
+                <a
+                  href="https://www.nabucasa.com"
+                  target="_blank"
+                  rel="noreferrer"
                 >
+                  Nabu&nbsp;Casa,&nbsp;Inc
+                </a>
                 [[localize('ui.panel.config.cloud.login.introduction2a')]]
               </p>
               <p>
                 [[localize('ui.panel.config.cloud.login.introduction3')]]
               </p>
               <p>
-                <a href="https://www.nabucasa.com" target="_blank"
-                  >[[localize('ui.panel.config.cloud.login.learn_more_link')]]</a
+                <a
+                  href="https://www.nabucasa.com"
+                  target="_blank"
+                  rel="noreferrer"
                 >
+                  [[localize('ui.panel.config.cloud.login.learn_more_link')]]
+                </a>
               </p>
             </div>
 
             <ha-card hidden$="[[!flashMessage]]">
               <div class="card-content flash-msg">
                 [[flashMessage]]
-                <paper-icon-button icon="hass:close" on-click="_dismissFlash"
-                  >[[localize('ui.panel.config.cloud.login.dismiss')]]</paper-icon-button
+                <ha-icon-button icon="hass:close" on-click="_dismissFlash"
+                  >[[localize('ui.panel.config.cloud.login.dismiss')]]</ha-icon-button
                 >
                 <paper-ripple id="flashRipple" noink=""></paper-ripple>
               </div>

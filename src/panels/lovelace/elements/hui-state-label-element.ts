@@ -1,29 +1,30 @@
 import {
-  html,
-  LitElement,
-  TemplateResult,
-  customElement,
-  property,
   css,
   CSSResult,
+  customElement,
+  html,
+  LitElement,
+  property,
   PropertyValues,
+  TemplateResult,
 } from "lit-element";
-
-import "../components/hui-warning-element";
-
+import { ifDefined } from "lit-html/directives/if-defined";
 import { computeStateDisplay } from "../../../common/entity/compute_state_display";
-import { computeTooltip } from "../common/compute-tooltip";
-import { LovelaceElement, StateLabelElementConfig } from "./types";
-import { HomeAssistant } from "../../../types";
-import { hasConfigOrEntityChanged } from "../common/has-changed";
-import { actionHandler } from "../common/directives/action-handler-directive";
-import { hasAction } from "../common/has-action";
 import { ActionHandlerEvent } from "../../../data/lovelace";
+import { HomeAssistant } from "../../../types";
+import { computeTooltip } from "../common/compute-tooltip";
+import { actionHandler } from "../common/directives/action-handler-directive";
 import { handleAction } from "../common/handle-action";
+import { hasAction } from "../common/has-action";
+import { hasConfigOrEntityChanged } from "../common/has-changed";
+import "../components/hui-warning-element";
+import { LovelaceElement, StateLabelElementConfig } from "./types";
+import { createEntityNotFoundWarning } from "../components/hui-warning";
 
 @customElement("hui-state-label-element")
 class HuiStateLabelElement extends LitElement implements LovelaceElement {
   @property() public hass?: HomeAssistant;
+
   @property() private _config?: StateLabelElementConfig;
 
   public setConfig(config: StateLabelElementConfig): void {
@@ -38,7 +39,7 @@ class HuiStateLabelElement extends LitElement implements LovelaceElement {
     return hasConfigOrEntityChanged(this, changedProps);
   }
 
-  protected render(): TemplateResult | void {
+  protected render(): TemplateResult {
     if (!this._config || !this.hass) {
       return html``;
     }
@@ -48,8 +49,21 @@ class HuiStateLabelElement extends LitElement implements LovelaceElement {
     if (!stateObj) {
       return html`
         <hui-warning-element
+          .label=${createEntityNotFoundWarning(this.hass, this._config.entity)}
+        ></hui-warning-element>
+      `;
+    }
+
+    if (
+      this._config.attribute &&
+      !stateObj.attributes[this._config.attribute]
+    ) {
+      return html`
+        <hui-warning-element
           label=${this.hass.localize(
-            "ui.panel.lovelace.warning.entity_not_found",
+            "ui.panel.lovelace.warning.attribute_not_found",
+            "attribute",
+            this._config.attribute,
             "entity",
             this._config.entity
           )}
@@ -65,15 +79,17 @@ class HuiStateLabelElement extends LitElement implements LovelaceElement {
           hasHold: hasAction(this._config!.hold_action),
           hasDoubleClick: hasAction(this._config!.double_tap_action),
         })}
-        tabindex="0"
+        tabindex=${ifDefined(
+          hasAction(this._config.tap_action) ? "0" : undefined
+        )}
       >
-        ${this._config.prefix}${stateObj
+        ${this._config.prefix}${!this._config.attribute
           ? computeStateDisplay(
               this.hass.localize,
               stateObj,
               this.hass.language
             )
-          : "-"}${this._config.suffix}
+          : stateObj.attributes[this._config.attribute]}${this._config.suffix}
       </div>
     `;
   }

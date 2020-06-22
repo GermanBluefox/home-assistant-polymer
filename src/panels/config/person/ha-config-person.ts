@@ -1,56 +1,68 @@
-import {
-  LitElement,
-  TemplateResult,
-  html,
-  css,
-  CSSResult,
-  property,
-} from "lit-element";
 import "@polymer/paper-item/paper-item";
 import "@polymer/paper-item/paper-item-body";
-
-import { HomeAssistant } from "../../../types";
 import {
-  Person,
-  fetchPersons,
-  updatePerson,
-  deletePerson,
-  createPerson,
-} from "../../../data/person";
-import "../../../components/ha-card";
-import "../../../components/ha-fab";
-import "../../../layouts/hass-subpage";
-import "../../../layouts/hass-loading-screen";
+  css,
+  CSSResult,
+  html,
+  LitElement,
+  property,
+  TemplateResult,
+} from "lit-element";
 import { compare } from "../../../common/string/compare";
-import "../ha-config-section";
+import "../../../components/ha-card";
+import "@material/mwc-fab";
 import {
-  showPersonDetailDialog,
+  createPerson,
+  deletePerson,
+  fetchPersons,
+  Person,
+  updatePerson,
+} from "../../../data/person";
+import { fetchUsers, User } from "../../../data/user";
+import { showConfirmationDialog } from "../../../dialogs/generic/show-dialog-box";
+import "../../../layouts/hass-loading-screen";
+import "../../../layouts/hass-tabs-subpage";
+import { HomeAssistant, Route } from "../../../types";
+import "../ha-config-section";
+import { configSections } from "../ha-panel-config";
+import {
   loadPersonDetailDialog,
+  showPersonDetailDialog,
 } from "./show-dialog-person-detail";
-import { User, fetchUsers } from "../../../data/user";
+import "../../../components/ha-svg-icon";
+import { mdiPlus } from "@mdi/js";
 
 class HaConfigPerson extends LitElement {
   @property() public hass?: HomeAssistant;
+
   @property() public isWide?: boolean;
+
+  @property() public narrow?: boolean;
+
+  @property() public route!: Route;
+
   @property() private _storageItems?: Person[];
+
   @property() private _configItems?: Person[];
+
   private _usersLoad?: Promise<User[]>;
 
-  protected render(): TemplateResult | void {
+  protected render(): TemplateResult {
     if (
       !this.hass ||
       this._storageItems === undefined ||
       this._configItems === undefined
     ) {
-      return html`
-        <hass-loading-screen></hass-loading-screen>
-      `;
+      return html` <hass-loading-screen></hass-loading-screen> `;
     }
     const hass = this.hass;
     return html`
-      <hass-subpage
-        .header=${hass.localize("ui.panel.config.person.caption")}
-        .showBackButton=${!this.isWide}
+      <hass-tabs-subpage
+        .hass=${this.hass}
+        .narrow=${this.narrow}
+        .route=${this.route}
+        back-path="/config"
+        .tabs=${configSections.persons}
       >
         <ha-config-section .isWide=${this.isWide}>
           <span slot="header"
@@ -109,14 +121,16 @@ class HaConfigPerson extends LitElement {
               `
             : ""}
         </ha-config-section>
-      </hass-subpage>
+      </hass-tabs-subpage>
 
-      <ha-fab
+      <mwc-fab
         ?is-wide=${this.isWide}
-        icon="hass:plus"
+        ?narrow=${this.narrow}
         title="${hass.localize("ui.panel.config.person.add_person")}"
         @click=${this._createPerson}
-      ></ha-fab>
+      >
+        <ha-svg-icon slot="icon" path=${mdiPlus}></ha-svg-icon>
+      </mwc-fab>
     `;
   }
 
@@ -182,11 +196,12 @@ class HaConfigPerson extends LitElement {
       },
       removeEntry: async () => {
         if (
-          !confirm(`${this.hass!.localize(
-            "ui.panel.config.person.confirm_delete"
-          )}
-
-${this.hass!.localize("ui.panel.config.person.confirm_delete2")}`)
+          !(await showConfirmationDialog(this, {
+            title: this.hass!.localize("ui.panel.config.person.confirm_delete"),
+            text: this.hass!.localize("ui.panel.config.person.confirm_delete2"),
+            dismissText: this.hass!.localize("ui.common.no"),
+            confirmText: this.hass!.localize("ui.common.yes"),
+          }))
         ) {
           return false;
         }
@@ -225,14 +240,16 @@ ${this.hass!.localize("ui.panel.config.person.confirm_delete2")}`)
       ha-card.storage paper-item {
         cursor: pointer;
       }
-      ha-fab {
+      mwc-fab {
         position: fixed;
         bottom: 16px;
         right: 16px;
         z-index: 1;
       }
-
-      ha-fab[is-wide] {
+      mwc-fab[narrow] {
+        bottom: 84px;
+      }
+      mwc-fab[is-wide] {
         bottom: 24px;
         right: 24px;
       }

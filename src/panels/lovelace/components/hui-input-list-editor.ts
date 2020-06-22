@@ -1,26 +1,27 @@
+import "../../../components/ha-icon-button";
+import "@polymer/paper-input/paper-input";
 import {
-  html,
   css,
+  CSSResult,
+  customElement,
+  html,
   LitElement,
   property,
   TemplateResult,
-  CSSResult,
-  customElement,
 } from "lit-element";
-import "@polymer/paper-input/paper-input";
-
-import { HomeAssistant } from "../../../types";
 import { fireEvent } from "../../../common/dom/fire_event";
-
+import { HomeAssistant } from "../../../types";
 import { EditorTarget } from "../editor/types";
 
 @customElement("hui-input-list-editor")
 export class HuiInputListEditor extends LitElement {
   @property() protected value?: string[];
+
   @property() protected hass?: HomeAssistant;
+
   @property() protected inputLabel?: string;
 
-  protected render(): TemplateResult | void {
+  protected render(): TemplateResult {
     if (!this.value) {
       return html``;
     }
@@ -35,13 +36,13 @@ export class HuiInputListEditor extends LitElement {
             .index="${index}"
             @value-changed="${this._valueChanged}"
             @blur="${this._consolidateEntries}"
-            ><paper-icon-button
+            ><ha-icon-button
               slot="suffix"
               class="clear-button"
               icon="hass:close"
               no-ripple
               @click="${this._removeEntry}"
-              >Clear</paper-icon-button
+              >Clear</ha-icon-button
             ></paper-input
           >
         `;
@@ -98,9 +99,8 @@ export class HuiInputListEditor extends LitElement {
 
   static get styles(): CSSResult {
     return css`
-      paper-input > paper-icon-button {
-        width: 24px;
-        height: 24px;
+      ha-icon-button {
+        --mdc-icon-button-size: 24px;
         padding: 2px;
         color: var(--secondary-text-color);
       }

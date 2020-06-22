@@ -1,32 +1,39 @@
+import "@material/mwc-button";
+import "@polymer/paper-input/paper-input";
 import {
-  LitElement,
-  html,
   css,
   CSSResult,
-  TemplateResult,
+  html,
+  LitElement,
   property,
+  TemplateResult,
 } from "lit-element";
 import memoizeOne from "memoize-one";
-
-import "@polymer/paper-input/paper-input";
-import "@material/mwc-button";
-import "@material/mwc-dialog";
-
 import "../../../components/entity/ha-entities-picker";
+import { createCloseHeading } from "../../../components/ha-dialog";
 import "../../../components/user/ha-user-picker";
-import { PersonDetailDialogParams } from "./show-dialog-person-detail";
-import { PolymerChangedEvent } from "../../../polymer-types";
-import { HomeAssistant } from "../../../types";
 import { PersonMutableParams } from "../../../data/person";
+import { PolymerChangedEvent } from "../../../polymer-types";
+import { haStyleDialog } from "../../../resources/styles";
+import { HomeAssistant } from "../../../types";
+import { PersonDetailDialogParams } from "./show-dialog-person-detail";
+
+const includeDomains = ["device_tracker"];
 
 class DialogPersonDetail extends LitElement {
   @property() public hass!: HomeAssistant;
+
   @property() private _name!: string;
+
   @property() private _userId?: string;
+
   @property() private _deviceTrackers!: string[];
+
   @property() private _error?: string;
+
   @property() private _params?: PersonDetailDialogParams;
-  @property() private _submitting: boolean = false;
+
+  @property() private _submitting = false;
 
   private _deviceTrackersAvailable = memoizeOne((hass) => {
     return Object.keys(hass.states).some(
@@ -50,27 +57,29 @@ class DialogPersonDetail extends LitElement {
     await this.updateComplete;
   }
 
-  protected render(): TemplateResult | void {
+  protected render(): TemplateResult {
     if (!this._params) {
       return html``;
     }
     const nameInvalid = this._name.trim() === "";
     return html`
-      <mwc-dialog
+      <ha-dialog
         open
-        @closing="${this._close}"
-        .title=${this._params.entry
-          ? this._params.entry.name
-          : this.hass!.localize("ui.panel.config.person.detail.new_person")}
+        @closing=${this._close}
+        scrimClickAction
+        escapeKeyAction
+        .heading=${createCloseHeading(
+          this.hass,
+          this._params.entry
+            ? this._params.entry.name
+            : this.hass!.localize("ui.panel.config.person.detail.new_person")
+        )}
       >
         <div>
-          ${this._error
-            ? html`
-                <div class="error">${this._error}</div>
-              `
-            : ""}
+          ${this._error ? html` <div class="error">${this._error}</div> ` : ""}
           <div class="form">
             <paper-input
+              dialogInitialFocus
               .value=${this._name}
               @value-changed=${this._nameChanged}
               label="${this.hass!.localize(
@@ -79,7 +88,8 @@ class DialogPersonDetail extends LitElement {
               error-message="${this.hass!.localize(
                 "ui.panel.config.person.detail.name_error_msg"
               )}"
-              .invalid=${nameInvalid}
+              required
+              auto-validate
             ></paper-input>
             <ha-user-picker
               label="${this.hass!.localize(
@@ -100,7 +110,7 @@ class DialogPersonDetail extends LitElement {
                   <ha-entities-picker
                     .hass=${this.hass}
                     .value=${this._deviceTrackers}
-                    include-domains='["device_tracker"]'
+                    .includeDomains=${includeDomains}
                     .pickedEntityLabel=${this.hass.localize(
                       "ui.panel.config.person.detail.device_tracker_picked"
                     )}
@@ -122,6 +132,7 @@ class DialogPersonDetail extends LitElement {
                       <a
                         href="https://www.home-assistant.io/integrations/#presence-detection"
                         target="_blank"
+                        rel="noreferrer"
                         >${this.hass!.localize(
                           "ui.panel.config.person.detail.link_presence_detection_integrations"
                         )}</a
@@ -162,7 +173,7 @@ class DialogPersonDetail extends LitElement {
             ? this.hass!.localize("ui.panel.config.person.detail.update")
             : this.hass!.localize("ui.panel.config.person.detail.create")}
         </mwc-button>
-      </mwc-dialog>
+      </ha-dialog>
     `;
   }
 
@@ -223,23 +234,13 @@ class DialogPersonDetail extends LitElement {
 
   static get styles(): CSSResult[] {
     return [
+      haStyleDialog,
       css`
-        mwc-dialog {
-          min-width: 400px;
-          max-width: 600px;
-          --mdc-dialog-title-ink-color: var(--primary-text-color);
-        }
         .form {
           padding-bottom: 24px;
         }
         ha-user-picker {
           margin-top: 16px;
-        }
-        mwc-button.warning {
-          --mdc-theme-primary: var(--google-red-500);
-        }
-        .error {
-          color: var(--google-red-500);
         }
         a {
           color: var(--primary-color);

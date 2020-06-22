@@ -1,14 +1,14 @@
 import "@polymer/paper-input/paper-input";
 import { html } from "@polymer/polymer/lib/utils/html-tag";
+/* eslint-plugin-disable lit */
 import { PolymerElement } from "@polymer/polymer/polymer-element";
-
-import "../../../../components/ha-card";
 import "../../../../components/buttons/ha-progress-button";
+import "../../../../components/ha-card";
 import "../../../../layouts/hass-subpage";
-import "../../../../resources/ha-style";
-import "../../ha-config-section";
 import { EventsMixin } from "../../../../mixins/events-mixin";
 import LocalizeMixin from "../../../../mixins/localize-mixin";
+import "../../../../styles/polymer-ha-style";
+import "../../ha-config-section";
 
 /*
  * @appliesMixin EventsMixin
@@ -74,8 +74,8 @@ class CloudRegister extends LocalizeMixin(EventsMixin(PolymerElement)) {
             <p>
               [[localize('ui.panel.config.cloud.register.information4')]]
               </p><ul>
-                <li><a href="https://home-assistant.io/tos/" target="_blank">[[localize('ui.panel.config.cloud.register.link_terms_conditions')]]</a></li>
-                <li><a href="https://home-assistant.io/privacy/" target="_blank">[[localize('ui.panel.config.cloud.register.link_privacy_policy')]]</a></li>
+                <li><a href="https://home-assistant.io/tos/" target="_blank" rel="noreferrer">[[localize('ui.panel.config.cloud.register.link_terms_conditions')]]</a></li>
+                <li><a href="https://home-assistant.io/privacy/" target="_blank" rel="noreferrer">[[localize('ui.panel.config.cloud.register.link_privacy_policy')]]</a></li>
               </ul>
             </p>
           </div>

@@ -1,20 +1,21 @@
+import "@polymer/paper-input/paper-input";
 import {
+  css,
+  CSSResult,
+  customElement,
   html,
   LitElement,
-  TemplateResult,
-  customElement,
   property,
+  TemplateResult,
 } from "lit-element";
-import "@polymer/paper-input/paper-input";
-
-import { struct } from "../../common/structs/struct";
-import { EntitiesEditorEvent, EditorTarget } from "../types";
-import { HomeAssistant } from "../../../../types";
-import { LovelaceCardEditor } from "../../types";
+import { isComponentLoaded } from "../../../../common/config/is_component_loaded";
 import { fireEvent } from "../../../../common/dom/fire_event";
+import { HomeAssistant } from "../../../../types";
 import { ShoppingListCardConfig } from "../../cards/types";
-
+import { struct } from "../../common/structs/struct";
 import "../../components/hui-theme-select-editor";
+import { LovelaceCardEditor } from "../../types";
+import { EditorTarget, EntitiesEditorEvent } from "../types";
 
 const cardConfigStruct = struct({
   type: "string",
@@ -39,16 +40,25 @@ export class HuiShoppingListEditor extends LitElement
   }
 
   get _theme(): string {
-    return this._config!.theme || "Backend-selected";
+    return this._config!.theme || "";
   }
 
-  protected render(): TemplateResult | void {
-    if (!this.hass) {
+  protected render(): TemplateResult {
+    if (!this.hass || !this._config) {
       return html``;
     }
 
     return html`
       <div class="card-config">
+        ${!isComponentLoaded(this.hass, "shopping_list")
+          ? html`
+              <div class="error">
+                ${this.hass.localize(
+                  "ui.panel.lovelace.editor.card.shopping-list.integration_not_loaded"
+                )}
+              </div>
+            `
+          : ""}
         <paper-input
           .label="${this.hass.localize(
             "ui.panel.lovelace.editor.card.generic.title"
@@ -60,10 +70,10 @@ export class HuiShoppingListEditor extends LitElement
           @value-changed="${this._valueChanged}"
         ></paper-input>
         <hui-theme-select-editor
-          .hass="${this.hass}"
+          .hass=${this.hass}
           .value="${this._theme}"
           .configValue="${"theme"}"
-          @theme-changed="${this._valueChanged}"
+          @value-changed="${this._valueChanged}"
         ></hui-theme-select-editor>
       </div>
     `;
@@ -89,6 +99,14 @@ export class HuiShoppingListEditor extends LitElement
       }
     }
     fireEvent(this, "config-changed", { config: this._config });
+  }
+
+  static get styles(): CSSResult {
+    return css`
+      .error {
+        color: var(--google-red-500);
+      }
+    `;
   }
 }
 

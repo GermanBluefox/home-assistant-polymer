@@ -1,24 +1,24 @@
 import {
+  customElement,
   html,
   LitElement,
-  TemplateResult,
-  customElement,
   property,
+  TemplateResult,
 } from "lit-element";
-
-import { struct } from "../../common/structs/struct";
-import { EntitiesEditorEvent, EditorTarget } from "../types";
-import { HomeAssistant } from "../../../../types";
-import { LovelaceCardEditor } from "../../types";
 import { fireEvent } from "../../../../common/dom/fire_event";
-import { MediaControlCardConfig } from "../../cards/hui-media-control-card";
-
 import "../../../../components/entity/ha-entity-picker";
+import { HomeAssistant } from "../../../../types";
+import { MediaControlCardConfig } from "../../cards/types";
+import { struct } from "../../common/structs/struct";
+import { LovelaceCardEditor } from "../../types";
+import { EditorTarget, EntitiesEditorEvent } from "../types";
 
 const cardConfigStruct = struct({
   type: "string",
   entity: "string?",
 });
+
+const includeDomains = ["media_player"];
 
 @customElement("hui-media-control-card-editor")
 export class HuiMediaControlCardEditor extends LitElement
@@ -36,8 +36,8 @@ export class HuiMediaControlCardEditor extends LitElement
     return this._config!.entity || "";
   }
 
-  protected render(): TemplateResult | void {
-    if (!this.hass) {
+  protected render(): TemplateResult {
+    if (!this.hass || !this._config) {
       return html``;
     }
 
@@ -49,10 +49,10 @@ export class HuiMediaControlCardEditor extends LitElement
           )} (${this.hass.localize(
             "ui.panel.lovelace.editor.card.config.required"
           )})"
-          .hass="${this.hass}"
+          .hass=${this.hass}
           .value="${this._entity}"
           .configValue=${"entity"}
-          include-domains='["media_player"]'
+          .includeDomains=${includeDomains}
           @change="${this._valueChanged}"
           allow-custom-entity
         ></ha-entity-picker>

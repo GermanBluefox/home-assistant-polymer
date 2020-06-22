@@ -1,22 +1,20 @@
+import "@polymer/paper-input/paper-input";
 import {
+  customElement,
   html,
   LitElement,
-  TemplateResult,
-  customElement,
   property,
+  TemplateResult,
 } from "lit-element";
-import "@polymer/paper-input/paper-input";
-
-import "../../components/hui-entity-editor";
-
-import { struct } from "../../common/structs/struct";
-import { EntitiesEditorEvent, EditorTarget } from "../types";
-import { HomeAssistant } from "../../../../types";
-import { LovelaceCardEditor } from "../../types";
 import { fireEvent } from "../../../../common/dom/fire_event";
-import { HistoryGraphCardConfig } from "../../cards/hui-history-graph-card";
+import { HomeAssistant } from "../../../../types";
+import { HistoryGraphCardConfig } from "../../cards/types";
+import { struct } from "../../common/structs/struct";
+import "../../components/hui-entity-editor";
 import { EntityConfig } from "../../entity-rows/types";
+import { LovelaceCardEditor } from "../../types";
 import { processEditorEntities } from "../process-editor-entities";
+import { EditorTarget, EntitiesEditorEvent } from "../types";
 import { configElementStyle } from "./config-elements-style";
 
 const entitiesConfigStruct = struct.union([
@@ -66,8 +64,8 @@ export class HuiHistoryGraphCardEditor extends LitElement
     return this._config!.refresh_interval || 0;
   }
 
-  protected render(): TemplateResult | void {
-    if (!this.hass) {
+  protected render(): TemplateResult {
+    if (!this.hass || !this._config) {
       return html``;
     }
 
@@ -109,7 +107,7 @@ export class HuiHistoryGraphCardEditor extends LitElement
           ></paper-input>
         </div>
         <hui-entity-editor
-          .hass="${this.hass}"
+          .hass=${this.hass}
           .entities="${this._configEntities}"
           @entities-changed="${this._valueChanged}"
         ></hui-entity-editor>

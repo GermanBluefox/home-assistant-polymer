@@ -1,45 +1,52 @@
+import "@material/mwc-button";
+import { mdiHomeAssistant } from "@mdi/js";
 import {
-  LitElement,
-  TemplateResult,
-  html,
-  CSSResult,
   css,
-  property,
+  CSSResult,
   customElement,
+  html,
+  LitElement,
+  property,
+  TemplateResult,
 } from "lit-element";
-import "@polymer/iron-icon/iron-icon";
-
-import { HomeAssistant } from "../../../src/types";
+import "../../../src/components/buttons/ha-call-api-button";
+import "../../../src/components/ha-card";
+import "../../../src/components/ha-svg-icon";
+import { HassioHassOSInfo } from "../../../src/data/hassio/host";
 import {
   HassioHomeAssistantInfo,
-  HassioHassOSInfo,
   HassioSupervisorInfo,
-} from "../../../src/data/hassio";
-
+} from "../../../src/data/hassio/supervisor";
+import { haStyle } from "../../../src/resources/styles";
+import { HomeAssistant } from "../../../src/types";
 import { hassioStyle } from "../resources/hassio-style";
-
-import "@material/mwc-button";
-import "@polymer/paper-card/paper-card";
-import "../../../src/components/buttons/ha-call-api-button";
-import "../components/hassio-card-content";
 
 @customElement("hassio-update")
 export class HassioUpdate extends LitElement {
   @property() public hass!: HomeAssistant;
 
   @property() public hassInfo: HassioHomeAssistantInfo;
+
   @property() public hassOsInfo?: HassioHassOSInfo;
+
   @property() public supervisorInfo: HassioSupervisorInfo;
 
-  @property() public error?: string;
+  @property() private _error?: string;
 
-  protected render(): TemplateResult | void {
+  protected render(): TemplateResult {
     const updatesAvailable: number = [
       this.hassInfo,
       this.supervisorInfo,
       this.hassOsInfo,
     ].filter((value) => {
-      return !!value && value.version !== value.last_version;
+      return (
+        !!value &&
+        (value.version_latest
+          ? value.version !== value.version_latest
+          : value.version_latest
+          ? value.version !== value.version_latest
+          : false)
+      );
     }).length;
 
     if (!updatesAvailable) {
@@ -48,40 +55,38 @@ export class HassioUpdate extends LitElement {
 
     return html`
       <div class="content">
-        ${this.error
-          ? html`
-              <div class="error">Error: ${this.error}</div>
-            `
+        ${this._error
+          ? html` <div class="error">Error: ${this._error}</div> `
           : ""}
+        <h1>
+          ${updatesAvailable > 1
+            ? "Updates Available 🎉"
+            : "Update Available 🎉"}
+        </h1>
         <div class="card-group">
-          <div class="title">
-            ${updatesAvailable > 1
-              ? "Updates Available 🎉"
-              : "Update Available 🎉"}
-          </div>
           ${this._renderUpdateCard(
-            "Home Assistant",
+            "Home Assistant Core",
             this.hassInfo.version,
-            this.hassInfo.last_version,
+            this.hassInfo.version_latest,
             "hassio/homeassistant/update",
             `https://${
-              this.hassInfo.last_version.includes("b") ? "rc" : "www"
+              this.hassInfo.version_latest.includes("b") ? "rc" : "www"
             }.home-assistant.io/latest-release-notes/`,
-            "hassio:home-assistant"
+            mdiHomeAssistant
           )}
           ${this._renderUpdateCard(
-            "Hass.io Supervisor",
+            "Supervisor",
             this.supervisorInfo.version,
-            this.supervisorInfo.last_version,
+            this.supervisorInfo.version_latest,
             "hassio/supervisor/update",
-            `https://github.com//home-assistant/hassio/releases/tag/${this.supervisorInfo.last_version}`
+            `https://github.com//home-assistant/hassio/releases/tag/${this.supervisorInfo.version_latest}`
           )}
           ${this.hassOsInfo
             ? this._renderUpdateCard(
-                "HassOS",
+                "Operating System",
                 this.hassOsInfo.version,
                 this.hassOsInfo.version_latest,
-                "hassio/hassos/update",
+                "hassio/os/update",
                 `https://github.com//home-assistant/hassos/releases/tag/${this.hassOsInfo.version_latest}`
               )
             : ""}
@@ -98,16 +103,16 @@ export class HassioUpdate extends LitElement {
     releaseNotesUrl: string,
     icon?: string
   ): TemplateResult {
-    if (lastVersion === curVersion) {
+    if (!lastVersion || lastVersion === curVersion) {
       return html``;
     }
     return html`
-      <paper-card>
+      <ha-card>
         <div class="card-content">
           ${icon
             ? html`
                 <div class="icon">
-                  <iron-icon .icon="${icon}" />
+                  <ha-svg-icon .path=${icon}></ha-svg-icon>
                 </div>
               `
             : ""}
@@ -117,7 +122,7 @@ export class HassioUpdate extends LitElement {
           </div>
         </div>
         <div class="card-actions">
-          <a href="${releaseNotesUrl}" target="_blank">
+          <a href="${releaseNotesUrl}" target="_blank" rel="noreferrer">
             <mwc-button>Release notes</mwc-button>
           </a>
           <ha-call-api-button
@@ -128,47 +133,48 @@ export class HassioUpdate extends LitElement {
             Update
           </ha-call-api-button>
         </div>
-      </paper-card>
+      </ha-card>
     `;
   }
 
-  private _apiCalled(ev) {
+  private _apiCalled(ev): void {
     if (ev.detail.success) {
-      this.error = "";
+      this._error = "";
       return;
     }
 
     const response = ev.detail.response;
 
-    typeof response.body === "object"
-      ? (this.error = response.body.message || "Unknown error")
-      : (this.error = response.body);
+    if (typeof response.body === "object") {
+      this._error = response.body.message || "Unknown error";
+    } else {
+      this._error = response.body;
+    }
   }
 
   static get styles(): CSSResult[] {
     return [
+      haStyle,
       hassioStyle,
       css`
-        :host {
-          width: 33%;
-        }
-        paper-card {
-          display: inline-block;
-          margin-bottom: 32px;
-        }
         .icon {
-          --iron-icon-height: 48px;
-          --iron-icon-width: 48px;
+          --mdc-icon-size: 48px;
           float: right;
           margin: 0 0 2px 10px;
+          color: var(--primary-text-color);
         }
         .update-heading {
           font-size: var(--paper-font-subhead_-_font-size);
           font-weight: 500;
           margin-bottom: 0.5em;
+          color: var(--primary-text-color);
         }
         .warning {
           color: var(--secondary-text-color);
+        }
+        .card-content {
+          height: calc(100% - 47px);
+          box-sizing: border-box;
         }
         .card-actions {
           text-align: right;

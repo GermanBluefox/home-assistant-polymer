@@ -2,11 +2,11 @@ import "@polymer/paper-spinner/paper-spinner";
 import { timeOut } from "@polymer/polymer/lib/utils/async";
 import { Debouncer } from "@polymer/polymer/lib/utils/debounce";
 import { html } from "@polymer/polymer/lib/utils/html-tag";
+/* eslint-plugin-disable lit */
 import { PolymerElement } from "@polymer/polymer/polymer-element";
-import LocalizeMixin from "../../../mixins/localize-mixin";
 import "../../../components/ha-code-editor";
-
-import "../../../resources/ha-style";
+import LocalizeMixin from "../../../mixins/localize-mixin";
+import "../../../styles/polymer-ha-style";
 
 class HaPanelDevTemplate extends LocalizeMixin(PolymerElement) {
   static get template() {
@@ -29,7 +29,7 @@ class HaPanelDevTemplate extends LocalizeMixin(PolymerElement) {
         }
 
         .edit-pane a {
-          color: var(--dark-primary-color);
+          color: var(--primary-color);
         }
 
         .horizontal .edit-pane {
@@ -68,6 +68,7 @@ class HaPanelDevTemplate extends LocalizeMixin(PolymerElement) {
               <a
                 href="http://jinja.pocoo.org/docs/dev/templates/"
                 target="_blank"
+                rel="noreferrer"
                 >[[localize('ui.panel.developer-tools.tabs.templates.jinja_documentation')]]</a
               >
             </li>
@@ -75,6 +76,7 @@ class HaPanelDevTemplate extends LocalizeMixin(PolymerElement) {
               <a
                 href="https://home-assistant.io/docs/configuration/templating/"
                 target="_blank"
+                rel="noreferrer"
                 >[[localize('ui.panel.developer-tools.tabs.templates.template_extensions')]]</a
               >
             </li>
@@ -181,11 +183,11 @@ For loop example:
     this.rendering = true;
 
     this.hass.callApi("POST", "template", { template: this.template }).then(
-      function(processed) {
+      function (processed) {
         this.processed = processed;
         this.rendering = false;
       }.bind(this),
-      function(error) {
+      function (error) {
         this.processed =
           (error && error.body && error.body.message) ||
           this.hass.localize(

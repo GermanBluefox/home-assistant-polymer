@@ -1,16 +1,16 @@
-import {
-  fetchOptionsFlow,
-  handleOptionsFlowStep,
-  deleteOptionsFlow,
-  createOptionsFlow,
-} from "../../data/options_flow";
 import { html } from "lit-element";
 import { localizeKey } from "../../common/translations/localize";
-import {
-  showFlowDialog,
-  loadDataEntryFlowDialog,
-} from "./show-dialog-data-entry-flow";
 import { ConfigEntry } from "../../data/config_entries";
+import {
+  createOptionsFlow,
+  deleteOptionsFlow,
+  fetchOptionsFlow,
+  handleOptionsFlowStep,
+} from "../../data/options_flow";
+import {
+  loadDataEntryFlowDialog,
+  showFlowDialog,
+} from "./show-dialog-data-entry-flow";
 
 export const loadOptionsFlowDialog = loadDataEntryFlowDialog;
 
@@ -25,8 +25,20 @@ export const showOptionsFlowDialog = (
     },
     {
       loadDevicesAndAreas: false,
-      createFlow: createOptionsFlow,
-      fetchFlow: fetchOptionsFlow,
+      createFlow: async (hass, handler) => {
+        const [step] = await Promise.all([
+          createOptionsFlow(hass, handler),
+          hass.loadBackendTranslation("options", configEntry.domain),
+        ]);
+        return step;
+      },
+      fetchFlow: async (hass, flowId) => {
+        const [step] = await Promise.all([
+          fetchOptionsFlow(hass, flowId),
+          hass.loadBackendTranslation("options", configEntry.domain),
+        ]);
+        return step;
+      },
       handleFlowStep: handleOptionsFlowStep,
       deleteFlow: deleteOptionsFlow,
 
@@ -39,17 +51,38 @@ export const showOptionsFlowDialog = (
 
         return description
           ? html`
-              <ha-markdown allowsvg .content=${description}></ha-markdown>
+              <ha-markdown
+                breaks
+                allowsvg
+                .content=${description}
+              ></ha-markdown>
             `
           : "";
       },
 
-      renderShowFormStepHeader(hass, _step) {
-        return hass.localize(`ui.dialogs.options_flow.form.header`);
+      renderShowFormStepHeader(hass, step) {
+        return (
+          hass.localize(
+            `component.${configEntry.domain}.options.step.${step.step_id}.title`
+          ) || hass.localize(`ui.dialogs.options_flow.form.header`)
+        );
       },
 
-      renderShowFormStepDescription(_hass, _step) {
-        return "";
+      renderShowFormStepDescription(hass, step) {
+        const description = localizeKey(
+          hass.localize,
+          `component.${configEntry.domain}.options.step.${step.step_id}.description`,
+          step.description_placeholders
+        );
+        return description
+          ? html`
+              <ha-markdown
+                allowsvg
+                breaks
+                .content=${description}
+              ></ha-markdown>
+            `
+          : "";
       },
 
       renderShowFormStepFieldLabel(hass, step, field) {

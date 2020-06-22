@@ -1,18 +1,31 @@
 import {
+  css,
+  CSSResult,
+  customElement,
   html,
   LitElement,
   TemplateResult,
-  CSSResult,
-  css,
-  customElement,
 } from "lit-element";
+import { HomeAssistant } from "../../../types";
+import { STATE_NOT_RUNNING } from "home-assistant-js-websocket";
+
+export const createEntityNotFoundWarning = (
+  hass: HomeAssistant,
+  entityId: string
+) => {
+  return hass.config.state !== STATE_NOT_RUNNING
+    ? hass.localize(
+        "ui.panel.lovelace.warning.entity_not_found",
+        "entity",
+        entityId
+      )
+    : hass.localize("ui.panel.lovelace.warning.starting");
+};
 
 @customElement("hui-warning")
 export class HuiWarning extends LitElement {
-  protected render(): TemplateResult | void {
-    return html`
-      <slot></slot>
-    `;
+  protected render(): TemplateResult {
+    return html` <slot></slot> `;
   }
 
   static get styles(): CSSResult {

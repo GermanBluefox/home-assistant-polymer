@@ -1,33 +1,33 @@
 import {
-  LitElement,
-  customElement,
-  property,
-  TemplateResult,
-  html,
-  PropertyValues,
-  CSSResult,
   css,
+  CSSResult,
+  customElement,
+  html,
+  LitElement,
+  property,
+  PropertyValues,
+  TemplateResult,
 } from "lit-element";
-import { HomeAssistant, Route } from "../../../src/types";
 import {
-  createHassioSession,
-  HassioAddonDetails,
   fetchHassioAddonInfo,
-} from "../../../src/data/hassio";
+  HassioAddonDetails,
+} from "../../../src/data/hassio/addon";
+import { createHassioSession } from "../../../src/data/hassio/supervisor";
 import "../../../src/layouts/hass-loading-screen";
 import "../../../src/layouts/hass-subpage";
+import { HomeAssistant, Route } from "../../../src/types";
 
 @customElement("hassio-ingress-view")
 class HassioIngressView extends LitElement {
   @property() public hass!: HomeAssistant;
+
   @property() public route!: Route;
+
   @property() private _addon?: HassioAddonDetails;
 
-  protected render(): TemplateResult | void {
+  protected render(): TemplateResult {
     if (!this._addon) {
-      return html`
-        <hass-loading-screen></hass-loading-screen>
-      `;
+      return html` <hass-loading-screen></hass-loading-screen> `;
     }
 
     return html`
@@ -71,7 +71,7 @@ class HassioIngressView extends LitElement {
 
       this._addon = addon;
     } catch (err) {
-      // tslint:disable-next-line
+      // eslint-disable-next-line
       console.error(err);
       alert(err.message || "Unknown error starting ingress.");
       history.back();
@@ -85,9 +85,6 @@ class HassioIngressView extends LitElement {
         width: 100%;
         height: 100%;
         border: 0;
-      }
-      paper-icon-button {
-        color: var(--text-primary-color);
       }
     `;
   }

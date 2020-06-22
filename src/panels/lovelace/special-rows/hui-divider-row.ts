@@ -1,16 +1,15 @@
 import {
+  customElement,
   html,
   LitElement,
-  TemplateResult,
-  customElement,
   property,
+  TemplateResult,
 } from "lit-element";
-
-import { EntityRow, DividerConfig } from "../entity-rows/types";
 import { HomeAssistant } from "../../../types";
+import { DividerConfig, LovelaceRow } from "../entity-rows/types";
 
 @customElement("hui-divider-row")
-class HuiDividerRow extends LitElement implements EntityRow {
+class HuiDividerRow extends LitElement implements LovelaceRow {
   public hass?: HomeAssistant;
 
   @property() private _config?: DividerConfig;
@@ -29,7 +28,7 @@ class HuiDividerRow extends LitElement implements EntityRow {
     };
   }
 
-  protected render(): TemplateResult | void {
+  protected render(): TemplateResult {
     if (!this._config) {
       return html``;
     }
@@ -40,9 +39,7 @@ class HuiDividerRow extends LitElement implements EntityRow {
       el.style.setProperty(prop, this._config!.style[prop]);
     });
 
-    return html`
-      ${el}
-    `;
+    return html` ${el} `;
   }
 }
 

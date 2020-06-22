@@ -1,9 +1,9 @@
 import {
-  HassEntityBase,
   HassEntityAttributeBase,
+  HassEntityBase,
 } from "home-assistant-js-websocket";
-import { HomeAssistant } from "../types";
 import { navigate } from "../common/navigate";
+import { HomeAssistant } from "../types";
 import { DeviceCondition, DeviceTrigger } from "./device_automation";
 import { Action } from "./script";
 
@@ -120,7 +120,7 @@ export type Trigger =
   | DeviceTrigger;
 
 export interface LogicalCondition {
-  condition: "and" | "or";
+  condition: "and" | "not" | "or";
   conditions: Condition[];
 }
 
@@ -173,6 +173,12 @@ export type Condition =
   | DeviceCondition
   | LogicalCondition;
 
+export const triggerAutomation = (hass: HomeAssistant, entityId: string) => {
+  hass.callService("automation", "trigger", {
+    entity_id: entityId,
+  });
+};
+
 export const deleteAutomation = (hass: HomeAssistant, id: string) =>
   hass.callApi("DELETE", `config/automation/config/${id}`);
 
@@ -183,7 +189,7 @@ export const showAutomationEditor = (
   data?: Partial<AutomationConfig>
 ) => {
   inititialAutomationEditorData = data;
-  navigate(el, "/config/automation/new");
+  navigate(el, "/config/automation/edit/new");
 };
 
 export const getAutomationEditorInitData = () => {

@@ -1,34 +1,41 @@
-import { html, LitElement, TemplateResult, CSSResult, css } from "lit-element";
-
-import { createCardElement } from "../common/create-card-element";
-import { LovelaceCard } from "../types";
+import {
+  css,
+  CSSResult,
+  html,
+  LitElement,
+  property,
+  PropertyValues,
+  TemplateResult,
+} from "lit-element";
 import { LovelaceCardConfig } from "../../../data/lovelace";
 import { HomeAssistant } from "../../../types";
+import { createCardElement } from "../create-element/create-card-element";
+import { LovelaceCard, LovelaceCardEditor } from "../types";
 import { StackCardConfig } from "./types";
 
 export abstract class HuiStackCard extends LitElement implements LovelaceCard {
-  static get properties() {
-    return {
-      _config: {},
-    };
+  public static async getConfigElement(): Promise<LovelaceCardEditor> {
+    await import(
+      /* webpackChunkName: "hui-stack-card-editor" */ "../editor/config-elements/hui-stack-card-editor"
+    );
+    return document.createElement("hui-stack-card-editor");
   }
 
-  set hass(hass: HomeAssistant) {
-    this._hass = hass;
-
-    if (!this._cards) {
-      return;
-    }
-
-    for (const element of this._cards) {
-      element.hass = this._hass;
-    }
+  public static getStubConfig(): object {
+    return { cards: [] };
   }
-  protected _cards?: LovelaceCard[];
-  private _config?: StackCardConfig;
-  private _hass?: HomeAssistant;
 
-  public abstract getCardSize(): number;
+  @property() public hass?: HomeAssistant;
+
+  @property() public editMode?: boolean;
+
+  @property() protected _cards?: LovelaceCard[];
+
+  @property() private _config?: StackCardConfig;
+
+  public getCardSize(): number | Promise<number> {
+    return 1;
+  }
 
   public setConfig(config: StackCardConfig): void {
     if (!config || !config.cards || !Array.isArray(config.cards)) {
@@ -41,25 +48,39 @@ export abstract class HuiStackCard extends LitElement implements LovelaceCard {
     });
   }
 
-  protected render(): TemplateResult | void {
-    if (!this._config) {
+  protected updated(changedProps: PropertyValues) {
+    super.updated(changedProps);
+    if (
+      !this._cards ||
+      (!changedProps.has("hass") && !changedProps.has("editMode"))
+    ) {
+      return;
+    }
+
+    for (const element of this._cards) {
+      if (this.hass) {
+        element.hass = this.hass;
+      }
+      if (this.editMode !== undefined) {
+        element.editMode = this.editMode;
+      }
+    }
+  }
+
+  protected render(): TemplateResult {
+    if (!this._config || !this._cards) {
       return html``;
     }
 
     return html`
-      ${this.renderStyle()}
       ${this._config.title
-        ? html`
-            <div class="card-header">${this._config.title}</div>
-          `
+        ? html` <div class="card-header">${this._config.title}</div> `
         : ""}
       <div id="root">${this._cards}</div>
     `;
   }
 
-  protected abstract renderStyle(): TemplateResult;
-
-  static get styles(): CSSResult {
+  static get sharedStyles(): CSSResult {
     return css`
       .card-header {
         color: var(--ha-card-header-color, --primary-text-color);
@@ -75,8 +96,8 @@ export abstract class HuiStackCard extends LitElement implements LovelaceCard {
 
   private _createCardElement(cardConfig: LovelaceCardConfig) {
     const element = createCardElement(cardConfig) as LovelaceCard;
-    if (this._hass) {
-      element.hass = this._hass;
+    if (this.hass) {
+      element.hass = this.hass;
     }
     element.addEventListener(
       "ll-rebuild",
@@ -94,7 +115,9 @@ export abstract class HuiStackCard extends LitElement implements LovelaceCard {
     config: LovelaceCardConfig
   ): void {
     const newCardEl = this._createCardElement(config);
-    cardElToReplace.parentElement!.replaceChild(newCardEl, cardElToReplace);
+    if (cardElToReplace.parentElement) {
+      cardElToReplace.parentElement.replaceChild(newCardEl, cardElToReplace);
+    }
     this._cards = this._cards!.map((curCardEl) =>
       curCardEl === cardElToReplace ? newCardEl : curCardEl
     );

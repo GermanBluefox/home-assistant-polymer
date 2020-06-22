@@ -1,13 +1,11 @@
 import "@polymer/polymer/lib/utils/debounce";
 import { html } from "@polymer/polymer/lib/utils/html-tag";
+/* eslint-plugin-disable lit */
 import { PolymerElement } from "@polymer/polymer/polymer-element";
-
-import LocalizeMixin from "../mixins/localize-mixin";
-
-import "./entity/ha-chart-base";
-
-import formatDateTime from "../common/datetime/format_date_time";
+import { formatDateTimeWithSeconds } from "../common/datetime/format_date_time";
 import { computeRTL } from "../common/util/compute_rtl";
+import LocalizeMixin from "../mixins/localize-mixin";
+import "./entity/ha-chart-base";
 
 class StateHistoryChartTimeline extends LocalizeMixin(PolymerElement) {
   static get template() {
@@ -165,8 +163,8 @@ class StateHistoryChartTimeline extends LocalizeMixin(PolymerElement) {
     const formatTooltipLabel = (item, data) => {
       const values = data.datasets[item.datasetIndex].data[item.index];
 
-      const start = formatDateTime(values[0], this.hass.language);
-      const end = formatDateTime(values[1], this.hass.language);
+      const start = formatDateTimeWithSeconds(values[0], this.hass.language);
+      const end = formatDateTimeWithSeconds(values[1], this.hass.language);
       const state = values[2];
 
       return [state, start, end];

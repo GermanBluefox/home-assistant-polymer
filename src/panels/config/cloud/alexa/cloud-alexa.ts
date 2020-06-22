@@ -1,42 +1,39 @@
+import "../../../../components/ha-icon-button";
 import {
-  LitElement,
-  TemplateResult,
-  html,
-  CSSResult,
   css,
+  CSSResult,
   customElement,
+  html,
+  LitElement,
   property,
+  TemplateResult,
 } from "lit-element";
-import "@polymer/paper-icon-button";
 import memoizeOne from "memoize-one";
-
-import "../../../../layouts/hass-subpage";
-import "../../../../layouts/hass-loading-screen";
-import "../../../../components/ha-card";
-import "../../../../components/ha-switch";
-import "../../../../components/entity/state-info";
-
-import { HomeAssistant } from "../../../../types";
+import { fireEvent } from "../../../../common/dom/fire_event";
+import { computeDomain } from "../../../../common/entity/compute_domain";
+import { computeStateName } from "../../../../common/entity/compute_state_name";
 import {
-  CloudStatusLoggedIn,
-  CloudPreferences,
-  updateCloudAlexaEntityConfig,
-  AlexaEntityConfig,
-} from "../../../../data/cloud";
-import {
+  EntityFilter,
   generateFilter,
   isEmptyFilter,
-  EntityFilter,
 } from "../../../../common/entity/entity_filter";
 import { compare } from "../../../../common/string/compare";
-import { fireEvent } from "../../../../common/dom/fire_event";
-import { showDomainTogglerDialog } from "../../../../dialogs/domain-toggler/show-dialog-domain-toggler";
+import "../../../../components/entity/state-info";
+import "../../../../components/ha-card";
+import "../../../../components/ha-switch";
+import type { HaSwitch } from "../../../../components/ha-switch";
 import { AlexaEntity, fetchCloudAlexaEntities } from "../../../../data/alexa";
-// tslint:disable-next-line: no-duplicate-imports
-import { HaSwitch } from "../../../../components/ha-switch";
-
-import { computeStateName } from "../../../../common/entity/compute_state_name";
-import { computeDomain } from "../../../../common/entity/compute_domain";
+import {
+  AlexaEntityConfig,
+  CloudPreferences,
+  CloudStatusLoggedIn,
+  updateCloudAlexaEntityConfig,
+} from "../../../../data/cloud";
+import { showDomainTogglerDialog } from "../../../../dialogs/domain-toggler/show-dialog-domain-toggler";
+import "../../../../layouts/hass-loading-screen";
+import "../../../../layouts/hass-subpage";
+import type { HomeAssistant } from "../../../../types";
+import "../../../../components/ha-formfield";
 
 const DEFAULT_CONFIG_EXPOSE = true;
 const IGNORE_INTERFACES = ["Alexa.EndpointHealth"];
@@ -59,8 +56,11 @@ class CloudAlexa extends LitElement {
 
   @property()
   private _entityConfigs: CloudPreferences["alexa_entity_configs"] = {};
+
   private _popstateSyncAttached = false;
+
   private _popstateReloadStatusAttached = false;
+
   private _isInitialExposed?: Set<string>;
 
   private _getEntityFilterFunc = memoizeOne((filter: EntityFilter) =>
@@ -72,11 +72,9 @@ class CloudAlexa extends LitElement {
     )
   );
 
-  protected render(): TemplateResult | void {
+  protected render(): TemplateResult {
     if (this._entities === undefined) {
-      return html`
-        <hass-loading-screen></hass-loading-screen>
-      `;
+      return html` <hass-loading-screen></hass-loading-screen> `;
     }
     const emptyFilter = isEmptyFilter(this.cloudStatus.alexa_entities);
     const filterFunc = this._getEntityFilterFunc(
@@ -130,14 +128,19 @@ class CloudAlexa extends LitElement {
                 )
                 .join(", ")}
             </state-info>
-            <ha-switch
-              .entityId=${entity.entity_id}
-              .disabled=${!emptyFilter}
-              .checked=${isExposed}
-              @change=${this._exposeChanged}
+            <ha-formfield
+              .label=${this.hass!.localize(
+                "ui.panel.config.cloud.alexa.expose"
+              )}
             >
-              ${this.hass!.localize("ui.panel.config.cloud.alexa.expose")}
-            </ha-switch>
+              <ha-switch
+                .entityId=${entity.entity_id}
+                .disabled=${!emptyFilter}
+                .checked=${isExposed}
+                @change=${this._exposeChanged}
+              >
+              </ha-switch>
+            </ha-formfield>
           </div>
         </ha-card>
       `);
@@ -152,22 +155,16 @@ class CloudAlexa extends LitElement {
         "ui.panel.config.cloud.alexa.title"
       )}">
         <span slot="toolbar-icon">
-          ${selected}${
-      !this.narrow
-        ? html`
-            selected
-          `
-        : ""
-    }
+          ${selected}${!this.narrow ? html` selected ` : ""}
         </span>
         ${
           emptyFilter
             ? html`
-                <paper-icon-button
+                <ha-icon-button
                   slot="toolbar-icon"
                   icon="hass:tune"
                   @click=${this._openDomainToggler}
-                ></paper-icon-button>
+                ></ha-icon-button>
               `
             : ""
         }
@@ -337,17 +334,13 @@ class CloudAlexa extends LitElement {
         padding: 0 8px;
       }
       .content {
-        display: flex;
-        flex-wrap: wrap;
-        padding: 4px;
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        grid-gap: 8px 8px;
+        padding: 8px;
       }
       ha-switch {
         clear: both;
-      }
-      ha-card {
-        margin: 4px;
-        width: 100%;
-        max-width: 300px;
       }
       .card-content {
         padding-bottom: 12px;

@@ -1,13 +1,12 @@
-import { loadModule, loadCSS, loadJS } from "../../../common/dom/load_resource";
-
-import { LovelaceConfig } from "../../../data/lovelace";
+import { loadCSS, loadJS, loadModule } from "../../../common/dom/load_resource";
+import { LovelaceResource } from "../../../data/lovelace";
 
 // CSS and JS should only be imported once. Modules and HTML are safe.
 const CSS_CACHE = {};
 const JS_CACHE = {};
 
 export const loadLovelaceResources = (
-  resources: NonNullable<LovelaceConfig["resources"]>,
+  resources: NonNullable<LovelaceResource[]>,
   hassUrl: string
 ) =>
   resources.forEach((resource) => {
@@ -38,7 +37,7 @@ export const loadLovelaceResources = (
         break;
 
       default:
-        // tslint:disable-next-line
+        // eslint-disable-next-line
         console.warn(`Unknown resource type specified: ${resource.type}`);
     }
   });

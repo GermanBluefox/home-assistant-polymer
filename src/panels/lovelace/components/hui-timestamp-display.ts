@@ -1,22 +1,21 @@
 import {
+  customElement,
   html,
   LitElement,
+  property,
   PropertyValues,
   TemplateResult,
-  customElement,
-  property,
 } from "lit-element";
-
-import { HomeAssistant } from "../../../types";
-import format_date from "../../../common/datetime/format_date";
-import format_date_time from "../../../common/datetime/format_date_time";
-import format_time from "../../../common/datetime/format_time";
+import { formatDate } from "../../../common/datetime/format_date";
+import { formatDateTime } from "../../../common/datetime/format_date_time";
+import { formatTime } from "../../../common/datetime/format_time";
 import relativeTime from "../../../common/datetime/relative_time";
+import { HomeAssistant } from "../../../types";
 
 const FORMATS: { [key: string]: (ts: Date, lang: string) => string } = {
-  date: format_date,
-  datetime: format_date_time,
-  time: format_time,
+  date: formatDate,
+  datetime: formatDateTime,
+  time: formatTime,
 };
 const INTERVAL_FORMAT = ["relative", "total"];
 
@@ -51,32 +50,24 @@ class HuiTimestampDisplay extends LitElement {
     this._clearInterval();
   }
 
-  protected render(): TemplateResult | void {
+  protected render(): TemplateResult {
     if (!this.ts || !this.hass) {
       return html``;
     }
 
     if (isNaN(this.ts.getTime())) {
-      return html`
-        Invalid date
-      `;
+      return html` Invalid date `;
     }
 
     const format = this._format;
 
     if (INTERVAL_FORMAT.includes(format)) {
-      return html`
-        ${this._relative}
-      `;
+      return html` ${this._relative} `;
     }
     if (format in FORMATS) {
-      return html`
-        ${FORMATS[format](this.ts, this.hass.language)}
-      `;
+      return html` ${FORMATS[format](this.ts, this.hass.language)} `;
     }
-    return html`
-      Invalid format
-    `;
+    return html` Invalid format `;
   }
 
   protected updated(changedProperties: PropertyValues): void {

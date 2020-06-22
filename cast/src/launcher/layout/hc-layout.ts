@@ -1,28 +1,31 @@
 import {
-  customElement,
-  LitElement,
-  TemplateResult,
-  html,
-  CSSResult,
-  css,
-  property,
-} from "lit-element";
-import {
   Auth,
   Connection,
-  HassUser,
   getUser,
+  HassUser,
 } from "home-assistant-js-websocket";
+import {
+  css,
+  CSSResult,
+  customElement,
+  html,
+  LitElement,
+  property,
+  TemplateResult,
+} from "lit-element";
 import "../../../../src/components/ha-card";
 
 @customElement("hc-layout")
 class HcLayout extends LitElement {
   @property() public subtitle?: string | undefined;
+
   @property() public auth?: Auth;
+
   @property() public connection?: Connection;
+
   @property() public user?: HassUser;
 
-  protected render(): TemplateResult | void {
+  protected render(): TemplateResult {
     return html`
       <ha-card>
         <div class="layout">
@@ -37,11 +40,7 @@ class HcLayout extends LitElement {
                         this.auth.data.hassUrl.indexOf("//") + 2
                       )}</a
                     >
-                    ${this.user
-                      ? html`
-                          – ${this.user.name}
-                        `
-                      : ""}
+                    ${this.user ? html` – ${this.user.name} ` : ""}
                   </div>
                 `
               : ""}
@@ -50,13 +49,12 @@ class HcLayout extends LitElement {
         </div>
       </ha-card>
       <div class="footer">
-        <a href="./faq.html">Frequently Asked Questions</a> – Found a bug? Let
-        @balloob know
-        <!-- <a
+        <a href="./faq.html">Frequently Asked Questions</a> – Found a bug?
+        <a
           href="https://github.com/home-assistant/home-assistant-polymer/issues"
           target="_blank"
           >Let us know!</a
-        > -->
+        >
       </div>
     `;
   }

@@ -1,11 +1,11 @@
 import {
+  ActionConfig,
   LovelaceCardConfig,
   LovelaceViewConfig,
-  ActionConfig,
+  ShowViewConfig,
 } from "../../../data/lovelace";
-import { EntityConfig } from "../entity-rows/types";
-import { InputType } from "zlib";
 import { struct } from "../common/structs/struct";
+import { EntityConfig } from "../entity-rows/types";
 
 export interface YamlChangedEvent extends Event {
   detail: {
@@ -13,10 +13,19 @@ export interface YamlChangedEvent extends Event {
   };
 }
 
+export interface GUIModeChangedEvent {
+  guiMode: boolean;
+  guiModeAvailable: boolean;
+}
+
 export interface ViewEditEvent extends Event {
   detail: {
     config: LovelaceViewConfig;
   };
+}
+
+export interface ViewVisibilityChangeEvent {
+  visible: ShowViewConfig[];
 }
 
 export interface ConfigValue {
@@ -41,12 +50,20 @@ export interface EditorTarget extends EventTarget {
   index?: number;
   checked?: boolean;
   configValue?: string;
-  type?: InputType;
+  type?: HTMLInputElement["type"];
   config: ActionConfig;
 }
 
-export interface CardPickTarget extends EventTarget {
+export interface Card {
   type: string;
+  name?: string;
+  description?: string;
+  showElement?: boolean;
+  isCustom?: boolean;
+}
+
+export interface CardPickTarget extends EventTarget {
+  config: LovelaceCardConfig;
 }
 
 export const actionConfigStruct = struct({

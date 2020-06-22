@@ -1,5 +1,5 @@
-import { HomeAssistant } from "../../../types";
 import { PropertyValues } from "lit-element";
+import { HomeAssistant } from "../../../types";
 
 // Check if config or Entity changed
 export function hasConfigOrEntityChanged(
@@ -17,14 +17,15 @@ export function hasConfigOrEntityChanged(
 
   if (
     oldHass.themes !== element.hass!.themes ||
-    oldHass.language !== element.hass!.language
+    oldHass.language !== element.hass!.language ||
+    oldHass.localize !== element.hass.localize ||
+    oldHass.config.state !== element.hass.config.state
   ) {
     return true;
   }
 
   return (
     oldHass.states[element._config!.entity] !==
-      element.hass!.states[element._config!.entity] ||
-    oldHass.localize !== element.hass.localize
+    element.hass!.states[element._config!.entity]
   );
 }

@@ -1,20 +1,19 @@
 import "@polymer/iron-flex-layout/iron-flex-layout-classes";
-import "@polymer/iron-icon/iron-icon";
-import "@polymer/paper-icon-button/paper-icon-button";
+import "../../../components/ha-icon-button";
 import "@polymer/paper-item/paper-item";
 import "@polymer/paper-listbox/paper-listbox";
 import { html } from "@polymer/polymer/lib/utils/html-tag";
+/* eslint-plugin-disable lit */
 import { PolymerElement } from "@polymer/polymer/polymer-element";
-
-import "../../../components/ha-paper-slider";
-import "../../../components/ha-paper-dropdown-menu";
-import HassMediaPlayerEntity from "../../../util/hass-media-player-model";
-
-import { attributeClassNames } from "../../../common/entity/attribute_class_names";
 import { isComponentLoaded } from "../../../common/config/is_component_loaded";
+import { attributeClassNames } from "../../../common/entity/attribute_class_names";
+import { computeRTLDirection } from "../../../common/util/compute_rtl";
+import "../../../components/ha-paper-dropdown-menu";
+import "../../../components/ha-paper-slider";
+import "../../../components/ha-icon";
 import { EventsMixin } from "../../../mixins/events-mixin";
 import LocalizeMixin from "../../../mixins/localize-mixin";
-import { computeRTLDirection } from "../../../common/util/compute_rtl";
+import HassMediaPlayerEntity from "../../../util/hass-media-player-model";
 
 /*
  * @appliesMixin LocalizeMixin
@@ -29,7 +28,7 @@ class MoreInfoMediaPlayer extends LocalizeMixin(EventsMixin(PolymerElement)) {
           text-transform: capitalize;
         }
 
-        paper-icon-button[highlight] {
+        ha-icon-button[highlight] {
           color: var(--accent-color);
         }
 
@@ -45,7 +44,7 @@ class MoreInfoMediaPlayer extends LocalizeMixin(EventsMixin(PolymerElement)) {
           max-height: 40px;
         }
 
-        iron-icon.source-input {
+        ha-icon.source-input {
           padding: 7px;
           margin-top: 15px;
         }
@@ -66,34 +65,34 @@ class MoreInfoMediaPlayer extends LocalizeMixin(EventsMixin(PolymerElement)) {
       <div class$="[[computeClassNames(stateObj)]]">
         <div class="layout horizontal">
           <div class="flex">
-            <paper-icon-button
+            <ha-icon-button
               icon="hass:power"
               highlight$="[[playerObj.isOff]]"
               on-click="handleTogglePower"
               hidden$="[[computeHidePowerButton(playerObj)]]"
-            ></paper-icon-button>
+            ></ha-icon-button>
           </div>
           <div>
             <template
               is="dom-if"
               if="[[computeShowPlaybackControls(playerObj)]]"
             >
-              <paper-icon-button
+              <ha-icon-button
                 icon="hass:skip-previous"
                 on-click="handlePrevious"
                 hidden$="[[!playerObj.supportsPreviousTrack]]"
-              ></paper-icon-button>
-              <paper-icon-button
+              ></ha-icon-button>
+              <ha-icon-button
                 icon="[[computePlaybackControlIcon(playerObj)]]"
                 on-click="handlePlaybackControl"
                 hidden$="[[!computePlaybackControlIcon(playerObj)]]"
                 highlight=""
-              ></paper-icon-button>
-              <paper-icon-button
+              ></ha-icon-button>
+              <ha-icon-button
                 icon="hass:skip-next"
                 on-click="handleNext"
                 hidden$="[[!playerObj.supportsNextTrack]]"
-              ></paper-icon-button>
+              ></ha-icon-button>
             </template>
           </div>
         </div>
@@ -102,36 +101,36 @@ class MoreInfoMediaPlayer extends LocalizeMixin(EventsMixin(PolymerElement)) {
           class="volume_buttons center horizontal layout"
           hidden$="[[computeHideVolumeButtons(playerObj)]]"
         >
-          <paper-icon-button
+          <ha-icon-button
             on-click="handleVolumeTap"
             icon="hass:volume-off"
-          ></paper-icon-button>
-          <paper-icon-button
+          ></ha-icon-button>
+          <ha-icon-button
             id="volumeDown"
             disabled$="[[playerObj.isMuted]]"
             on-mousedown="handleVolumeDown"
             on-touchstart="handleVolumeDown"
             on-touchend="handleVolumeTouchEnd"
             icon="hass:volume-medium"
-          ></paper-icon-button>
-          <paper-icon-button
+          ></ha-icon-button>
+          <ha-icon-button
             id="volumeUp"
             disabled$="[[playerObj.isMuted]]"
             on-mousedown="handleVolumeUp"
             on-touchstart="handleVolumeUp"
             on-touchend="handleVolumeTouchEnd"
             icon="hass:volume-high"
-          ></paper-icon-button>
+          ></ha-icon-button>
         </div>
         <div
           class="volume center horizontal layout"
           hidden$="[[!playerObj.supportsVolumeSet]]"
         >
-          <paper-icon-button
+          <ha-icon-button
             on-click="handleVolumeTap"
             hidden$="[[playerObj.supportsVolumeButtons]]"
             icon="[[computeMuteVolumeIcon(playerObj)]]"
-          ></paper-icon-button>
+          ></ha-icon-button>
           <ha-paper-slider
             disabled$="[[playerObj.isMuted]]"
             min="0"
@@ -149,7 +148,7 @@ class MoreInfoMediaPlayer extends LocalizeMixin(EventsMixin(PolymerElement)) {
           class="controls layout horizontal justified"
           hidden$="[[computeHideSelectSource(playerObj)]]"
         >
-          <iron-icon class="source-input" icon="hass:login-variant"></iron-icon>
+          <ha-icon class="source-input" icon="hass:login-variant"></ha-icon>
           <ha-paper-dropdown-menu
             class="flex source-input"
             dynamic-align=""
@@ -171,7 +170,7 @@ class MoreInfoMediaPlayer extends LocalizeMixin(EventsMixin(PolymerElement)) {
         <!-- SOUND MODE PICKER -->
         <template is="dom-if" if="[[!computeHideSelectSoundMode(playerObj)]]">
           <div class="controls layout horizontal justified">
-            <iron-icon class="source-input" icon="hass:music-note"></iron-icon>
+            <ha-icon class="source-input" icon="hass:music-note"></ha-icon>
             <ha-paper-dropdown-menu
               class="flex source-input"
               dynamic-align
@@ -203,10 +202,7 @@ class MoreInfoMediaPlayer extends LocalizeMixin(EventsMixin(PolymerElement)) {
             value="{{ttsMessage}}"
             on-keydown="ttsCheckForEnter"
           ></paper-input>
-          <paper-icon-button
-            icon="hass:send"
-            on-click="sendTTS"
-          ></paper-icon-button>
+          <ha-icon-button icon="hass:send" on-click="sendTTS"></ha-icon-button>
         </div>
       </div>
     `;

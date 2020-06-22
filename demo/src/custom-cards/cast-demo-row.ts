@@ -1,24 +1,23 @@
 import {
-  html,
-  LitElement,
-  TemplateResult,
-  customElement,
-  property,
   css,
   CSSResult,
+  customElement,
+  html,
+  LitElement,
+  property,
+  TemplateResult,
 } from "lit-element";
-
-import "../../../src/components/ha-icon";
-import {
-  EntityRow,
-  CastConfig,
-} from "../../../src/panels/lovelace/entity-rows/types";
-import { HomeAssistant } from "../../../src/types";
 import { CastManager } from "../../../src/cast/cast_manager";
 import { castSendShowDemo } from "../../../src/cast/receiver_messages";
+import "../../../src/components/ha-icon";
+import {
+  CastConfig,
+  LovelaceRow,
+} from "../../../src/panels/lovelace/entity-rows/types";
+import { HomeAssistant } from "../../../src/types";
 
 @customElement("cast-demo-row")
-class CastDemoRow extends LitElement implements EntityRow {
+class CastDemoRow extends LitElement implements LovelaceRow {
   public hass!: HomeAssistant;
 
   @property() private _castManager?: CastManager | null;
@@ -27,7 +26,7 @@ class CastDemoRow extends LitElement implements EntityRow {
     // No config possible.
   }
 
-  protected render(): TemplateResult | void {
+  protected render(): TemplateResult {
     if (
       !this._castManager ||
       this._castManager.castState === "NO_DEVICES_AVAILABLE"
@@ -52,6 +51,8 @@ class CastDemoRow extends LitElement implements EntityRow {
           this.requestUpdate();
         });
         mgr.castContext.addEventListener(
+          // eslint-disable-next-line no-undef
+          // @ts-ignore
           cast.framework.CastContextEventType.SESSION_STATE_CHANGED,
           (ev) => {
             // On Android, opening a new session always results in SESSION_RESUMED.

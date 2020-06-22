@@ -1,33 +1,32 @@
 import {
-  html,
-  LitElement,
-  TemplateResult,
-  customElement,
-  property,
   css,
   CSSResult,
+  customElement,
+  html,
+  LitElement,
+  property,
   PropertyValues,
+  TemplateResult,
 } from "lit-element";
 import { classMap } from "lit-html/directives/class-map";
-
-import "../../../components/ha-card";
-import "../components/hui-image";
-import "../components/hui-warning";
-
-import { computeDomain } from "../../../common/entity/compute_domain";
-import { computeStateName } from "../../../common/entity/compute_state_name";
-
-import { computeStateDisplay } from "../../../common/entity/compute_state_display";
-import { HomeAssistant } from "../../../types";
-import { LovelaceCard, LovelaceCardEditor } from "../types";
-import { UNAVAILABLE } from "../../../data/entity";
-import { hasConfigOrEntityChanged } from "../common/has-changed";
-import { PictureEntityCardConfig } from "./types";
+import { ifDefined } from "lit-html/directives/if-defined";
 import { applyThemesOnElement } from "../../../common/dom/apply_themes_on_element";
-import { actionHandler } from "../common/directives/action-handler-directive";
-import { hasAction } from "../common/has-action";
+import { computeDomain } from "../../../common/entity/compute_domain";
+import { computeStateDisplay } from "../../../common/entity/compute_state_display";
+import { computeStateName } from "../../../common/entity/compute_state_name";
+import "../../../components/ha-card";
+import { UNAVAILABLE_STATES } from "../../../data/entity";
 import { ActionHandlerEvent } from "../../../data/lovelace";
+import { HomeAssistant } from "../../../types";
+import { actionHandler } from "../common/directives/action-handler-directive";
+import { findEntities } from "../common/find-entites";
 import { handleAction } from "../common/handle-action";
+import { hasAction } from "../common/has-action";
+import { hasConfigOrEntityChanged } from "../common/has-changed";
+import "../components/hui-image";
+import { createEntityNotFoundWarning } from "../components/hui-warning";
+import { LovelaceCard, LovelaceCardEditor } from "../types";
+import { PictureEntityCardConfig } from "./types";
 
 @customElement("hui-picture-entity-card")
 class HuiPictureEntityCard extends LitElement implements LovelaceCard {
@@ -37,11 +36,25 @@ class HuiPictureEntityCard extends LitElement implements LovelaceCard {
     );
     return document.createElement("hui-picture-entity-card-editor");
   }
-  public static getStubConfig(): object {
+
+  public static getStubConfig(
+    hass: HomeAssistant,
+    entities: string[],
+    entitiesFallback: string[]
+  ): PictureEntityCardConfig {
+    const maxEntities = 1;
+    const foundEntities = findEntities(
+      hass,
+      maxEntities,
+      entities,
+      entitiesFallback,
+      ["light", "switch"]
+    );
+
     return {
-      entity: "",
-      image:
-        "https://www.home-assistant.io/images/merchandise/shirt-frontpage.png",
+      type: "picture-entity",
+      entity: foundEntities[0] || "",
+      image: "https://demo.home-assistant.io/stub_config/bedroom.png",
     };
   }
 
@@ -94,7 +107,7 @@ class HuiPictureEntityCard extends LitElement implements LovelaceCard {
     }
   }
 
-  protected render(): TemplateResult | void {
+  protected render(): TemplateResult {
     if (!this._config || !this.hass) {
       return html``;
     }
@@ -103,13 +116,9 @@ class HuiPictureEntityCard extends LitElement implements LovelaceCard {
 
     if (!stateObj) {
       return html`
-        <hui-warning
-          >${this.hass.localize(
-            "ui.panel.lovelace.warning.entity_not_found",
-            "entity",
-            this._config.entity
-          )}</hui-warning
-        >
+        <hui-warning>
+          ${createEntityNotFoundWarning(this.hass, this._config.entity)}
+        </hui-warning>
       `;
     }
 
@@ -129,13 +138,9 @@ class HuiPictureEntityCard extends LitElement implements LovelaceCard {
         </div>
       `;
     } else if (this._config.show_name) {
-      footer = html`
-        <div class="footer">${name}</div>
-      `;
+      footer = html` <div class="footer">${name}</div> `;
     } else if (this._config.show_state) {
-      footer = html`
-        <div class="footer state">${state}</div>
-      `;
+      footer = html` <div class="footer state">${state}</div> `;
     }
 
     return html`
@@ -156,9 +161,13 @@ class HuiPictureEntityCard extends LitElement implements LovelaceCard {
             hasHold: hasAction(this._config!.hold_action),
             hasDoubleClick: hasAction(this._config!.double_tap_action),
           })}
-          tabindex="0"
+          tabindex=${ifDefined(
+            hasAction(this._config.tap_action) || this._config.entity
+              ? "0"
+              : undefined
+          )}
           class=${classMap({
-            clickable: stateObj.state !== UNAVAILABLE,
+            clickable: !UNAVAILABLE_STATES.includes(stateObj.state),
           })}
         ></hui-image>
         ${footer}

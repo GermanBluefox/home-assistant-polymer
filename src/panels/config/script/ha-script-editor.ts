@@ -1,6 +1,6 @@
 import "@polymer/app-layout/app-header/app-header";
 import "@polymer/app-layout/app-toolbar/app-toolbar";
-import "@polymer/paper-icon-button/paper-icon-button";
+import "../../../components/ha-icon-button";
 import {
   css,
   CSSResult,
@@ -11,67 +11,72 @@ import {
   TemplateResult,
 } from "lit-element";
 import { classMap } from "lit-html/directives/class-map";
-import { computeStateName } from "../../../common/entity/compute_state_name";
+import { computeObjectId } from "../../../common/entity/compute_object_id";
 import { navigate } from "../../../common/navigate";
 import { computeRTL } from "../../../common/util/compute_rtl";
-import "../../../components/ha-fab";
-import "../../../components/ha-paper-icon-button-arrow-prev";
+import "../../../components/ha-card";
+import "@material/mwc-fab";
 import {
   Action,
-  ScriptEntity,
-  ScriptConfig,
   deleteScript,
+  getScriptEditorInitData,
+  ScriptConfig,
 } from "../../../data/script";
-import { showConfirmationDialog } from "../../../dialogs/confirmation/show-dialog-confirmation";
+import { showConfirmationDialog } from "../../../dialogs/generic/show-dialog-box";
 import "../../../layouts/ha-app-layout";
 import { haStyle } from "../../../resources/styles";
-import { HomeAssistant } from "../../../types";
+import { HomeAssistant, Route } from "../../../types";
 import "../automation/action/ha-automation-action";
-import { computeObjectId } from "../../../common/entity/compute_object_id";
+import { HaDeviceAction } from "../automation/action/types/ha-automation-action-device_id";
+import "../ha-config-section";
+import { configSections } from "../ha-panel-config";
+import "../../../components/ha-svg-icon";
+import { mdiContentSave } from "@mdi/js";
 
 export class HaScriptEditor extends LitElement {
   @property() public hass!: HomeAssistant;
-  @property() public script!: ScriptEntity;
+
+  @property() public scriptEntityId!: string;
+
+  @property() public route!: Route;
+
   @property() public isWide?: boolean;
-  @property() public creatingNew?: boolean;
+
+  @property() public narrow!: boolean;
+
   @property() private _config?: ScriptConfig;
+
   @property() private _dirty?: boolean;
+
   @property() private _errors?: string;
 
-  protected render(): TemplateResult | void {
+  protected render(): TemplateResult {
     return html`
-      <ha-app-layout has-scrolling-region>
-        <app-header slot="header" fixed>
-          <app-toolbar>
-            <ha-paper-icon-button-arrow-prev
-              @click=${this._backTapped}
-            ></ha-paper-icon-button-arrow-prev>
-            <div main-title>
-              ${this.script
-                ? computeStateName(this.script)
-                : this.hass.localize(
-                    "ui.panel.config.script.editor.default_name"
-                  )}
-            </div>
-            ${this.creatingNew
-              ? ""
-              : html`
-                  <paper-icon-button
-                    title="${this.hass.localize(
-                      "ui.panel.config.script.editor.delete_script"
-                    )}"
-                    icon="hass:delete"
-                    @click=${this._delete}
-                  ></paper-icon-button>
-                `}
-          </app-toolbar>
-        </app-header>
-
+      <hass-tabs-subpage
+        .hass=${this.hass}
+        .narrow=${this.narrow}
+        .route=${this.route}
+        .backCallback=${() => this._backTapped()}
+        .tabs=${configSections.automation}
+      >
+        ${!this.scriptEntityId
+          ? ""
+          : html`
+              <ha-icon-button
+                slot="toolbar-icon"
+                title="${this.hass.localize(
+                  "ui.panel.config.script.editor.delete_script"
+                )}"
+                icon="hass:delete"
+                @click=${this._deleteConfirm}
+              ></ha-icon-button>
+            `}
+        ${this.narrow
+          ? html` <span slot="header">${this._config?.alias}</span> `
+          : ""}
         <div class="content">
           ${this._errors
-            ? html`
-                <div class="errors">${this._errors}</div>
-              `
+            ? html` <div class="errors">${this._errors}</div> `
             : ""}
           <div
             class="${classMap({
@@ -81,7 +86,9 @@ export class HaScriptEditor extends LitElement {
             ${this._config
               ? html`
                   <ha-config-section .isWide=${this.isWide}>
-                    <span slot="header">${this._config.alias}</span>
+                    ${!this.narrow
+                      ? html` <span slot="header">${this._config.alias}</span> `
+                      : ""}
                     <span slot="introduction">
                       ${this.hass.localize(
                         "ui.panel.config.script.editor.introduction"
@@ -117,6 +124,7 @@ export class HaScriptEditor extends LitElement {
                       <a
                         href="https://home-assistant.io/docs/scripts/"
                         target="_blank"
+                        rel="noreferrer"
                       >
                         ${this.hass.localize(
                           "ui.panel.config.script.editor.link_available_actions"
@@ -133,36 +141,37 @@ export class HaScriptEditor extends LitElement {
               : ""}
           </div>
         </div>
-        <ha-fab
-          slot="fab"
-          ?is-wide="${this.isWide}"
-          ?dirty="${this._dirty}"
-          icon="hass:content-save"
+        <mwc-fab
+          ?is-wide=${this.isWide}
+          ?narrow=${this.narrow}
+          ?dirty=${this._dirty}
           .title="${this.hass.localize("ui.common.save")}"
           @click=${this._saveScript}
           class="${classMap({
             rtl: computeRTL(this.hass),
           })}"
-        ></ha-fab>
-      </ha-app-layout>
+        >
+          <ha-svg-icon slot="icon" path=${mdiContentSave}></ha-svg-icon>
+        </mwc-fab>
+      </hass-tabs-subpage>
     `;
   }
 
   protected updated(changedProps: PropertyValues): void {
     super.updated(changedProps);
 
-    const oldScript = changedProps.get("script") as ScriptEntity;
+    const oldScript = changedProps.get("scriptEntityId");
     if (
-      changedProps.has("script") &&
-      this.script &&
+      changedProps.has("scriptEntityId") &&
+      this.scriptEntityId &&
       this.hass &&
       // Only refresh config if we picked a new script. If same ID, don't fetch it.
-      (!oldScript || oldScript.entity_id !== this.script.entity_id)
+      (!oldScript || oldScript !== this.scriptEntityId)
     ) {
       this.hass
         .callApi<ScriptConfig>(
           "GET",
-          `config/script/config/${computeObjectId(this.script.entity_id)}`
+          `config/script/config/${computeObjectId(this.scriptEntityId)}`
         )
         .then(
           (config) => {
@@ -192,11 +201,17 @@ export class HaScriptEditor extends LitElement {
         );
     }
 
-    if (changedProps.has("creatingNew") && this.creatingNew && this.hass) {
-      this._dirty = false;
+    if (
+      changedProps.has("scriptEntityId") &&
+      !this.scriptEntityId &&
+      this.hass
+    ) {
+      const initData = getScriptEditorInitData();
+      this._dirty = !!initData;
       this._config = {
         alias: this.hass.localize("ui.panel.config.script.editor.default_name"),
-        sequence: [{ service: "" }],
+        sequence: [{ ...HaDeviceAction.defaultConfig }],
+        ...initData,
       };
     }
   }
@@ -228,8 +243,8 @@ export class HaScriptEditor extends LitElement {
         text: this.hass!.localize(
           "ui.panel.config.common.editor.confirm_unsaved"
         ),
-        confirmBtnText: this.hass!.localize("ui.common.yes"),
-        cancelBtnText: this.hass!.localize("ui.common.no"),
+        confirmText: this.hass!.localize("ui.common.yes"),
+        dismissText: this.hass!.localize("ui.common.no"),
         confirm: () => history.back(),
       });
     } else {
@@ -237,27 +252,29 @@ export class HaScriptEditor extends LitElement {
     }
   }
 
+  private async _deleteConfirm() {
+    showConfirmationDialog(this, {
+      text: this.hass.localize("ui.panel.config.script.editor.delete_confirm"),
+      confirmText: this.hass!.localize("ui.common.yes"),
+      dismissText: this.hass!.localize("ui.common.no"),
+      confirm: () => this._delete(),
+    });
+  }
+
   private async _delete() {
-    if (
-      !confirm(
-        this.hass.localize("ui.panel.config.script.editor.delete_confirm")
-      )
-    ) {
-      return;
-    }
-    await deleteScript(this.hass, computeObjectId(this.script.entity_id));
+    await deleteScript(this.hass, computeObjectId(this.scriptEntityId));
     history.back();
   }
 
   private _saveScript(): void {
-    const id = this.creatingNew
-      ? "" + Date.now()
-      : computeObjectId(this.script.entity_id);
+    const id = this.scriptEntityId
+      ? computeObjectId(this.scriptEntityId)
+      : Date.now();
     this.hass!.callApi("POST", "config/script/config/" + id, this._config).then(
       () => {
         this._dirty = false;
 
-        if (this.creatingNew) {
+        if (!this.scriptEntityId) {
           navigate(this, `/config/script/edit/${id}`, true);
         }
       },
@@ -286,7 +303,7 @@ export class HaScriptEditor extends LitElement {
         span[slot="introduction"] a {
           color: var(--primary-color);
         }
-        ha-fab {
+        mwc-fab {
           position: fixed;
           bottom: 16px;
           right: 16px;
@@ -295,21 +312,24 @@ export class HaScriptEditor extends LitElement {
           transition: margin-bottom 0.3s;
         }
 
-        ha-fab[is-wide] {
+        mwc-fab[is-wide] {
           bottom: 24px;
           right: 24px;
         }
-
-        ha-fab[dirty] {
+        mwc-fab[narrow] {
+          bottom: 84px;
+          margin-bottom: -140px;
+        }
+        mwc-fab[dirty] {
           margin-bottom: 0;
         }
 
-        ha-fab.rtl {
+        mwc-fab.rtl {
           right: auto;
           left: 16px;
         }
 
-        ha-fab[is-wide].rtl {
+        mwc-fab[is-wide].rtl {
           bottom: 24px;
           right: auto;
           left: 24px;

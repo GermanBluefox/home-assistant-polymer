@@ -1,18 +1,16 @@
 import {
+  css,
+  CSSResult,
+  customElement,
+  html,
   LitElement,
   TemplateResult,
-  html,
-  customElement,
-  CSSResult,
-  css,
 } from "lit-element";
 
 @customElement("onboarding-loading")
 class OnboardingLoading extends LitElement {
-  protected render(): TemplateResult | void {
-    return html`
-      <div class="loader"></div>
-    `;
+  protected render(): TemplateResult {
+    return html` <div class="loader"></div> `;
   }
 
   static get styles(): CSSResult {

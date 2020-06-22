@@ -1,44 +1,38 @@
-import { litLocalizeLiteMixin } from "../mixins/lit-localize-lite-mixin";
 import {
-  LitElement,
-  html,
-  PropertyValues,
-  CSSResult,
   css,
+  CSSResult,
+  html,
+  LitElement,
   property,
+  PropertyValues,
 } from "lit-element";
-import "./ha-auth-flow";
-import { AuthProvider, fetchAuthProviders } from "../data/auth";
+import {
+  AuthProvider,
+  fetchAuthProviders,
+  AuthUrlSearchParams,
+} from "../data/auth";
+import { litLocalizeLiteMixin } from "../mixins/lit-localize-lite-mixin";
 import { registerServiceWorker } from "../util/register-service-worker";
+import "./ha-auth-flow";
+import { extractSearchParamsObject } from "../common/url/search-params";
 
-import(
-  /* webpackChunkName: "pick-auth-provider" */ "../auth/ha-pick-auth-provider"
-);
-
-interface QueryParams {
-  client_id?: string;
-  redirect_uri?: string;
-  state?: string;
-}
+import(/* webpackChunkName: "pick-auth-provider" */ "./ha-pick-auth-provider");
 
 class HaAuthorize extends litLocalizeLiteMixin(LitElement) {
   @property() public clientId?: string;
+
   @property() public redirectUri?: string;
+
   @property() public oauth2State?: string;
+
   @property() private _authProvider?: AuthProvider;
+
   @property() private _authProviders?: AuthProvider[];
 
   constructor() {
     super();
     this.translationFragment = "page-authorize";
-    const query: QueryParams = {};
-    const values = location.search.substr(1).split("&");
-    for (const item of values) {
-      const value = item.split("=");
-      if (value.length > 1) {
-        query[decodeURIComponent(value[0])] = decodeURIComponent(value[1]);
-      }
-    }
+    const query = extractSearchParamsObject() as AuthUrlSearchParams;
     if (query.client_id) {
       this.clientId = query.client_id;
     }
@@ -91,7 +85,6 @@ class HaAuthorize extends litLocalizeLiteMixin(LitElement) {
         .redirectUri="${this.redirectUri}"
         .oauth2State="${this.oauth2State}"
         .authProvider="${this._authProvider}"
-        .step="{{step}}"
       ></ha-auth-flow>
 
       ${inactiveProviders.length > 0
@@ -120,7 +113,14 @@ class HaAuthorize extends litLocalizeLiteMixin(LitElement) {
     const tempA = document.createElement("a");
     tempA.href = this.redirectUri!;
     if (tempA.host === location.host) {
-      registerServiceWorker(false);
+      registerServiceWorker(this, false);
+    }
+  }
+
+  protected updated(changedProps: PropertyValues) {
+    super.updated(changedProps);
+    if (changedProps.has("language")) {
+      document.querySelector("html")!.setAttribute("lang", this.language!);
     }
   }
 
@@ -137,7 +137,7 @@ class HaAuthorize extends litLocalizeLiteMixin(LitElement) {
         response.status === 400 &&
         authProviders.code === "onboarding_required"
       ) {
-        location.href = "/?";
+        location.href = `/onboarding.html${location.search}`;
         return;
       }
 
@@ -149,7 +149,7 @@ class HaAuthorize extends litLocalizeLiteMixin(LitElement) {
       this._authProviders = authProviders;
       this._authProvider = authProviders[0];
     } catch (err) {
-      // tslint:disable-next-line
+      // eslint-disable-next-line
       console.error("Error loading auth providers", err);
     }
   }

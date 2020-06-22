@@ -1,17 +1,17 @@
 import {
-  LitElement,
-  TemplateResult,
-  html,
-  customElement,
-  CSSResult,
   css,
+  CSSResult,
+  customElement,
+  html,
+  LitElement,
   property,
+  TemplateResult,
 } from "lit-element";
 import { LovelaceConfig } from "../../../../src/data/lovelace";
-import "../../../../src/panels/lovelace/views/hui-view";
-import "../../../../src/panels/lovelace/views/hui-panel-view";
-import { HomeAssistant } from "../../../../src/types";
 import { Lovelace } from "../../../../src/panels/lovelace/types";
+import "../../../../src/panels/lovelace/views/hui-panel-view";
+import "../../../../src/panels/lovelace/views/hui-view";
+import { HomeAssistant } from "../../../../src/types";
 import "./hc-launch-screen";
 
 @customElement("hc-lovelace")
@@ -22,7 +22,7 @@ class HcLovelace extends LitElement {
 
   @property() public viewPath?: string | number;
 
-  protected render(): TemplateResult | void {
+  protected render(): TemplateResult {
     const index = this._viewIndex;
     if (index === undefined) {
       return html`
@@ -46,6 +46,7 @@ class HcLovelace extends LitElement {
       ? html`
           <hui-panel-view
             .hass=${this.hass}
+            .lovelace=${lovelace}
             .config=${this.lovelaceConfig.views[index]}
           ></hui-panel-view>
         `

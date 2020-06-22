@@ -3,6 +3,7 @@ const gulp = require("gulp");
 const webpack = require("webpack");
 const WebpackDevServer = require("webpack-dev-server");
 const log = require("fancy-log");
+const path = require("path");
 const paths = require("../paths");
 const {
   createAppConfig,
@@ -27,7 +28,7 @@ const runDevServer = ({
     open: true,
     watchContentBase: true,
     contentBase,
-  }).listen(port, listenHost, function(err) {
+  }).listen(port, listenHost, function (err) {
     if (err) {
       throw err;
     }
@@ -37,9 +38,9 @@ const runDevServer = ({
 
 const handler = (done) => (err, stats) => {
   if (err) {
-    console.log(err.stack || err);
+    log.error(err.stack || err);
     if (err.details) {
-      console.log(err.details);
+      log.error(err.details);
     }
     return;
   }
@@ -47,7 +48,7 @@ const handler = (done) => (err, stats) => {
   log(`Build done @ ${new Date().toLocaleTimeString()}`);
 
   if (stats.hasErrors() || stats.hasWarnings()) {
-    console.log(stats.toString("minimal"));
+    log.warn(stats.toString("minimal"));
   }
 
   if (done) {
@@ -57,9 +58,13 @@ const handler = (done) => (err, stats) => {
 
 gulp.task("webpack-watch-app", () => {
   // we are not calling done, so this command will run forever
-  webpack(bothBuilds(createAppConfig, { isProdBuild: false })).watch(
-    {},
+  webpack(createAppConfig({ isProdBuild: false, latestBuild: true })).watch(
+    { ignored: /build-translations/ },
     handler()
+  );
+  gulp.watch(
+    path.join(paths.translations_src, "en.json"),
+    gulp.series("build-translations", "copy-translations-app")
   );
 });
 
@@ -100,7 +105,7 @@ gulp.task(
 gulp.task("webpack-dev-server-demo", () => {
   runDevServer({
     compiler: webpack(bothBuilds(createDemoConfig, { isProdBuild: false })),
-    contentBase: paths.demo_root,
+    contentBase: paths.demo_output_root,
     port: 8090,
   });
 });
@@ -121,7 +126,7 @@ gulp.task(
 gulp.task("webpack-dev-server-cast", () => {
   runDevServer({
     compiler: webpack(bothBuilds(createCastConfig, { isProdBuild: false })),
-    contentBase: paths.cast_root,
+    contentBase: paths.cast_output_root,
     port: 8080,
     // Accessible from the network, because that's how Cast hits it.
     listenHost: "0.0.0.0",
@@ -147,7 +152,7 @@ gulp.task("webpack-watch-hassio", () => {
   webpack(
     createHassioConfig({
       isProdBuild: false,
-      latestBuild: false,
+      latestBuild: true,
     })
   ).watch({}, handler());
 });
@@ -157,9 +162,8 @@ gulp.task(
   () =>
     new Promise((resolve) =>
       webpack(
-        createHassioConfig({
+        bothBuilds(createHassioConfig, {
           isProdBuild: true,
-          latestBuild: false,
         }),
         handler(resolve)
       )
@@ -168,10 +172,9 @@ gulp.task(
 
 gulp.task("webpack-dev-server-gallery", () => {
   runDevServer({
-    compiler: webpack(
-      createGalleryConfig({ latestBuild: true, isProdBuild: false })
-    ),
-    contentBase: paths.gallery_root,
+    // We don't use the es5 build, but the dev server will fuck up the publicPath if we don't
+    compiler: webpack(bothBuilds(createGalleryConfig, { isProdBuild: false })),
+    contentBase: paths.gallery_output_root,
     port: 8100,
   });
 });

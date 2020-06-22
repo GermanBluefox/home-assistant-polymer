@@ -1,101 +1,99 @@
+import "@polymer/paper-item/paper-icon-item";
+import "@polymer/paper-item/paper-item";
+import "@polymer/paper-item/paper-item-body";
 import {
-  LitElement,
-  TemplateResult,
-  html,
-  property,
-  customElement,
   css,
   CSSResult,
+  customElement,
+  html,
+  LitElement,
+  property,
+  PropertyValues,
+  TemplateResult,
 } from "lit-element";
-import { classMap } from "lit-html/directives/class-map";
-
-import { HomeAssistant } from "../../../../types";
-
-import "../../../../components/entity/state-badge";
-
-import "@polymer/paper-item/paper-item";
-import "@polymer/paper-item/paper-icon-item";
-import "@polymer/paper-item/paper-item-body";
-
-import "../../../../components/ha-card";
-import "../../../../components/ha-icon";
-import "../../../../components/ha-switch";
-import { showEntityRegistryDetailDialog } from "../../entities/show-dialog-entity-registry-detail";
-import { fireEvent } from "../../../../common/dom/fire_event";
 import { computeDomain } from "../../../../common/entity/compute_domain";
 import { domainIcon } from "../../../../common/entity/domain_icon";
-// tslint:disable-next-line
-import { HaSwitch } from "../../../../components/ha-switch";
-import { EntityRegistryStateEntry } from "../ha-config-device-page";
+import "../../../../components/entity/state-badge";
+import "../../../../components/ha-card";
+import "../../../../components/ha-icon";
+import { HomeAssistant } from "../../../../types";
+import { createRowElement } from "../../../lovelace/create-element/create-row-element";
 import { addEntitiesToLovelaceView } from "../../../lovelace/editor/add-entities-to-view";
+import { LovelaceRow } from "../../../lovelace/entity-rows/types";
+import { showEntityEditorDialog } from "../../entities/show-dialog-entity-editor";
+import { EntityRegistryStateEntry } from "../ha-config-device-page";
+import { HuiErrorCard } from "../../../lovelace/cards/hui-error-card";
 
 @customElement("ha-device-entities-card")
 export class HaDeviceEntitiesCard extends LitElement {
   @property() public hass!: HomeAssistant;
-  @property() public deviceId!: string;
+
   @property() public entities!: EntityRegistryStateEntry[];
-  @property() public narrow!: boolean;
+
   @property() private _showDisabled = false;
 
+  private _entityRows: Array<LovelaceRow | HuiErrorCard> = [];
+
+  protected shouldUpdate(changedProps: PropertyValues) {
+    if (changedProps.has("hass") && changedProps.size === 1) {
+      this._entityRows.forEach((element) => {
+        element.hass = this.hass;
+      });
+      return false;
+    }
+    return true;
+  }
+
   protected render(): TemplateResult {
+    const disabledEntities: EntityRegistryStateEntry[] = [];
+    this._entityRows = [];
     return html`
-      <ha-card>
-        <paper-item>
-          <ha-switch
-            ?checked=${this._showDisabled}
-            @change=${this._showDisabledChanged}
-            >${this.hass.localize(
-              "ui.panel.config.entity_registry.picker.show_disabled"
-            )}
-          </ha-switch>
-        </paper-item>
+      <ha-card
+        .header=${this.hass.localize(
+          "ui.panel.config.devices.entities.entities"
+        )}
+      >
         ${this.entities.length
           ? html`
-              ${this.entities.map((entry: EntityRegistryStateEntry) => {
-                if (!this._showDisabled && entry.disabled_by) {
-                  return "";
-                }
-                const stateObj = this.hass.states[entry.entity_id];
-                return html`
-                  <paper-icon-item
-                    .entry=${entry}
-                    class=${classMap({ "disabled-entry": !!entry.disabled_by })}
-                  >
-                    ${stateObj
-                      ? html`
-                          <state-badge
-                            @click=${this._openMoreInfo}
-                            .stateObj=${stateObj}
-                            slot="item-icon"
-                          ></state-badge>
-                        `
-                      : html`
-                          <ha-icon
-                            slot="item-icon"
-                            .icon=${domainIcon(computeDomain(entry.entity_id))}
-                          ></ha-icon>
-                        `}
-                    <paper-item-body two-line @click=${this._openMoreInfo}>
-                      <div class="name">${entry.stateName}</div>
-                      <div class="secondary entity-id">${entry.entity_id}</div>
-                    </paper-item-body>
-                    <div class="buttons">
-                      ${stateObj
-                        ? html`
-                            <paper-icon-button
-                              @click=${this._openMoreInfo}
-                              icon="hass:information-outline"
-                            ></paper-icon-button>
-                          `
-                        : ""}
-                      <paper-icon-button
-                        @click=${this._openEditEntry}
-                        icon="hass:settings"
-                      ></paper-icon-button>
-                    </div>
-                  </paper-icon-item>
-                `;
-              })}
+              <div id="entities" @hass-more-info=${this._overrideMoreInfo}>
+                ${this.entities.map((entry: EntityRegistryStateEntry) => {
+                  if (entry.disabled_by) {
+                    disabledEntities.push(entry);
+                    return "";
+                  }
+                  return this.hass.states[entry.entity_id]
+                    ? this._renderEntity(entry)
+                    : this._renderEntry(entry);
+                })}
+              </div>
+              ${disabledEntities.length
+                ? !this._showDisabled
+                  ? html`
+                      <button
+                        class="show-more"
+                        @click=${this._toggleShowDisabled}
+                      >
+                        ${this.hass.localize(
+                          "ui.panel.config.devices.entities.disabled_entities",
+                          "count",
+                          disabledEntities.length
+                        )}
+                      </button>
+                    `
+                  : html`
+                      ${disabledEntities.map((entry) =>
+                        this._renderEntry(entry)
+                      )}
+                      <button
+                        class="show-more"
+                        @click=${this._toggleShowDisabled}
+                      >
+                        ${this.hass.localize(
+                          "ui.panel.config.devices.entities.hide_disabled"
+                        )}
+                      </button>
+                    `
+                : ""}
               <div class="card-actions">
                 <mwc-button @click=${this._addToLovelaceView}>
                   ${this.hass.localize(
@@ -119,34 +117,71 @@ export class HaDeviceEntitiesCard extends LitElement {
     `;
   }
 
-  private _showDisabledChanged(ev: Event) {
-    this._showDisabled = (ev.target as HaSwitch).checked;
+  private _toggleShowDisabled() {
+    this._showDisabled = !this._showDisabled;
   }
 
-  private _openEditEntry(ev: MouseEvent): void {
-    const entry = (ev.currentTarget! as any).closest("paper-icon-item").entry;
-    showEntityRegistryDetailDialog(this, {
+  private _renderEntity(entry: EntityRegistryStateEntry): TemplateResult {
+    const element = createRowElement({ entity: entry.entity_id });
+    if (this.hass) {
+      element.hass = this.hass;
+    }
+    // @ts-ignore
+    element.entry = entry;
+    this._entityRows.push(element);
+    return html` <div>${element}</div> `;
+  }
+
+  private _renderEntry(entry: EntityRegistryStateEntry): TemplateResult {
+    return html`
+      <paper-icon-item .entry=${entry} @click=${this._openEditEntry}>
+        <ha-icon
+          slot="item-icon"
+          .icon=${domainIcon(computeDomain(entry.entity_id))}
+        ></ha-icon>
+        <paper-item-body>
+          <div class="name">
+            ${entry.stateName || entry.entity_id}
+          </div>
+        </paper-item-body>
+      </paper-icon-item>
+    `;
+  }
+
+  private _overrideMoreInfo(ev: Event): void {
+    ev.stopPropagation();
+    const entry = (ev.target! as any).entry;
+    showEntityEditorDialog(this, {
       entry,
+      entity_id: entry.entity_id,
     });
   }
 
-  private _openMoreInfo(ev: MouseEvent) {
-    const entry = (ev.currentTarget! as any).closest("paper-icon-item").entry;
-    fireEvent(this, "hass-more-info", { entityId: entry.entity_id });
+  private _openEditEntry(ev: Event): void {
+    const entry = (ev.currentTarget! as any).entry;
+    showEntityEditorDialog(this, {
+      entry,
+      entity_id: entry.entity_id,
+    });
   }
 
   private _addToLovelaceView(): void {
     addEntitiesToLovelaceView(
       this,
       this.hass,
-      this.entities.map((entity) => entity.entity_id)
+      this.entities
+        .filter((entity) => !entity.disabled_by)
+        .map((entity) => entity.entity_id)
     );
   }
 
   static get styles(): CSSResult {
     return css`
+      :host {
+        display: block;
+      }
       ha-icon {
-        width: 40px;
+        margin-left: 8px;
       }
       .entity-id {
         color: var(--secondary-text-color);
@@ -158,11 +193,35 @@ export class HaDeviceEntitiesCard extends LitElement {
       .disabled-entry {
         color: var(--secondary-text-color);
       }
-      state-badge {
+      #entities > * {
+        margin: 8px 16px 8px 8px;
+      }
+      #entities > paper-icon-item {
+        margin: 0;
+      }
+      paper-icon-item {
+        min-height: 40px;
+        padding: 0 8px;
         cursor: pointer;
       }
-      paper-icon-item:not(.disabled-entry) paper-item-body {
+      .name {
+        font-size: 14px;
+      }
+      button.show-more {
+        color: var(--primary-color);
+        text-align: left;
         cursor: pointer;
+        background: none;
+        border-width: initial;
+        border-style: none;
+        border-color: initial;
+        border-image: initial;
+        padding: 16px;
+        font: inherit;
+      }
+      button.show-more:focus {
+        outline: none;
+        text-decoration: underline;
       }
     `;
   }

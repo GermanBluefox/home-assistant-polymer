@@ -1,28 +1,32 @@
 import {
+  customElement,
   html,
   LitElement,
-  TemplateResult,
-  customElement,
   property,
+  TemplateResult,
 } from "lit-element";
-
-import "../../../../components/entity/ha-entity-picker";
-import "../../components/hui-theme-select-editor";
-
-import { struct } from "../../common/structs/struct";
-import { EntitiesEditorEvent, EditorTarget } from "../types";
-import { HomeAssistant } from "../../../../types";
-import { LovelaceCardEditor } from "../../types";
 import { fireEvent } from "../../../../common/dom/fire_event";
-import { configElementStyle } from "./config-elements-style";
+import "../../../../components/entity/ha-entity-picker";
+import "../../../../components/ha-switch";
+import "../../../../components/ha-formfield";
+import { HomeAssistant } from "../../../../types";
 import { WeatherForecastCardConfig } from "../../cards/types";
+import { struct } from "../../common/structs/struct";
+import "../../components/hui-theme-select-editor";
+import { LovelaceCardEditor } from "../../types";
+import { EditorTarget, EntitiesEditorEvent } from "../types";
+import { configElementStyle } from "./config-elements-style";
 
 const cardConfigStruct = struct({
   type: "string",
   entity: "string?",
   name: "string?",
   theme: "string?",
+  show_forecast: "boolean?",
+  secondary_info_attribute: "string?",
 });
+
+const includeDomains = ["weather"];
 
 @customElement("hui-weather-forecast-card-editor")
 export class HuiWeatherForecastCardEditor extends LitElement
@@ -45,11 +49,19 @@ export class HuiWeatherForecastCardEditor extends LitElement
   }
 
   get _theme(): string {
-    return this._config!.theme || "Backend-selected";
+    return this._config!.theme || "";
   }
 
-  protected render(): TemplateResult | void {
-    if (!this.hass) {
+  get _show_forecast(): boolean {
+    return this._config!.show_forecast || true;
+  }
+
+  get _secondary_info_attribute(): string {
+    return this._config!.secondary_info_attribute || "";
+  }
+
+  protected render(): TemplateResult {
+    if (!this.hass || !this._config) {
       return html``;
     }
 
@@ -62,29 +74,54 @@ export class HuiWeatherForecastCardEditor extends LitElement
           )} (${this.hass.localize(
             "ui.panel.lovelace.editor.card.config.required"
           )})"
-          .hass="${this.hass}"
-          .value="${this._entity}"
+          .hass=${this.hass}
+          .value=${this._entity}
           .configValue=${"entity"}
-          include-domains='["weather"]'
-          @change="${this._valueChanged}"
+          .includeDomains=${includeDomains}
+          @change=${this._valueChanged}
           allow-custom-entity
         ></ha-entity-picker>
-        <paper-input
-          .label="${this.hass.localize(
-            "ui.panel.lovelace.editor.card.generic.name"
-          )} (${this.hass.localize(
-            "ui.panel.lovelace.editor.card.config.optional"
-          )})"
-          .value="${this._name}"
-          .configValue="${"name"}"
-          @value-changed="${this._valueChanged}"
-        ></paper-input>
-        <hui-theme-select-editor
-          .hass="${this.hass}"
-          .value="${this._theme}"
-          .configValue="${"theme"}"
-          @theme-changed="${this._valueChanged}"
-        ></hui-theme-select-editor>
+        <div class="side-by-side">
+          <paper-input
+            .label="${this.hass.localize(
+              "ui.panel.lovelace.editor.card.generic.name"
+            )} (${this.hass.localize(
+              "ui.panel.lovelace.editor.card.config.optional"
+            )})"
+            .value=${this._name}
+            .configValue=${"name"}
+            @value-changed=${this._valueChanged}
+          ></paper-input>
+          <hui-theme-select-editor
+            .hass=${this.hass}
+            .value=${this._theme}
+            .configValue=${"theme"}
+            @value-changed=${this._valueChanged}
+          ></hui-theme-select-editor>
+        </div>
+        <div class="side-by-side">
+          <paper-input
+            .label="${this.hass.localize(
+              "ui.panel.lovelace.editor.card.generic.secondary_info_attribute"
+            )} (${this.hass.localize(
+              "ui.panel.lovelace.editor.card.config.optional"
+            )})"
+            .value=${this._secondary_info_attribute}
+            .configValue=${"secondary_info_attribute"}
+            @value-changed=${this._valueChanged}
+          ></paper-input>
+          <ha-formfield
+            .label=${this.hass.localize(
+              "ui.panel.lovelace.editor.card.weather-forecast.show_forecast"
+            )}
+          >
+            <ha-switch
+              .checked=${this._config!.show_forecast !== false}
+              .configValue=${"show_forecast"}
+              @change=${this._valueChanged}
+            ></ha-switch
+          ></ha-formfield>
+        </div>
       </div>
     `;
   }
@@ -103,7 +140,8 @@ export class HuiWeatherForecastCardEditor extends LitElement
       } else {
         this._config = {
           ...this._config,
-          [target.configValue!]: target.value,
+          [target.configValue!]:
+            target.checked !== undefined ? target.checked : target.value,
         };
       }
     }

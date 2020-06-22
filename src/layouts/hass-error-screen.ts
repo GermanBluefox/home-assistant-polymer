@@ -1,13 +1,13 @@
-import {
-  LitElement,
-  CSSResultArray,
-  css,
-  TemplateResult,
-  html,
-  property,
-  customElement,
-} from "lit-element";
 import "@material/mwc-button";
+import {
+  css,
+  CSSResultArray,
+  customElement,
+  html,
+  LitElement,
+  property,
+  TemplateResult,
+} from "lit-element";
 import "./hass-subpage";
 
 @customElement("hass-error-screen")
@@ -15,7 +15,7 @@ class HassErrorScreen extends LitElement {
   @property()
   public error?: string;
 
-  protected render(): TemplateResult | void {
+  protected render(): TemplateResult {
     return html`
       <hass-subpage>
         <div class="content">

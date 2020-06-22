@@ -1,27 +1,33 @@
 import {
-  getAuth,
   createConnection,
+  getAuth,
   UnsubscribeFunc,
 } from "home-assistant-js-websocket";
-import { customElement, TemplateResult, html, property } from "lit-element";
-import { HassElement } from "../../../../src/state/hass-element";
-import {
-  HassMessage,
-  ConnectMessage,
-  ShowLovelaceViewMessage,
-  GetStatusMessage,
-  ShowDemoMessage,
-} from "../../../../src/cast/receiver_messages";
-import {
-  LovelaceConfig,
-  getLovelaceCollection,
-} from "../../../../src/data/lovelace";
-import "./hc-launch-screen";
-import { castContext } from "../cast_context";
+import { customElement, html, property, TemplateResult } from "lit-element";
 import { CAST_NS } from "../../../../src/cast/const";
+import {
+  ConnectMessage,
+  GetStatusMessage,
+  HassMessage,
+  ShowDemoMessage,
+  ShowLovelaceViewMessage,
+} from "../../../../src/cast/receiver_messages";
 import { ReceiverStatusMessage } from "../../../../src/cast/sender_messages";
-import { loadLovelaceResources } from "../../../../src/panels/lovelace/common/load-resources";
+import { atLeastVersion } from "../../../../src/common/config/version";
 import { isNavigationClick } from "../../../../src/common/dom/is-navigation-click";
+import {
+  fetchResources,
+  getLegacyLovelaceCollection,
+  getLovelaceCollection,
+  LegacyLovelaceConfig,
+  LovelaceConfig,
+} from "../../../../src/data/lovelace";
+import { loadLovelaceResources } from "../../../../src/panels/lovelace/common/load-resources";
+import { HassElement } from "../../../../src/state/hass-element";
+import { castContext } from "../cast_context";
+import "./hc-launch-screen";
+
+let resourcesLoaded = false;
 
 @customElement("hc-main")
 export class HcMain extends HassElement {
@@ -35,6 +41,8 @@ export class HcMain extends HassElement {
 
   private _unsubLovelace?: UnsubscribeFunc;
 
+  private _urlPath?: string | null;
+
   public processIncomingMessage(msg: HassMessage) {
     if (msg.type === "connect") {
       this._handleConnectMessage(msg);
@@ -45,16 +53,14 @@ export class HcMain extends HassElement {
     } else if (msg.type === "show_demo") {
       this._handleShowDemo(msg);
     } else {
-      // tslint:disable-next-line: no-console
+      // eslint-disable-next-line no-console
       console.warn("unknown msg type", msg);
     }
   }
 
-  protected render(): TemplateResult | void {
+  protected render(): TemplateResult {
     if (this._showDemo) {
-      return html`
-        <hc-demo .lovelacePath=${this._lovelacePath}></hc-demo>
-      `;
+      return html` <hc-demo .lovelacePath=${this._lovelacePath}></hc-demo> `;
     }
 
     if (
@@ -76,6 +82,7 @@ export class HcMain extends HassElement {
         .hass=${this.hass}
         .lovelaceConfig=${this._lovelaceConfig}
         .viewPath=${this._lovelacePath}
+        @config-refresh=${this._generateLovelaceConfig}
       ></hc-lovelace>
     `;
   }
@@ -84,15 +91,17 @@ export class HcMain extends HassElement {
     super.firstUpdated(changedProps);
     import("../second-load");
     window.addEventListener("location-changed", () => {
-      if (location.pathname.startsWith("/lovelace/")) {
-        this._lovelacePath = location.pathname.substr(10);
+      const panelPath = `/${this._urlPath || "lovelace"}/`;
+      if (location.pathname.startsWith(panelPath)) {
+        this._lovelacePath = location.pathname.substr(panelPath.length);
         this._sendStatus();
       }
     });
     document.body.addEventListener("click", (ev) => {
+      const panelPath = `/${this._urlPath || "lovelace"}/`;
       const href = isNavigationClick(ev);
-      if (href && href.startsWith("/lovelace/")) {
-        this._lovelacePath = href.substr(10);
+      if (href && href.startsWith(panelPath)) {
+        this._lovelacePath = href.substr(panelPath.length);
         this._sendStatus();
       }
     });
@@ -108,6 +117,7 @@ export class HcMain extends HassElement {
     if (this.hass) {
       status.hassUrl = this.hass.auth.data.hassUrl;
       status.lovelacePath = this._lovelacePath!;
+      status.urlPath = this._urlPath;
     }
 
     if (senderId) {
@@ -163,8 +173,17 @@ export class HcMain extends HassElement {
       this._error = "Cannot show Lovelace because we're not connected.";
       return;
     }
-    if (!this._unsubLovelace) {
-      const llColl = getLovelaceCollection(this.hass!.connection);
+    if (msg.urlPath === "lovelace") {
+      msg.urlPath = null;
+    }
+    if (!this._unsubLovelace || this._urlPath !== msg.urlPath) {
+      this._urlPath = msg.urlPath;
+      if (this._unsubLovelace) {
+        this._unsubLovelace();
+      }
+      const llColl = atLeastVersion(this.hass.connection.haVersion, 0, 107)
+        ? getLovelaceCollection(this.hass!.connection, msg.urlPath)
+        : getLegacyLovelaceCollection(this.hass!.connection);
       // We first do a single refresh because we need to check if there is LL
       // configuration.
       try {
@@ -173,14 +192,20 @@ export class HcMain extends HassElement {
           this._handleNewLovelaceConfig(lovelaceConfig)
         );
       } catch (err) {
+        // eslint-disable-next-line
+        console.log("Error fetching Lovelace configuration", err, msg);
         // Generate a Lovelace config.
         this._unsubLovelace = () => undefined;
-        const { generateLovelaceConfigFromHass } = await import(
-          "../../../../src/panels/lovelace/common/generate-lovelace-config"
-        );
-        this._handleNewLovelaceConfig(
-          await generateLovelaceConfigFromHass(this.hass!)
-        );
+        await this._generateLovelaceConfig();
+      }
+    }
+    if (!resourcesLoaded) {
+      resourcesLoaded = true;
+      const resources = atLeastVersion(this.hass.connection.haVersion, 0, 107)
+        ? await fetchResources(this.hass!.connection)
+        : (this._lovelaceConfig as LegacyLovelaceConfig).resources;
+      if (resources) {
+        loadLovelaceResources(resources, this.hass!.auth.data.hassUrl);
       }
     }
     this._showDemo = false;
@@ -191,15 +216,18 @@ export class HcMain extends HassElement {
     this._sendStatus();
   }
 
+  private async _generateLovelaceConfig() {
+    const { generateLovelaceConfigFromHass } = await import(
+      "../../../../src/panels/lovelace/common/generate-lovelace-config"
+    );
+    this._handleNewLovelaceConfig(
+      await generateLovelaceConfigFromHass(this.hass!)
+    );
+  }
+
   private _handleNewLovelaceConfig(lovelaceConfig: LovelaceConfig) {
     castContext.setApplicationState(lovelaceConfig.title!);
     this._lovelaceConfig = lovelaceConfig;
-    if (lovelaceConfig.resources) {
-      loadLovelaceResources(
-        lovelaceConfig.resources,
-        this.hass!.auth.data.hassUrl
-      );
-    }
   }
 
   private _handleShowDemo(_msg: ShowDemoMessage) {

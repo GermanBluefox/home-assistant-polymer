@@ -1,22 +1,20 @@
-import {
-  html,
-  LitElement,
-  TemplateResult,
-  customElement,
-  property,
-} from "lit-element";
 import "@polymer/paper-input/paper-input";
 import "@polymer/paper-input/paper-textarea";
-
-import { struct } from "../../common/structs/struct";
-import { EntitiesEditorEvent, EditorTarget } from "../types";
-import { HomeAssistant } from "../../../../types";
-import { LovelaceCardEditor } from "../../types";
+import {
+  customElement,
+  html,
+  LitElement,
+  property,
+  TemplateResult,
+} from "lit-element";
 import { fireEvent } from "../../../../common/dom/fire_event";
-import { configElementStyle } from "./config-elements-style";
+import { HomeAssistant } from "../../../../types";
 import { MarkdownCardConfig } from "../../cards/types";
-
+import { struct } from "../../common/structs/struct";
 import "../../components/hui-theme-select-editor";
+import { LovelaceCardEditor } from "../../types";
+import { EditorTarget, EntitiesEditorEvent } from "../types";
+import { configElementStyle } from "./config-elements-style";
 
 const cardConfigStruct = struct({
   type: "string",
@@ -46,11 +44,11 @@ export class HuiMarkdownCardEditor extends LitElement
   }
 
   get _theme(): string {
-    return this._config!.theme || "Backend-selected";
+    return this._config!.theme || "";
   }
 
-  protected render(): TemplateResult | void {
-    if (!this.hass) {
+  protected render(): TemplateResult {
+    if (!this.hass || !this._config) {
       return html``;
     }
 
@@ -81,10 +79,10 @@ export class HuiMarkdownCardEditor extends LitElement
           spellcheck="false"
         ></paper-textarea>
         <hui-theme-select-editor
-          .hass="${this.hass}"
+          .hass=${this.hass}
           .value="${this._theme}"
           .configValue="${"theme"}"
-          @theme-changed="${this._valueChanged}"
+          @value-changed="${this._valueChanged}"
         ></hui-theme-select-editor>
       </div>
     `;
@@ -100,7 +98,7 @@ export class HuiMarkdownCardEditor extends LitElement
       return;
     }
     if (target.configValue) {
-      if (target.value === "") {
+      if (target.value === "" && target.configValue !== "content") {
         delete this._config[target.configValue!];
       } else {
         this._config = {

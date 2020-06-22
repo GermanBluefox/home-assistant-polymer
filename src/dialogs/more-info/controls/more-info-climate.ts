@@ -2,44 +2,43 @@ import "@polymer/iron-flex-layout/iron-flex-layout-classes";
 import "@polymer/paper-item/paper-item";
 import "@polymer/paper-listbox/paper-listbox";
 import {
-  LitElement,
-  html,
-  TemplateResult,
-  CSSResult,
   css,
+  CSSResult,
+  html,
+  LitElement,
   property,
   PropertyValues,
+  TemplateResult,
 } from "lit-element";
-
-import "../../../components/ha-climate-control";
-import "../../../components/ha-paper-slider";
-import "../../../components/ha-paper-dropdown-menu";
-import "../../../components/ha-switch";
-
+import { classMap } from "lit-html/directives/class-map";
+import { fireEvent } from "../../../common/dom/fire_event";
 import { supportsFeature } from "../../../common/entity/supports-feature";
-
 import { computeRTLDirection } from "../../../common/util/compute_rtl";
-import { HomeAssistant } from "../../../types";
+import "../../../components/ha-climate-control";
+import "../../../components/ha-paper-dropdown-menu";
+import "../../../components/ha-paper-slider";
+import "../../../components/ha-switch";
 import {
   ClimateEntity,
+  CLIMATE_SUPPORT_AUX_HEAT,
+  CLIMATE_SUPPORT_FAN_MODE,
+  CLIMATE_SUPPORT_PRESET_MODE,
+  CLIMATE_SUPPORT_SWING_MODE,
+  CLIMATE_SUPPORT_TARGET_HUMIDITY,
   CLIMATE_SUPPORT_TARGET_TEMPERATURE,
   CLIMATE_SUPPORT_TARGET_TEMPERATURE_RANGE,
-  CLIMATE_SUPPORT_TARGET_HUMIDITY,
-  CLIMATE_SUPPORT_FAN_MODE,
-  CLIMATE_SUPPORT_SWING_MODE,
-  CLIMATE_SUPPORT_AUX_HEAT,
-  CLIMATE_SUPPORT_PRESET_MODE,
   compareClimateHvacModes,
 } from "../../../data/climate";
-import { fireEvent } from "../../../common/dom/fire_event";
-import { classMap } from "lit-html/directives/class-map";
+import { HomeAssistant } from "../../../types";
 
 class MoreInfoClimate extends LitElement {
   @property() public hass!: HomeAssistant;
+
   @property() public stateObj?: ClimateEntity;
+
   private _resizeDebounce?: number;
 
-  protected render(): TemplateResult | void {
+  protected render(): TemplateResult {
     if (!this.stateObj) {
       return html``;
     }
@@ -100,7 +99,8 @@ class MoreInfoClimate extends LitElement {
                   </div>
                 `
               : ""}
-            ${stateObj.attributes.temperature !== undefined
+            ${stateObj.attributes.temperature !== undefined &&
+            stateObj.attributes.temperature !== null
               ? html`
                   <ha-climate-control
                     .value=${stateObj.attributes.temperature}
@@ -112,8 +112,10 @@ class MoreInfoClimate extends LitElement {
                   ></ha-climate-control>
                 `
               : ""}
-            ${stateObj.attributes.target_temp_low !== undefined ||
-            stateObj.attributes.target_temp_high !== undefined
+            ${(stateObj.attributes.target_temp_low !== undefined &&
+              stateObj.attributes.target_temp_low !== null) ||
+            (stateObj.attributes.target_temp_high !== undefined &&
+              stateObj.attributes.target_temp_high !== null)
               ? html`
                   <ha-climate-control
                     .value=${stateObj.attributes.target_temp_low}
@@ -183,7 +185,7 @@ class MoreInfoClimate extends LitElement {
                   .map(
                     (mode) => html`
                       <paper-item item-name=${mode}>
-                        ${hass.localize(`state.climate.${mode}`)}
+                        ${hass.localize(`component.climate.state._.${mode}`)}
                       </paper-item>
                     `
                   )}
@@ -439,12 +441,6 @@ class MoreInfoClimate extends LitElement {
     return css`
       :host {
         color: var(--primary-text-color);
-      }
-
-      .container-hvac_modes iron-icon,
-      .container-fan_list iron-icon,
-      .container-swing_list iron-icon {
-        margin: 22px 16px 0 0;
       }
 
       ha-paper-dropdown-menu {

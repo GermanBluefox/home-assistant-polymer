@@ -1,22 +1,25 @@
-import {
-  property,
-  LitElement,
-  TemplateResult,
-  html,
-  CSSResult,
-  css,
-  customElement,
-} from "lit-element";
 import { HassEntity } from "home-assistant-js-websocket";
-
+import {
+  css,
+  CSSResult,
+  customElement,
+  html,
+  LitElement,
+  property,
+  TemplateResult,
+} from "lit-element";
+import { until } from "lit-html/directives/until";
 import hassAttributeUtil from "../util/hass-attributes-util";
+
+let jsYamlPromise: Promise<typeof import("js-yaml")>;
 
 @customElement("ha-attributes")
 class HaAttributes extends LitElement {
   @property() public stateObj?: HassEntity;
+
   @property() public extraFilters?: string;
 
-  protected render(): TemplateResult | void {
+  protected render(): TemplateResult {
     if (!this.stateObj) {
       return html``;
     }
@@ -32,7 +35,7 @@ class HaAttributes extends LitElement {
             <div class="data-entry">
               <div class="key">${attribute.replace(/_/g, " ")}</div>
               <div class="value">
-                ${this.formatAttributeValue(attribute)}
+                ${this.formatAttribute(attribute)}
               </div>
             </div>
           `
@@ -63,6 +66,10 @@ class HaAttributes extends LitElement {
         color: var(--secondary-text-color);
         text-align: right;
       }
+      pre {
+        font-family: inherit;
+        font-size: inherit;
+      }
     `;
   }
 
@@ -75,18 +82,29 @@ class HaAttributes extends LitElement {
     });
   }
 
-  private formatAttributeValue(attribute: string): string {
+  private formatAttribute(attribute: string): string | TemplateResult {
     if (!this.stateObj) {
       return "-";
     }
     const value = this.stateObj.attributes[attribute];
+    return this.formatAttributeValue(value);
+  }
+
+  private formatAttributeValue(value: any): string | TemplateResult {
     if (value === null) {
       return "-";
     }
-    if (Array.isArray(value)) {
-      return value.join(", ");
+    if (
+      (Array.isArray(value) && value.some((val) => val instanceof Object)) ||
+      (!Array.isArray(value) && value instanceof Object)
+    ) {
+      if (!jsYamlPromise) {
+        jsYamlPromise = import(/* webpackChunkName: "js-yaml" */ "js-yaml");
+      }
+      const yaml = jsYamlPromise.then((jsYaml) => jsYaml.safeDump(value));
+      return html` <pre>${until(yaml, "")}</pre> `;
     }
-    return value instanceof Object ? JSON.stringify(value, null, 2) : value;
+    return Array.isArray(value) ? value.join(", ") : value;
   }
 }
 

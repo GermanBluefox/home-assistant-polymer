@@ -1,34 +1,32 @@
-import "@polymer/iron-icon/iron-icon";
-import "@polymer/paper-icon-button/paper-icon-button";
-import "../../components/dialog/ha-paper-dialog";
 import "@polymer/paper-dialog-scrollable/paper-dialog-scrollable";
-
+import type { PaperDialogScrollableElement } from "@polymer/paper-dialog-scrollable/paper-dialog-scrollable";
+import "../../components/ha-icon-button";
+import "@polymer/paper-input/paper-input";
+import type { PaperInputElement } from "@polymer/paper-input/paper-input";
 import {
-  LitElement,
-  html,
-  property,
-  CSSResult,
   css,
+  CSSResult,
   customElement,
-  query,
+  html,
+  LitElement,
+  property,
   PropertyValues,
+  query,
   TemplateResult,
 } from "lit-element";
-import { HomeAssistant } from "../../types";
+import { classMap } from "lit-html/directives/class-map";
 import { fireEvent } from "../../common/dom/fire_event";
 import { SpeechRecognition } from "../../common/dom/speech-recognition";
-import {
-  processText,
-  getAgentInfo,
-  setConversationOnboarding,
-  AgentInfo,
-} from "../../data/conversation";
-import { classMap } from "lit-html/directives/class-map";
-import { PaperInputElement } from "@polymer/paper-input/paper-input";
-import { haStyleDialog } from "../../resources/styles";
-// tslint:disable-next-line
-import { PaperDialogScrollableElement } from "@polymer/paper-dialog-scrollable/paper-dialog-scrollable";
 import { uid } from "../../common/util/uid";
+import "../../components/dialog/ha-paper-dialog";
+import {
+  AgentInfo,
+  getAgentInfo,
+  processText,
+  setConversationOnboarding,
+} from "../../data/conversation";
+import { haStyleDialog } from "../../resources/styles";
+import type { HomeAssistant } from "../../types";
 
 interface Message {
   who: string;
@@ -44,17 +42,24 @@ interface Results {
 @customElement("ha-voice-command-dialog")
 export class HaVoiceCommandDialog extends LitElement {
   @property() public hass!: HomeAssistant;
+
   @property() public results: Results | null = null;
+
   @property() private _conversation: Message[] = [
     {
       who: "hass",
       text: "",
     },
   ];
+
   @property() private _opened = false;
+
   @property() private _agentInfo?: AgentInfo;
+
   @query("#messages") private messages!: PaperDialogScrollableElement;
+
   private recognition!: SpeechRecognition;
+
   private _conversationId?: string;
 
   public async showDialog(): Promise<void> {
@@ -113,6 +118,7 @@ export class HaVoiceCommandDialog extends LitElement {
                     class="button"
                     href="${this._agentInfo.onboarding.url}"
                     target="_blank"
+                    rel="noreferrer"
                     ><mwc-button unelevated>Yes!</mwc-button></a
                   >
                   <mwc-button outlined>No</mwc-button>
@@ -169,12 +175,11 @@ export class HaVoiceCommandDialog extends LitElement {
                           </div>
                         `
                       : ""}
-                    <paper-icon-button
-                      .active=${Boolean(this.results)}
+                    <ha-icon-button
                       icon="hass:microphone"
                       @click=${this._toggleListening}
                     >
-                    </paper-icon-button>
+                    </ha-icon-button>
                   </span>
                 `
               : ""}
@@ -185,6 +190,7 @@ export class HaVoiceCommandDialog extends LitElement {
                   href=${this._agentInfo.attribution.url}
                   class="attribution"
                   target="_blank"
+                  rel="noreferrer"
                   >${this._agentInfo.attribution.name}</a
                 >
               `
@@ -242,6 +248,7 @@ export class HaVoiceCommandDialog extends LitElement {
     };
     this.recognition.onerror = (event) => {
       this.recognition!.abort();
+      // @ts-ignore
       if (event.error !== "aborted") {
         const text =
           this.results && this.results.transcript
@@ -360,11 +367,11 @@ export class HaVoiceCommandDialog extends LitElement {
           z-index: 103;
         }
 
-        paper-icon-button {
+        ha-icon-button {
           color: var(--secondary-text-color);
         }
 
-        paper-icon-button[active] {
+        ha-icon-button[active] {
           color: var(--primary-color);
         }
 
@@ -448,15 +455,15 @@ export class HaVoiceCommandDialog extends LitElement {
         }
 
         .bouncer {
-          width: 40px;
-          height: 40px;
+          width: 48px;
+          height: 48px;
           position: absolute;
           top: 0;
         }
         .double-bounce1,
         .double-bounce2 {
-          width: 40px;
-          height: 40px;
+          width: 48px;
+          height: 48px;
           border-radius: 50%;
           background-color: var(--primary-color);
           opacity: 0.2;

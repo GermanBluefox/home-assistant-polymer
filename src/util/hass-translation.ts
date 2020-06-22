@@ -1,6 +1,6 @@
+import { fetchTranslationPreferences } from "../data/translation";
 import { translationMetadata } from "../resources/translations-metadata";
 import { HomeAssistant } from "../types";
-import { fetchTranslationPreferences } from "../data/translation";
 
 const STORAGE = window.localStorage || {};
 
@@ -32,11 +32,9 @@ function findAvailableLanguage(language: string) {
     return LOCALE_LOOKUP[langLower];
   }
 
-  for (const lang in Object.keys(translationMetadata.translations)) {
-    if (lang.toLowerCase() === langLower) {
-      return lang;
-    }
-  }
+  return Object.keys(translationMetadata.translations).find(
+    (lang) => lang.toLowerCase() === langLower
+  );
 }
 
 /**
@@ -122,8 +120,11 @@ export async function getTranslation(
     }
     throw new Error("Language en is not found in metadata");
   }
-  const fingerprint =
-    metadata.fingerprints[fragment ? `${fragment}/${language}` : language];
+
+  // nl-abcd.jon or logbook/nl-abcd.json
+  const fingerprint = `${fragment ? fragment + "/" : ""}${language}-${
+    metadata.hash
+  }.json`;
 
   // Fetch translation from the server
   if (!translations[fingerprint]) {

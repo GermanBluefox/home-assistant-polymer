@@ -1,23 +1,21 @@
 import "@material/mwc-button";
 import "@polymer/paper-item/paper-item-body";
 import { html } from "@polymer/polymer/lib/utils/html-tag";
+/* eslint-plugin-disable lit */
 import { PolymerElement } from "@polymer/polymer/polymer-element";
-
-import "../../../../components/ha-card";
+import { formatDateTime } from "../../../../common/datetime/format_date_time";
 import "../../../../components/buttons/ha-call-api-button";
+import "../../../../components/ha-card";
+import { fetchCloudSubscriptionInfo } from "../../../../data/cloud";
 import "../../../../layouts/hass-subpage";
-import "../../../../resources/ha-style";
+import { EventsMixin } from "../../../../mixins/events-mixin";
+import LocalizeMixin from "../../../../mixins/localize-mixin";
+import "../../../../styles/polymer-ha-style";
 import "../../ha-config-section";
-import "./cloud-webhooks";
 import "./cloud-alexa-pref";
 import "./cloud-google-pref";
 import "./cloud-remote-pref";
-
-import { EventsMixin } from "../../../../mixins/events-mixin";
-import { fetchCloudSubscriptionInfo } from "../../../../data/cloud";
-
-import formatDateTime from "../../../../common/datetime/format_date_time";
-import LocalizeMixin from "../../../../mixins/localize-mixin";
+import "./cloud-webhooks";
 
 /*
  * @appliesMixin EventsMixin
@@ -98,11 +96,15 @@ class CloudAccount extends EventsMixin(LocalizeMixin(PolymerElement)) {
               </div>
 
               <div class="card-actions">
-                <a href="https://account.nabucasa.com" target="_blank"
-                  ><mwc-button
-                    >[[localize('ui.panel.config.cloud.account.manage_account')]]</mwc-button
-                  ></a
+                <a
+                  href="https://account.nabucasa.com"
+                  target="_blank"
+                  rel="noreferrer"
                 >
+                  <mwc-button
+                    >[[localize('ui.panel.config.cloud.account.manage_account')]]</mwc-button
+                  >
+                </a>
                 <mwc-button style="float: right" on-click="handleLogout"
                   >[[localize('ui.panel.config.cloud.account.sign_out')]]</mwc-button
                 >
@@ -120,8 +122,12 @@ class CloudAccount extends EventsMixin(LocalizeMixin(PolymerElement)) {
               </p>
               <p>
                 [[localize('ui.panel.config.cloud.account.integrations_introduction2')]]
-                <a href="https://www.nabucasa.com" target="_blank"
-                  >[[localize('ui.panel.config.cloud.account.integrations_link_all_features')]]</a
+                <a
+                  href="https://www.nabucasa.com"
+                  target="_blank"
+                  rel="noreferrer"
+                >
+                  [[localize('ui.panel.config.cloud.account.integrations_link_all_features')]] </a
                 >.
               </p>
             </div>

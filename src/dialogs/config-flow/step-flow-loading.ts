@@ -1,18 +1,22 @@
-import {
-  LitElement,
-  TemplateResult,
-  html,
-  css,
-  customElement,
-  CSSResult,
-} from "lit-element";
 import "@polymer/paper-spinner/paper-spinner-lite";
+import {
+  css,
+  CSSResult,
+  customElement,
+  html,
+  LitElement,
+  property,
+  TemplateResult,
+} from "lit-element";
 
 @customElement("step-flow-loading")
 class StepFlowLoading extends LitElement {
-  protected render(): TemplateResult | void {
+  @property() public label?: string;
+
+  protected render(): TemplateResult {
     return html`
       <div class="init-spinner">
+        ${this.label ? html` <div>${this.label}</div> ` : ""}
         <paper-spinner-lite active></paper-spinner-lite>
       </div>
     `;
@@ -23,6 +27,9 @@ class StepFlowLoading extends LitElement {
       .init-spinner {
         padding: 50px 100px;
         text-align: center;
+      }
+      paper-spinner-lite {
+        margin-top: 16px;
       }
     `;
   }

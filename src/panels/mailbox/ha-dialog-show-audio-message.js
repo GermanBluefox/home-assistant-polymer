@@ -1,12 +1,11 @@
 import "@material/mwc-button";
 import "@polymer/paper-spinner/paper-spinner";
 import { html } from "@polymer/polymer/lib/utils/html-tag";
+/* eslint-plugin-disable lit */
 import { PolymerElement } from "@polymer/polymer/polymer-element";
-
-import "../../resources/ha-style";
 import "../../components/dialog/ha-paper-dialog";
-
 import LocalizeMixin from "../../mixins/localize-mixin";
+import "../../styles/polymer-ha-style-dialog";
 
 /*
  * @appliesMixin LocalizeMixin
@@ -57,11 +56,11 @@ class HaDialogShowAudioMessage extends LocalizeMixin(PolymerElement) {
             <template is="dom-if" if="[[_loading]]">
               <paper-spinner active></paper-spinner>
             </template>
-            <paper-icon-button
+            <ha-icon-button
               id="delicon"
               on-click="openDeleteDialog"
               icon="hass:delete"
-            ></paper-icon-button>
+            ></ha-icon-button>
           </div>
         </h2>
         <div id="transcribe"></div>

@@ -1,48 +1,49 @@
-import {
-  customElement,
-  LitElement,
-  html,
-  TemplateResult,
-  CSSResult,
-  css,
-  property,
-} from "lit-element";
-import { classMap } from "lit-html/directives/class-map";
-import { safeDump, safeLoad } from "js-yaml";
-
+import "@material/mwc-button";
 import "@polymer/app-layout/app-header-layout/app-header-layout";
 import "@polymer/app-layout/app-header/app-header";
 import "@polymer/app-layout/app-toolbar/app-toolbar";
-import "@material/mwc-button";
-import "@polymer/paper-icon-button/paper-icon-button";
+import "../../components/ha-icon-button";
 import "@polymer/paper-spinner/paper-spinner";
-
-import { struct } from "./common/structs/struct";
-import { Lovelace } from "./types";
-
-import "../../components/ha-icon";
-import { haStyle } from "../../resources/styles";
-import "../../components/ha-code-editor";
-// This is not a duplicate import, one is for types, one is for element.
-// tslint:disable-next-line
-import { HaCodeEditor } from "../../components/ha-code-editor";
-import { HomeAssistant } from "../../types";
+import { safeDump, safeLoad } from "js-yaml";
+import {
+  css,
+  CSSResult,
+  customElement,
+  html,
+  LitElement,
+  property,
+  TemplateResult,
+} from "lit-element";
+import { classMap } from "lit-html/directives/class-map";
 import { computeRTL } from "../../common/util/compute_rtl";
-import { LovelaceConfig } from "../../data/lovelace";
-import { showConfirmationDialog } from "../../dialogs/confirmation/show-dialog-confirmation";
+import "../../components/ha-code-editor";
+import type { HaCodeEditor } from "../../components/ha-code-editor";
+import "../../components/ha-icon";
+import type { LovelaceConfig } from "../../data/lovelace";
+import {
+  showAlertDialog,
+  showConfirmationDialog,
+} from "../../dialogs/generic/show-dialog-box";
+import { haStyle } from "../../resources/styles";
+import type { HomeAssistant } from "../../types";
+import { struct } from "./common/structs/struct";
+import type { Lovelace } from "./types";
 
 const lovelaceStruct = struct.interface({
   title: "string?",
   views: ["object"],
-  resources: struct.optional(["object"]),
 });
 
 @customElement("hui-editor")
 class LovelaceFullConfigEditor extends LitElement {
   @property() public hass!: HomeAssistant;
+
   @property() public lovelace?: Lovelace;
+
   @property() public closeEditor?: () => void;
+
   @property() private _saving?: boolean;
+
   @property() private _changed?: boolean;
 
   private _generation = 1;
@@ -52,10 +53,10 @@ class LovelaceFullConfigEditor extends LitElement {
       <app-header-layout>
         <app-header>
           <app-toolbar>
-            <paper-icon-button
+            <ha-icon-button
               icon="hass:close"
               @click="${this._closeEditor}"
-            ></paper-icon-button>
+            ></ha-icon-button>
             <div main-title>
               ${this.hass!.localize(
                 "ui.panel.lovelace.editor.raw_editor.header"
@@ -90,7 +91,7 @@ class LovelaceFullConfigEditor extends LitElement {
             mode="yaml"
             autofocus
             .rtl=${computeRTL(this.hass)}
-            .hass="${this.hass}"
+            .hass=${this.hass}
             @value-changed="${this._yamlChanged}"
             @editor-save="${this._handleSave}"
           >
@@ -164,18 +165,20 @@ class LovelaceFullConfigEditor extends LitElement {
     }
   }
 
-  private _closeEditor() {
-    if (this._changed) {
-      if (
-        !confirm(
-          this.hass.localize(
-            "ui.panel.lovelace.editor.raw_editor.confirm_unsaved_changes"
-          )
-        )
-      ) {
-        return;
-      }
+  private async _closeEditor() {
+    if (
+      this._changed &&
+      !(await showConfirmationDialog(this, {
+        text: this.hass.localize(
+          "ui.panel.lovelace.editor.raw_editor.confirm_unsaved_changes"
+        ),
+        dismissText: this.hass!.localize("ui.common.no"),
+        confirmText: this.hass!.localize("ui.common.yes"),
+      }))
+    ) {
+      return;
     }
+
     window.onbeforeunload = null;
     if (this.closeEditor) {
       this.closeEditor();
@@ -186,13 +189,13 @@ class LovelaceFullConfigEditor extends LitElement {
     try {
       await this.lovelace!.deleteConfig();
     } catch (err) {
-      alert(
-        this.hass.localize(
+      showAlertDialog(this, {
+        text: this.hass.localize(
           "ui.panel.lovelace.editor.raw_editor.error_remove",
           "error",
           err
-        )
-      );
+        ),
+      });
     }
     window.onbeforeunload = null;
     if (this.closeEditor) {
@@ -213,8 +216,8 @@ class LovelaceFullConfigEditor extends LitElement {
         text: this.hass.localize(
           "ui.panel.lovelace.editor.raw_editor.confirm_remove_config_text"
         ),
-        confirmBtnText: this.hass.localize("ui.common.yes"),
-        cancelBtnText: this.hass.localize("ui.common.no"),
+        confirmText: this.hass.localize("ui.common.yes"),
+        dismissText: this.hass.localize("ui.common.no"),
         confirm: () => this._removeConfig(),
       });
       return;
@@ -236,38 +239,46 @@ class LovelaceFullConfigEditor extends LitElement {
     try {
       config = safeLoad(value);
     } catch (err) {
-      alert(
-        this.hass.localize(
+      showAlertDialog(this, {
+        text: this.hass.localize(
           "ui.panel.lovelace.editor.raw_editor.error_parse_yaml",
           "error",
           err
-        )
-      );
+        ),
+      });
       this._saving = false;
       return;
     }
     try {
       config = lovelaceStruct(config);
     } catch (err) {
-      alert(
-        this.hass.localize(
+      showAlertDialog(this, {
+        text: this.hass.localize(
           "ui.panel.lovelace.editor.raw_editor.error_invalid_config",
           "error",
           err
-        )
-      );
+        ),
+      });
       return;
+    }
+    // @ts-ignore
+    if (config.resources) {
+      showAlertDialog(this, {
+        text: this.hass.localize(
+          "ui.panel.lovelace.editor.raw_editor.resources_moved"
+        ),
+      });
     }
     try {
       await this.lovelace!.saveConfig(config);
     } catch (err) {
-      alert(
-        this.hass.localize(
+      showAlertDialog(this, {
+        text: this.hass.localize(
           "ui.panel.lovelace.editor.raw_editor.error_save_yaml",
           "error",
           err
-        )
-      );
+        ),
+      });
     }
     this._generation = this.yamlEditor
       .codemirror!.getDoc()

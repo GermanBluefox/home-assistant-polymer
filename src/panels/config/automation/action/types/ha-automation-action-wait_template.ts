@@ -1,14 +1,15 @@
 import "@polymer/paper-input/paper-input";
-
-import { LitElement, property, customElement } from "lit-element";
-import { ActionElement, handleChangeEvent } from "../ha-automation-action-row";
-import { HomeAssistant } from "../../../../../types";
+import "@polymer/paper-input/paper-textarea";
+import { customElement, LitElement, property } from "lit-element";
 import { html } from "lit-html";
 import { WaitAction } from "../../../../../data/script";
+import { HomeAssistant } from "../../../../../types";
+import { ActionElement, handleChangeEvent } from "../ha-automation-action-row";
 
 @customElement("ha-automation-action-wait_template")
 export class HaWaitAction extends LitElement implements ActionElement {
   @property() public hass!: HomeAssistant;
+
   @property() public action!: WaitAction;
 
   public static get defaultConfig() {
@@ -19,7 +20,7 @@ export class HaWaitAction extends LitElement implements ActionElement {
     const { wait_template, timeout } = this.action;
 
     return html`
-      <ha-textarea
+      <paper-textarea
         .label=${this.hass.localize(
           "ui.panel.config.automation.editor.actions.type.wait_template.wait_template"
         )}
@@ -27,7 +28,7 @@ export class HaWaitAction extends LitElement implements ActionElement {
         .value=${wait_template}
         @value-changed=${this._valueChanged}
         dir="ltr"
-      ></ha-textarea>
+      ></paper-textarea>
       <paper-input
         .label=${this.hass.localize(
           "ui.panel.config.automation.editor.actions.type.wait_template.timeout"

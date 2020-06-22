@@ -1,19 +1,17 @@
 import "@material/mwc-button";
 import "@polymer/paper-input/paper-input";
 import { html } from "@polymer/polymer/lib/utils/html-tag";
+/* eslint-plugin-disable lit */
 import { PolymerElement } from "@polymer/polymer/polymer-element";
-
-import "../../../components/ha-card";
-import "../../../components/buttons/ha-call-service-button";
-import "../../../resources/ha-style";
-
-import "../ha-config-section";
-
 import { isComponentLoaded } from "../../../common/config/is_component_loaded";
+import "../../../components/buttons/ha-call-service-button";
+import "../../../components/ha-card";
 import LocalizeMixin from "../../../mixins/localize-mixin";
-
-import "./ha-config-name-form";
+import "../../../styles/polymer-ha-style";
+import "../ha-config-section";
 import "./ha-config-core-form";
+import "./ha-config-name-form";
+import "./ha-config-url-form";
 
 /*
  * @appliesMixin LocalizeMixin
@@ -62,6 +60,7 @@ class HaConfigSectionCore extends LocalizeMixin(PolymerElement) {
 
         <ha-config-name-form hass="[[hass]]"></ha-config-name-form>
         <ha-config-core-form hass="[[hass]]"></ha-config-core-form>
+        <ha-config-url-form hass="[[hass]]"></ha-config-url-form>
       </ha-config-section>
     `;
   }

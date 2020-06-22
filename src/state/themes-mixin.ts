@@ -1,9 +1,12 @@
-import { applyThemesOnElement } from "../common/dom/apply_themes_on_element";
-import { storeState } from "../util/ha-pref-storage";
-import { subscribeThemes } from "../data/ws-themes";
-import { HassBaseEl } from "./hass-base-mixin";
+import {
+  applyThemesOnElement,
+  invalidateThemeCache,
+} from "../common/dom/apply_themes_on_element";
 import { HASSDomEvent } from "../common/dom/fire_event";
+import { subscribeThemes } from "../data/ws-themes";
 import { Constructor } from "../types";
+import { storeState } from "../util/ha-pref-storage";
+import { HassBaseEl } from "./hass-base-mixin";
 
 declare global {
   // for add event listener
@@ -28,6 +31,7 @@ export default <T extends Constructor<HassBaseEl>>(superClass: T) =>
 
       subscribeThemes(this.hass!.connection, (themes) => {
         this._updateHass({ themes });
+        invalidateThemeCache();
         this._applyTheme();
       });
     }
@@ -36,8 +40,21 @@ export default <T extends Constructor<HassBaseEl>>(superClass: T) =>
       applyThemesOnElement(
         document.documentElement,
         this.hass!.themes,
-        this.hass!.selectedTheme,
-        true
+        this.hass!.selectedTheme || this.hass!.themes.default_theme
       );
+
+      const meta = document.querySelector("meta[name=theme-color]");
+      const headerColor = getComputedStyle(
+        document.documentElement
+      ).getPropertyValue("--app-header-background-color");
+      if (meta) {
+        if (!meta.hasAttribute("default-content")) {
+          meta.setAttribute("default-content", meta.getAttribute("content")!);
+        }
+        const themeColor =
+          headerColor.trim() ||
+          (meta.getAttribute("default-content") as string);
+        meta.setAttribute("content", themeColor);
+      }
     }
   };

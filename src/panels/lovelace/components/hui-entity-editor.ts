@@ -1,20 +1,18 @@
+import "../../../components/ha-icon-button";
 import {
-  html,
-  LitElement,
-  TemplateResult,
-  customElement,
-  property,
   css,
   CSSResult,
+  customElement,
+  html,
+  LitElement,
+  property,
+  TemplateResult,
 } from "lit-element";
-import "@polymer/paper-icon-button/paper-icon-button";
-
-import { HomeAssistant } from "../../../types";
 import { fireEvent } from "../../../common/dom/fire_event";
-import { EntityConfig } from "../entity-rows/types";
-
 import "../../../components/entity/ha-entity-picker";
+import { HomeAssistant } from "../../../types";
 import { EditorTarget } from "../editor/types";
+import { EntityConfig } from "../entity-rows/types";
 
 @customElement("hui-entity-editor")
 export class HuiEntityEditor extends LitElement {
@@ -24,7 +22,7 @@ export class HuiEntityEditor extends LitElement {
 
   @property() protected label?: string;
 
-  protected render(): TemplateResult | void {
+  protected render(): TemplateResult {
     if (!this.entities) {
       return html``;
     }
@@ -32,45 +30,41 @@ export class HuiEntityEditor extends LitElement {
     return html`
       <h3>
         ${this.label ||
-          this.hass!.localize(
-            "ui.panel.lovelace.editor.card.generic.entities"
-          ) +
-            " (" +
-            this.hass!.localize(
-              "ui.panel.lovelace.editor.card.config.required"
-            ) +
-            ")"}
+        this.hass!.localize("ui.panel.lovelace.editor.card.generic.entities") +
+          " (" +
+          this.hass!.localize("ui.panel.lovelace.editor.card.config.required") +
+          ")"}
       </h3>
       <div class="entities">
         ${this.entities.map((entityConf, index) => {
           return html`
             <div class="entity">
               <ha-entity-picker
-                .hass="${this.hass}"
+                .hass=${this.hass}
                 .value="${entityConf.entity}"
                 .index="${index}"
                 @change="${this._valueChanged}"
                 allow-custom-entity
               ></ha-entity-picker>
-              <paper-icon-button
+              <ha-icon-button
                 title="Move entity down"
                 icon="hass:arrow-down"
                 .index="${index}"
                 @click="${this._entityDown}"
                 ?disabled="${index === this.entities!.length - 1}"
-              ></paper-icon-button>
-              <paper-icon-button
+              ></ha-icon-button>
+              <ha-icon-button
                 title="Move entity up"
                 icon="hass:arrow-up"
                 .index="${index}"
                 @click="${this._entityUp}"
                 ?disabled="${index === 0}"
-              ></paper-icon-button>
+              ></ha-icon-button>
             </div>
           `;
         })}
         <ha-entity-picker
-          .hass="${this.hass}"
+          .hass=${this.hass}
           @change="${this._addEntity}"
         ></ha-entity-picker>
       </div>

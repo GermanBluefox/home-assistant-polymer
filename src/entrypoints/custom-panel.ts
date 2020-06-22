@@ -1,11 +1,12 @@
-import { loadJS } from "../common/dom/load_resource";
-import { loadCustomPanel } from "../util/custom-panel/load-custom-panel";
-import { createCustomPanelElement } from "../util/custom-panel/create-custom-panel-element";
-import { setCustomPanelProperties } from "../util/custom-panel/set-custom-panel-properties";
-import { fireEvent } from "../common/dom/fire_event";
+import "../resources/compatibility";
 import { PolymerElement } from "@polymer/polymer";
-import { CustomPanelInfo } from "../data/panel_custom";
+import { fireEvent } from "../common/dom/fire_event";
+import { loadJS } from "../common/dom/load_resource";
 import { webComponentsSupported } from "../common/feature-detect/support-web-components";
+import { CustomPanelInfo } from "../data/panel_custom";
+import { createCustomPanelElement } from "../util/custom-panel/create-custom-panel-element";
+import { loadCustomPanel } from "../util/custom-panel/load-custom-panel";
+import { setCustomPanelProperties } from "../util/custom-panel/set-custom-panel-properties";
 
 declare global {
   interface Window {
@@ -17,12 +18,9 @@ let es5Loaded: Promise<unknown> | undefined;
 
 window.loadES5Adapter = () => {
   if (!es5Loaded) {
-    es5Loaded = Promise.all([
-      loadJS(
-        `${__STATIC_PATH__}polyfills/custom-elements-es5-adapter.js`
-      ).catch(),
-      import(/* webpackChunkName: "compat" */ "./compatibility"),
-    ]);
+    es5Loaded = loadJS(
+      `${__STATIC_PATH__}polyfills/custom-elements-es5-adapter.js`
+    ).catch(); // Swallow errors as it raises errors on old browsers.
   }
   return es5Loaded;
 };
@@ -51,7 +49,6 @@ function initialize(panel: CustomPanelInfo, properties: {}) {
   }
 
   if (__BUILD__ === "es5") {
-    // Load ES5 adapter. Swallow errors as it raises errors on old browsers.
     start = start.then(() => window.loadES5Adapter());
   }
 
@@ -82,7 +79,7 @@ function initialize(panel: CustomPanelInfo, properties: {}) {
         document.body.appendChild(panelEl!);
       },
       (err) => {
-        // tslint:disable-next-line
+        // eslint-disable-next-line
         console.error(err, panel);
         alert(`Unable to load the panel source: ${err}.`);
       }
