@@ -61,13 +61,13 @@ gulp.task(
     },
     "clean",
     gulp.parallel(
-      "gen-service-worker-dev",
-      gulp.parallel("gen-icons-app", "gen-icons-mdi"),
+      "gen-service-worker-app-dev",
+      gulp.parallel("gen-icons-json"),
       "gen-pages-dev",
       "gen-index-app-dev",
       gulp.series("create-test-translation", "build-translations")
     ),
-    "copy-static",
+    "copy-static-app",
     "webpack-dev-app"
   )
 );
