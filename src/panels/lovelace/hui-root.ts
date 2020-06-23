@@ -604,7 +604,9 @@ class HUIRoot extends LitElement {
     // IoB
     // window.open("https://www.home-assistant.io/lovelace/", "_blank");
     window.open(
-      "https://www.iobroker.net/#en/adapters/adapterref/iobroker.lovelace/README.md",
+      `https://www.iobroker.net/#${
+        this.hass!.language ? this.hass!.language.split("-")[0] || "en" : "en"
+      }/adapters/adapterref/iobroker.lovelace/README.md`,
       "_blank"
     );
   }
