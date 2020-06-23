@@ -171,7 +171,14 @@ class HuiWeatherForecastCard extends LitElement implements LovelaceCard {
       hourly = timeDiff < DAY_IN_MILLISECONDS;
     }
 
-    const weatherStateIcon = getWeatherStateIcon(stateObj.state, this);
+    const weatherStateIcon = getWeatherStateIcon(
+      stateObj.state,
+      this,
+      this.hass.auth.accessToken
+    );
+    const isImage = !!stateObj.state
+      .toString()
+      .match(/\.png|\.svg|\.jpg|\.jpeg/i);
 
     return html`
       <ha-card
@@ -192,14 +199,18 @@ class HuiWeatherForecastCard extends LitElement implements LovelaceCard {
           <div class="info">
             <div class="name-state">
               <div class="state">
-                ${computeStateDisplay(
-                  this.hass.localize,
-                  stateObj,
-                  this.hass.language
-                )}
+                ${isImage
+                  ? this._config.name || computeStateName(stateObj)
+                  : computeStateDisplay(
+                      this.hass.localize,
+                      stateObj,
+                      this.hass.language
+                    )}
               </div>
               <div class="name">
-                ${this._config.name || computeStateName(stateObj)}
+                ${isImage
+                  ? ""
+                  : this._config.name || computeStateName(stateObj)}
               </div>
             </div>
             <div class="temp-attribute">
@@ -253,7 +264,11 @@ class HuiWeatherForecastCard extends LitElement implements LovelaceCard {
                       ${item.condition !== undefined && item.condition !== null
                         ? html`
                             <div class="forecast-image-icon">
-                              ${getWeatherStateIcon(item.condition, this)}
+                              ${getWeatherStateIcon(
+                                item.condition,
+                                this,
+                                this.hass.auth.accessToken
+                              )}
                             </div>
                           `
                         : ""}

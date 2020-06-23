@@ -342,7 +342,8 @@ export const getWeatherStateSVG = (state: string): SVGTemplateResult => {
 
 export const getWeatherStateIcon = (
   state: string,
-  element: HTMLElement
+  element: HTMLElement,
+  token?: string
 ): TemplateResult | undefined => {
   const userDefinedIcon = getComputedStyle(element).getPropertyValue(
     `--weather-icon-${state}`
@@ -354,6 +355,16 @@ export const getWeatherStateIcon = (
         style="background-size: cover;${styleMap({
           "background-image": userDefinedIcon,
         })}"
+      ></div>
+    `;
+  }
+
+  if (state.toString().match(/\.png|\.svg|\.jpg|\.jpeg/i)) {
+    const imgUrl = state.toString() + (token ? "?token=" + token : "");
+    return html`
+      <div
+        style="background-size: cover; 
+               background-image: url(${imgUrl});"
       ></div>
     `;
   }
