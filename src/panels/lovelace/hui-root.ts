@@ -7,6 +7,7 @@ import {
   mdiClose,
   mdiPencil,
   mdiHelpCircle,
+  mdiBell, //IoB
 } from "@mdi/js";
 import "@polymer/app-layout/app-header-layout/app-header-layout";
 import "@polymer/app-layout/app-header/app-header";
@@ -502,29 +503,30 @@ class HUIRoot extends LitElement {
   // for IoB
   private renderNotificationButton(withVoice?: boolean): TemplateResult | void {
     return html`
-      <paper-icon-item
+      <mwc-icon-button
         style="cursor: pointer; position: relative;"
-        aria-label="${this.hass.localize("ui.notification_drawer.title")}"
+        label="${this.hass.localize("ui.notification_drawer.title")}"
         @click=${this._handleShowNotificationDrawer}
       >
-        <ha-icon slot="item-icon" icon="hass:bell"></ha-icon>
+        <ha-svg-icon path=${mdiBell}></ha-svg-icon>
         ${this._notificationsCount > 0
           ? html`
               <span
-                style="top: -6px; right: -6px; font-size: 0.7rem; position: absolute; min-width: 20px; box-sizing: border-box; border-radius: 50%; font-weight: 400; background-color: var(--accent-color); line-height: 20px; text-align: center; padding: 0 6px; color: var(--text-primary-color);"
+                style="top: -4px; right: -6px; font-size: 1.0rem; position: absolute; min-width: 20px; box-sizing: border-box; border-radius: 50%; font-weight: 400; background-color: var(--accent-color); line-height: 24px; text-align: center; padding: 0 6px; color: var(--text-primary-color);"
               >
                 ${this._notificationsCount}
               </span>
             `
           : ""}
-      </paper-icon-item>
+      </mwc-icon-button>
       ${withVoice && this._conversation(this.hass.config.components)
         ? html`
-            <paper-icon-button
-              aria-label="Start conversation"
-              icon="hass:microphone"
+            <mwc-icon-button
+              label="Start conversation"
               @click=${this._showVoiceCommandDialog}
-            ></paper-icon-button>
+            >
+              <ha-svg-icon path=${mdiMicrophone}></ha-svg-icon>
+            </mwc-icon-button>
           `
         : ""}
     `;
