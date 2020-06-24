@@ -5,6 +5,7 @@ import { html } from "@polymer/polymer/lib/utils/html-tag";
 /* eslint-plugin-disable lit */
 import { PolymerElement } from "@polymer/polymer/polymer-element";
 import { computeDomain } from "../../common/entity/compute_domain";
+import "../../components/ha-icon-button"; // IoB
 import "../../components/ha-icon-button-prev";
 import { subscribeNotifications } from "../../data/persistent_notification";
 import { EventsMixin } from "../../mixins/events-mixin";
@@ -52,11 +53,7 @@ export class HuiNotificationDrawer extends EventsMixin(
         <div main-title>[[localize('ui.notification_drawer.title')]]</div>
         <!--IoB-->
         <template is="dom-if" if="[[!_empty(_notificationsBackend)]]">
-          <paper-icon-button
-            icon="hass:notification-clear-all"
-            on-click="_ackAll"
-            title="[[localize('ui.notification_drawer.ack_all')]]"
-          ></paper-icon-button>
+          <ha-icon-button on-click="_ackAll" aria-label$="[[localize('ui.notification_drawer.ack_all]]" icon="hass:notification-clear-all"></ha-icon-button>
         </template>
         <ha-icon-button-prev on-click="_closeDrawer" aria-label$="[[localize('ui.notification_drawer.close')]]"></ha-icon-button-prev>
       </app-toolbar>
