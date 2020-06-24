@@ -553,7 +553,7 @@ class HUIRoot extends LitElement {
   }
 
   private _handleShowNotificationDrawer() {
-    showNotificationDrawer(this, { narrow: false });
+    showNotificationDrawer(this, { narrow: this.narrow! });
   }
   // end of IoB
 
