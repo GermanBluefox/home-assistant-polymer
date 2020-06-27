@@ -7,7 +7,7 @@ import {
   mdiClose,
   mdiPencil,
   mdiHelpCircle,
-  mdiBell, //IoB
+  mdiBell, // IoB
 } from "@mdi/js";
 import "@polymer/app-layout/app-header-layout/app-header-layout";
 import "@polymer/app-layout/app-header/app-header";
@@ -79,6 +79,7 @@ class HUIRoot extends LitElement {
   @property() private _curView?: number | "hass-unused-entities";
 
   @property() private _persistentNotifications?: number; // IoB
+
   private _unsubNotifications?: () => void; // IoB
 
   private _viewCache?: { [viewId: string]: HUIView };
