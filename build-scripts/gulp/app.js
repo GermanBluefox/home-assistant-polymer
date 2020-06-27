@@ -39,6 +39,7 @@ gulp.task(
       process.env.NODE_ENV = "production";
     },
     "clean",
+    "translations-enable-merge-backend", // IoB - includes backend translation in frontend files.
     gulp.parallel("gen-icons-json", "build-translations"),
     "copy-static-app",
     env.useRollup() ? "rollup-prod-app" : "webpack-prod-app",
@@ -60,6 +61,7 @@ gulp.task(
       process.env.NODE_ENV = "development";
     },
     "clean",
+    "translations-enable-merge-backend", // includes backend translation in frontend translations file.
     gulp.parallel(
       "gen-service-worker-app-dev",
       "gen-icons-json",
