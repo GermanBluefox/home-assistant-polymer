@@ -56,6 +56,21 @@ export const computeLocalize = (
     const translatedValue = resources[language][key];
 
     if (!translatedValue) {
+      // IoB: somehow translation of binary_sensor values is broken for me. Key is component.${domain}.state.${stateObj.attributes.device_class}.${stateObj.state
+      //                  from compute_state_display -> but ressources[lang] has no such key, but component is an object with those attributes... somehow that is not fattened?
+      const parts = key.split(".");
+      let prevPart = resources[language];
+      for (const part of parts) {
+        if (prevPart[part]) {
+          if (typeof prevPart[part] === "string") {
+            return prevPart[part];
+          }
+          prevPart = (prevPart[part] as unknown) as { [key: string]: string };
+        } else {
+          return "";
+        }
+      }
+
       return "";
     }
 
