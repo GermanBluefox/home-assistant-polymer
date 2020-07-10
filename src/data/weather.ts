@@ -361,7 +361,11 @@ export const getWeatherStateIcon = (
 
   // IoB weather icon
   if (state.toString().match(/\.png|\.svg|\.jpg|\.jpeg/i)) {
-    const imgUrl = state.toString() + (token ? "?token=" + token : "");
+    let imgUrl = state.toString();
+    if (imgUrl.startsWith("/adapter")) {
+      // make sure we do not send token to 3rd parties!
+      imgUrl += token ? "?token=" + token : "";
+    }
     return html`
       <div
         style="background-size: cover; 
