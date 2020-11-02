@@ -1,5 +1,5 @@
 import "@material/mwc-button";
-import "@polymer/paper-spinner/paper-spinner";
+import "../../components/ha-circular-progress";
 import { html } from "@polymer/polymer/lib/utils/html-tag";
 /* eslint-plugin-disable lit */
 import { PolymerElement } from "@polymer/polymer/polymer-element";
@@ -21,7 +21,7 @@ class HaDialogShowAudioMessage extends LocalizeMixin(PolymerElement) {
           ha-paper-dialog {
             margin: 0;
             width: 100%;
-            max-height: calc(100% - 64px);
+            max-height: calc(100% - var(--header-height));
 
             position: fixed !important;
             bottom: 0px;
@@ -54,7 +54,7 @@ class HaDialogShowAudioMessage extends LocalizeMixin(PolymerElement) {
           [[localize('ui.panel.mailbox.playback_title')]]
           <div class="icon">
             <template is="dom-if" if="[[_loading]]">
-              <paper-spinner active></paper-spinner>
+              <ha-circular-progress active></ha-circular-progress>
             </template>
             <ha-icon-button
               id="delicon"

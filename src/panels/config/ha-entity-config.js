@@ -2,7 +2,7 @@ import "@material/mwc-button";
 import "@polymer/paper-dropdown-menu/paper-dropdown-menu";
 import "@polymer/paper-item/paper-item";
 import "@polymer/paper-listbox/paper-listbox";
-import "@polymer/paper-spinner/paper-spinner";
+import "../../components/ha-circular-progress";
 import { html } from "@polymer/polymer/lib/utils/html-tag";
 /* eslint-plugin-disable lit */
 import { PolymerElement } from "@polymer/polymer/polymer-element";
@@ -65,7 +65,10 @@ class HaEntityConfig extends PolymerElement {
                 </template>
 
                 <template is="dom-if" if="[[computeShowSpinner(formState)]]">
-                  <paper-spinner active="" alt="[[formState]]"></paper-spinner>
+                  <ha-circular-progress
+                    active=""
+                    alt="[[formState]]"
+                  ></ha-circular-progress>
                   [[formState]]
                 </template>
               </div>
@@ -179,9 +182,9 @@ class HaEntityConfig extends PolymerElement {
       return;
     }
 
-    var oldEntityId = oldEntities[this.selectedEntity].entity_id;
+    const oldEntityId = oldEntities[this.selectedEntity].entity_id;
 
-    var newIndex = entities.findIndex(function (ent) {
+    const newIndex = entities.findIndex(function (ent) {
       return ent.entity_id === oldEntityId;
     });
 
@@ -195,12 +198,12 @@ class HaEntityConfig extends PolymerElement {
 
   entityChanged(index) {
     if (!this.entities || !this.formEl) return;
-    var entity = this.entities[index];
+    const entity = this.entities[index];
     if (!entity) return;
 
     this.formState = "loading";
     // eslint-disable-next-line @typescript-eslint/no-this-alias
-    var el = this;
+    const el = this;
     this.formEl.loadEntity(entity).then(function () {
       el.formState = "editing";
     });
@@ -209,7 +212,7 @@ class HaEntityConfig extends PolymerElement {
   saveEntity() {
     this.formState = "saving";
     // eslint-disable-next-line @typescript-eslint/no-this-alias
-    var el = this;
+    const el = this;
     this.formEl.saveEntity().then(function () {
       el.formState = "editing";
     });

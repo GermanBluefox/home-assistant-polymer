@@ -1,7 +1,7 @@
 import "../../../components/ha-icon-button";
 import "@polymer/paper-item/paper-item";
 import "@polymer/paper-item/paper-item-body";
-import "@polymer/paper-spinner/paper-spinner";
+import "../../../components/ha-circular-progress";
 import {
   css,
   CSSResult,
@@ -9,6 +9,7 @@ import {
   html,
   LitElement,
   property,
+  internalProperty,
   TemplateResult,
 } from "lit-element";
 import "../../../components/buttons/ha-call-service-button";
@@ -26,11 +27,11 @@ import { formatSystemLogTime } from "./util";
 
 @customElement("system-log-card")
 export class SystemLogCard extends LitElement {
-  @property() public hass!: HomeAssistant;
+  @property({ attribute: false }) public hass!: HomeAssistant;
 
   public loaded = false;
 
-  @property() private _items?: LoggedError[];
+  @internalProperty() private _items?: LoggedError[];
 
   public async fetchData(): Promise<void> {
     this._items = undefined;
@@ -47,7 +48,7 @@ export class SystemLogCard extends LitElement {
           ${this._items === undefined
             ? html`
                 <div class="loading-container">
-                  <paper-spinner active></paper-spinner>
+                  <ha-circular-progress active></ha-circular-progress>
                 </div>
               `
             : html`
@@ -76,7 +77,9 @@ export class SystemLogCard extends LitElement {
                                     integrations[idx]!
                                   )
                                 : item.source[0]}
-                              (${item.level})
+                              ${html`(<span class="${item.level.toLowerCase()}"
+                                  >${item.level}</span
+                                >)`}
                               ${item.count > 1
                                 ? html`
                                     -
@@ -162,6 +165,14 @@ export class SystemLogCard extends LitElement {
         display: flex;
         align-items: center;
         justify-content: center;
+      }
+
+      .error {
+        color: var(--error-color);
+      }
+
+      .warning {
+        color: var(--warning-color);
       }
     `;
   }

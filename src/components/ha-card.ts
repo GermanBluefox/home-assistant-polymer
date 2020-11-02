@@ -9,7 +9,7 @@ import {
 } from "lit-element";
 
 @customElement("ha-card")
-class HaCard extends LitElement {
+export class HaCard extends LitElement {
   @property() public header?: string;
 
   @property({ type: Boolean, reflect: true }) public outlined = false;
@@ -19,7 +19,7 @@ class HaCard extends LitElement {
       :host {
         background: var(
           --ha-card-background,
-          var(--paper-card-background-color, white)
+          var(--card-background-color, white)
         );
         border-radius: var(--ha-card-border-radius, 4px);
         box-shadow: var(
@@ -36,7 +36,7 @@ class HaCard extends LitElement {
 
       :host([outlined]) {
         box-shadow: none;
-        border-width: 1px;
+        border-width: var(--ha-card-border-width, 1px);
         border-style: solid;
         border-color: var(
           --ha-card-border-color,
@@ -50,9 +50,12 @@ class HaCard extends LitElement {
         font-family: var(--ha-card-header-font-family, inherit);
         font-size: var(--ha-card-header-font-size, 24px);
         letter-spacing: -0.012em;
-        line-height: 32px;
-        padding: 24px 16px 16px;
+        line-height: 48px;
+        padding: 12px 16px 16px;
         display: block;
+        margin-block-start: 0px;
+        margin-block-end: 0px;
+        font-weight: normal;
       }
 
       :host ::slotted(.card-content:not(:first-child)),
@@ -66,7 +69,7 @@ class HaCard extends LitElement {
       }
 
       :host ::slotted(.card-actions) {
-        border-top: 1px solid #e8e8e8;
+        border-top: 1px solid var(--divider-color, #e8e8e8);
         padding: 5px 16px;
       }
     `;
@@ -75,7 +78,7 @@ class HaCard extends LitElement {
   protected render(): TemplateResult {
     return html`
       ${this.header
-        ? html` <div class="card-header">${this.header}</div> `
+        ? html`<h1 class="card-header">${this.header}</h1>`
         : html``}
       <slot></slot>
     `;

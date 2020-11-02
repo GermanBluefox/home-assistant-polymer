@@ -4,6 +4,7 @@ import {
   html,
   LitElement,
   property,
+  internalProperty,
   PropertyValues,
   TemplateResult,
 } from "lit-element";
@@ -21,17 +22,17 @@ export abstract class HuiStackCard extends LitElement implements LovelaceCard {
     return document.createElement("hui-stack-card-editor");
   }
 
-  public static getStubConfig(): object {
+  public static getStubConfig(): Record<string, unknown> {
     return { cards: [] };
   }
 
-  @property() public hass?: HomeAssistant;
+  @property({ attribute: false }) public hass?: HomeAssistant;
 
   @property() public editMode?: boolean;
 
   @property() protected _cards?: LovelaceCard[];
 
-  @property() private _config?: StackCardConfig;
+  @internalProperty() private _config?: StackCardConfig;
 
   public getCardSize(): number | Promise<number> {
     return 1;
@@ -74,7 +75,7 @@ export abstract class HuiStackCard extends LitElement implements LovelaceCard {
 
     return html`
       ${this._config.title
-        ? html` <div class="card-header">${this._config.title}</div> `
+        ? html`<h1 class="card-header">${this._config.title}</h1>`
         : ""}
       <div id="root">${this._cards}</div>
     `;

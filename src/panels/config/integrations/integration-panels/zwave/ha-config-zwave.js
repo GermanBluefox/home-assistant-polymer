@@ -89,7 +89,7 @@ class HaConfigZwave extends LocalizeMixin(EventsMixin(PolymerElement)) {
           color: var(--primary-color);
         }
       </style>
-      <ha-app-layout has-scrolling-region="">
+      <ha-app-layout>
         <app-header slot="header" fixed="">
           <app-toolbar>
             <ha-icon-button-arrow-prev
@@ -487,7 +487,6 @@ class HaConfigZwave extends LocalizeMixin(EventsMixin(PolymerElement)) {
           return false;
         }
         return (
-          !ent.attributes.hidden &&
           "node_id" in ent.attributes &&
           ent.attributes.node_id === nodeid &&
           !ent.entity_id.match("zwave[.]")

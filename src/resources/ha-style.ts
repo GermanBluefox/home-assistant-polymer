@@ -22,6 +22,7 @@ documentContainer.innerHTML = `<custom-style>
       --primary-text-color: #212121;
       --secondary-text-color: #727272;
       --text-primary-color: #ffffff;
+      --text-light-primary-color: #212121;
       --disabled-text-color: #bdbdbd;
 
       /* main interface colors */
@@ -34,6 +35,9 @@ documentContainer.innerHTML = `<custom-style>
       --scrollbar-thumb-color: rgb(194, 194, 194);
 
       --error-color: #db4437;
+      --warning-color: #FF9800;
+      --success-color: #0f9d58;
+      --info-color: #4285f4;
 
       /* states and badges */
       --state-icon-color: #44739e;
@@ -43,6 +47,9 @@ documentContainer.innerHTML = `<custom-style>
       --card-background-color: #ffffff;
       --primary-background-color: #fafafa;
       --secondary-background-color: #e5e5e5; /* behind the cards on state */
+
+      /* for header */
+      --header-height: 64px;
 
       /* for label-badge */
       --label-badge-red: #DF4C1E;
@@ -59,12 +66,6 @@ documentContainer.innerHTML = `<custom-style>
       --paper-grey-50: #fafafa; /* default for: --mwc-switch-unchecked-button-color */
       --paper-grey-200: #eeeeee;  /* for ha-date-picker-style */
       --paper-grey-500: #9e9e9e;  /* --label-badge-grey */
-
-      /* for paper-spinner */
-      --google-red-500: #db4437;
-      --google-blue-500: #4285f4;
-      --google-green-500: #0f9d58;
-      --google-yellow-500: #f4b400;
 
       /* for paper-slider */
       --paper-green-400: #66bb6a;
@@ -84,10 +85,7 @@ documentContainer.innerHTML = `<custom-style>
       --light-primary-opacity: 1.0;
 
       /* set our slider style */
-      --ha-paper-slider-pin-font-size: 15px;
-
-      /* markdown styles */
-      --markdown-code-background-color: #f6f8fa;
+      --ha-slider-pin-font-size: 15px;
 
       /* rgb */
       --rgb-primary-color: 3, 169, 244;

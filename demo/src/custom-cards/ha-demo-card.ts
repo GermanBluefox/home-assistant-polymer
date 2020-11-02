@@ -1,15 +1,16 @@
 import "@material/mwc-button";
-import "@polymer/paper-spinner/paper-spinner-lite";
 import {
   css,
   CSSResult,
   html,
   LitElement,
   property,
+  internalProperty,
   TemplateResult,
 } from "lit-element";
 import { until } from "lit-html/directives/until";
 import "../../../src/components/ha-card";
+import "../../../src/components/ha-circular-progress";
 import { LovelaceCardConfig } from "../../../src/data/lovelace";
 import { MockHomeAssistant } from "../../../src/fake_data/provide_hass";
 import { Lovelace, LovelaceCard } from "../../../src/panels/lovelace/types";
@@ -21,11 +22,11 @@ import {
 } from "../configs/demo-configs";
 
 export class HADemoCard extends LitElement implements LovelaceCard {
-  @property() public lovelace?: Lovelace;
+  @property({ attribute: false }) public lovelace?: Lovelace;
 
-  @property() public hass!: MockHomeAssistant;
+  @property({ attribute: false }) public hass!: MockHomeAssistant;
 
-  @property() private _switching?: boolean;
+  @internalProperty() private _switching?: boolean;
 
   private _hidden = localStorage.hide_demo_card;
 
@@ -49,7 +50,7 @@ export class HADemoCard extends LitElement implements LovelaceCard {
         <div class="picker">
           <div class="label">
             ${this._switching
-              ? html` <paper-spinner-lite active></paper-spinner-lite> `
+              ? html`<ha-circular-progress active></ha-circular-progress>`
               : until(
                   selectedDemoConfig.then(
                     (conf) => html`

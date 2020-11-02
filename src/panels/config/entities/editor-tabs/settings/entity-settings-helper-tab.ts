@@ -5,6 +5,7 @@ import {
   html,
   LitElement,
   property,
+  internalProperty,
   PropertyValues,
   query,
   TemplateResult,
@@ -12,7 +13,6 @@ import {
 import { isComponentLoaded } from "../../../../../common/config/is_component_loaded";
 import { dynamicElement } from "../../../../../common/dom/dynamic-element-directive";
 import { fireEvent } from "../../../../../common/dom/fire_event";
-import { HaPaperDialog } from "../../../../../components/dialog/ha-paper-dialog";
 import {
   ExtEntityRegistryEntry,
   removeEntityRegistryEntry,
@@ -42,6 +42,16 @@ import {
   fetchInputText,
   updateInputText,
 } from "../../../../../data/input_text";
+import {
+  deleteCounter,
+  fetchCounter,
+  updateCounter,
+} from "../../../../../data/counter";
+import {
+  deleteTimer,
+  fetchTimer,
+  updateTimer,
+} from "../../../../../data/timer";
 import { showConfirmationDialog } from "../../../../../dialogs/generic/show-dialog-box";
 import type { HomeAssistant } from "../../../../../types";
 import type { Helper } from "../../../helpers/const";
@@ -50,8 +60,11 @@ import "../../../helpers/forms/ha-input_datetime-form";
 import "../../../helpers/forms/ha-input_number-form";
 import "../../../helpers/forms/ha-input_select-form";
 import "../../../helpers/forms/ha-input_text-form";
+import "../../../helpers/forms/ha-counter-form";
+import "../../../helpers/forms/ha-timer-form";
 import "../../entity-registry-basic-editor";
 import type { HaEntityRegistryBasicEditor } from "../../entity-registry-basic-editor";
+import { haStyle } from "../../../../../resources/styles";
 
 const HELPERS = {
   input_boolean: {
@@ -79,23 +92,31 @@ const HELPERS = {
     update: updateInputSelect,
     delete: deleteInputSelect,
   },
+  counter: {
+    fetch: fetchCounter,
+    update: updateCounter,
+    delete: deleteCounter,
+  },
+  timer: {
+    fetch: fetchTimer,
+    update: updateTimer,
+    delete: deleteTimer,
+  },
 };
 
 @customElement("entity-settings-helper-tab")
 export class EntityRegistrySettingsHelper extends LitElement {
-  @property() public hass!: HomeAssistant;
+  @property({ attribute: false }) public hass!: HomeAssistant;
 
   @property() public entry!: ExtEntityRegistryEntry;
 
-  @property() public dialogElement!: HaPaperDialog;
+  @internalProperty() private _error?: string;
 
-  @property() private _error?: string;
+  @internalProperty() private _item?: Helper | null;
 
-  @property() private _item?: Helper | null;
+  @internalProperty() private _submitting?: boolean;
 
-  @property() private _submitting?: boolean;
-
-  @property() private _componentLoaded?: boolean;
+  @internalProperty() private _componentLoaded?: boolean;
 
   @query("ha-registry-basic-editor")
   private _registryEditor?: HaEntityRegistryBasicEditor;
@@ -120,32 +141,30 @@ export class EntityRegistrySettingsHelper extends LitElement {
     }
     const stateObj = this.hass.states[this.entry.entity_id];
     return html`
-      <paper-dialog-scrollable .dialogElement=${this.dialogElement}>
-        ${this._error ? html` <div class="error">${this._error}</div> ` : ""}
-        <div class="form">
-          ${!this._componentLoaded
-            ? this.hass.localize(
-                "ui.dialogs.helper_settings.platform_not_loaded",
-                "platform",
-                this.entry.platform
-              )
-            : this._item === null
-            ? this.hass.localize("ui.dialogs.helper_settings.yaml_not_editable")
-            : html`
-                <div @value-changed=${this._valueChanged}>
-                  ${dynamicElement(`ha-${this.entry.platform}-form`, {
-                    hass: this.hass,
-                    item: this._item,
-                    entry: this.entry,
-                  })}
-                </div>
-              `}
-          <ha-registry-basic-editor
-            .hass=${this.hass}
-            .entry=${this.entry}
-          ></ha-registry-basic-editor>
-        </div>
-      </paper-dialog-scrollable>
+      ${this._error ? html` <div class="error">${this._error}</div> ` : ""}
+      <div class="form">
+        ${!this._componentLoaded
+          ? this.hass.localize(
+              "ui.dialogs.helper_settings.platform_not_loaded",
+              "platform",
+              this.entry.platform
+            )
+          : this._item === null
+          ? this.hass.localize("ui.dialogs.helper_settings.yaml_not_editable")
+          : html`
+              <span @value-changed=${this._valueChanged}>
+                ${dynamicElement(`ha-${this.entry.platform}-form`, {
+                  hass: this.hass,
+                  item: this._item,
+                  entry: this.entry,
+                })}
+              </span>
+            `}
+        <ha-registry-basic-editor
+          .hass=${this.hass}
+          .entry=${this.entry}
+        ></ha-registry-basic-editor>
+      </div>
       <div class="buttons">
         <mwc-button
           class="warning"
@@ -173,8 +192,6 @@ export class EntityRegistrySettingsHelper extends LitElement {
   private async _getItem() {
     const items = await HELPERS[this.entry.platform].fetch(this.hass!);
     this._item = items.find((item) => item.id === this.entry.unique_id) || null;
-    await this.updateComplete;
-    fireEvent(this.dialogElement as HTMLElement, "iron-resize");
   }
 
   private async _updateItem(): Promise<void> {
@@ -225,35 +242,42 @@ export class EntityRegistrySettingsHelper extends LitElement {
     }
   }
 
-  static get styles(): CSSResult {
-    return css`
-      :host {
-        display: block;
-        padding: 0 !important;
-      }
-      .form {
-        padding-bottom: 24px;
-      }
-      .buttons {
-        display: flex;
-        justify-content: space-between;
-        padding: 8px;
-        margin-bottom: -20px;
-      }
-      mwc-button.warning {
-        --mdc-theme-primary: var(--google-red-500);
-      }
-      .error {
-        color: var(--google-red-500);
-      }
-      .row {
-        margin-top: 8px;
-        color: var(--primary-text-color);
-      }
-      .secondary {
-        color: var(--secondary-text-color);
-      }
-    `;
+  static get styles(): CSSResult[] {
+    return [
+      haStyle,
+      css`
+        :host {
+          display: block;
+          padding: 0 !important;
+        }
+        .form {
+          padding: 20px 24px;
+          margin-bottom: 53px;
+        }
+        .buttons {
+          position: absolute;
+          bottom: 0;
+          width: 100%;
+          box-sizing: border-box;
+          border-top: 1px solid
+            var(--mdc-dialog-scroll-divider-color, rgba(0, 0, 0, 0.12));
+          display: flex;
+          justify-content: space-between;
+          padding: 8px;
+          background-color: var(--mdc-theme-surface, #fff);
+        }
+        .error {
+          color: var(--error-color);
+        }
+        .row {
+          margin-top: 8px;
+          color: var(--primary-text-color);
+        }
+        .secondary {
+          color: var(--secondary-text-color);
+        }
+      `,
+    ];
   }
 }
 

@@ -10,16 +10,16 @@ import {
   PropertyValues,
 } from "lit-element";
 import "../../../components/ha-card";
+import "../../../components/ha-circular-progress";
 import { HomeAssistant } from "../../../types";
 import { LovelaceCard } from "../types";
 import { LovelaceCardConfig } from "../../../data/lovelace";
-import "@polymer/paper-spinner/paper-spinner-lite";
 import { fireEvent } from "../../../common/dom/fire_event";
 import { STATE_NOT_RUNNING } from "home-assistant-js-websocket";
 
 @customElement("hui-starting-card")
 export class HuiStartingCard extends LitElement implements LovelaceCard {
-  @property() public hass?: HomeAssistant;
+  @property({ attribute: false }) public hass?: HomeAssistant;
 
   public getCardSize(): number {
     return 2;
@@ -47,7 +47,7 @@ export class HuiStartingCard extends LitElement implements LovelaceCard {
 
     return html`
       <div class="content">
-        <paper-spinner-lite active></paper-spinner-lite>
+        <ha-circular-progress active></ha-circular-progress>
         ${this.hass.localize("ui.panel.lovelace.cards.starting.description")}
       </div>
     `;
@@ -57,9 +57,9 @@ export class HuiStartingCard extends LitElement implements LovelaceCard {
     return css`
       :host {
         display: block;
-        height: calc(100vh - 64px);
+        height: calc(100vh - var(--header-height));
       }
-      paper-spinner-lite {
+      ha-circular-progress {
         padding-bottom: 20px;
       }
       .content {

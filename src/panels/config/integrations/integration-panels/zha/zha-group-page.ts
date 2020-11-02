@@ -1,6 +1,6 @@
 import "@material/mwc-button";
 import "../../../../../components/ha-icon-button";
-import "@polymer/paper-spinner/paper-spinner";
+import "../../../../../components/ha-circular-progress";
 import {
   css,
   CSSResult,
@@ -8,6 +8,7 @@ import {
   html,
   LitElement,
   property,
+  internalProperty,
   PropertyValues,
   query,
 } from "lit-element";
@@ -45,17 +46,18 @@ export class ZHAGroupPage extends LitElement {
 
   @property({ type: Array }) public deviceEndpoints: ZHADeviceEndpoint[] = [];
 
-  @property() private _processingAdd = false;
+  @internalProperty() private _processingAdd = false;
 
-  @property() private _processingRemove = false;
+  @internalProperty() private _processingRemove = false;
 
-  @property() private _filteredDeviceEndpoints: ZHADeviceEndpoint[] = [];
+  @internalProperty()
+  private _filteredDeviceEndpoints: ZHADeviceEndpoint[] = [];
 
-  @property() private _selectedDevicesToAdd: string[] = [];
+  @internalProperty() private _selectedDevicesToAdd: string[] = [];
 
-  @property() private _selectedDevicesToRemove: string[] = [];
+  @internalProperty() private _selectedDevicesToRemove: string[] = [];
 
-  @query("#addMembers")
+  @query("#addMembers", true)
   private _zhaAddMembersDataTable!: ZHADeviceEndpointDataTable;
 
   @query("#removeMembers")
@@ -166,12 +168,12 @@ export class ZHAGroupPage extends LitElement {
                     @click="${this._removeMembersFromGroup}"
                     class="button"
                   >
-                    <paper-spinner
+                    <ha-circular-progress
                       ?active="${this._processingRemove}"
                       alt=${this.hass.localize(
                         "ui.panel.config.zha.groups.removing_members"
                       )}
-                    ></paper-spinner>
+                    ></ha-circular-progress>
                     ${this.hass!.localize(
                       "ui.panel.config.zha.groups.remove_members"
                     )}</mwc-button
@@ -201,12 +203,13 @@ export class ZHAGroupPage extends LitElement {
               @click="${this._addMembersToGroup}"
               class="button"
             >
-              <paper-spinner
-                ?active="${this._processingAdd}"
-                alt=${this.hass.localize(
-                  "ui.panel.config.zha.groups.adding_members"
-                )}
-              ></paper-spinner>
+              ${this._processingAdd
+                ? html`<ha-circular-progress
+                    active
+                    size="small"
+                    title="Saving"
+                  ></ha-circular-progress>`
+                : ""}
               ${this.hass!.localize(
                 "ui.panel.config.zha.groups.add_members"
               )}</mwc-button
@@ -308,24 +311,12 @@ export class ZHAGroupPage extends LitElement {
           color: var(--primary-color);
           text-decoration: none;
         }
-
-        mwc-button paper-spinner {
-          width: 14px;
-          height: 14px;
-          margin-right: 20px;
-        }
-        paper-spinner {
-          display: none;
-        }
-        paper-spinner[active] {
-          display: block;
-        }
         .paper-dialog-buttons {
           align-items: flex-end;
           padding: 8px;
         }
         .paper-dialog-buttons .warning {
-          --mdc-theme-primary: var(--google-red-500);
+          --mdc-theme-primary: var(--error-color);
         }
       `,
     ];

@@ -37,23 +37,21 @@
   <body>
     <%= renderTemplate('_js_base') %>
 
-    <script type="module" crossorigin="use-credentials">
-      import "<%= latestLauncherJS %>";
+    <script>
+      import("<%= latestLauncherJS %>");
+      window.latestJS = true;
     </script>
 
-    <script nomodule>
-      (function() {
-        // // Safari 10.1 supports type=module but ignores nomodule, so we add this check.
-        if (!isS101) {
-          <% if (useRollup) { %>
-            _ls("/static/js/s.min.js").onload = function() {
-              System.import("<%= es5LauncherJS %>");
-            };
-          <% } else { %>
-            _ls("<%= es5LauncherJS %>");
-          <% } %>
-        }
-      })();
+    <script>
+      if (!window.latestJS) {
+        <% if (useRollup) { %>
+          _ls("/static/js/s.min.js").onload = function() {
+            System.import("<%= es5LauncherJS %>");
+          };
+        <% } else { %>
+          _ls("<%= es5LauncherJS %>");
+        <% } %>
+      }
     </script>
 
     <hc-layout subtitle="FAQ">
@@ -214,13 +212,8 @@
           Chromecast is a technology developed by Google, and is available on:
         </p>
         <ul>
-          <li>Google Chrome (all platforms except on iOS)</li>
-          <li>
-            Microsoft Edge (all platforms,
-            <a href="https://www.microsoftedgeinsider.com" target="_blank"
-              >dev and canary builds only</a
-            >)
-          </li>
+          <li>Google Chrome (all platforms except iOS)</li>
+          <li>Microsoft Edge (all platforms)</li>
         </ul>
       </div>
 
@@ -253,7 +246,7 @@ http:
 
     <script>
       var _gaq = [["_setAccount", "UA-57927901-9"], ["_trackPageview"]];
-      (function(d, t) {
+      (function (d, t) {
         var g = d.createElement(t),
           s = d.getElementsByTagName(t)[0];
         g.src =

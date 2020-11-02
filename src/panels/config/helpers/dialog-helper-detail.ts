@@ -6,6 +6,7 @@ import {
   CSSResult,
   customElement,
   html,
+  internalProperty,
   LitElement,
   property,
   query,
@@ -21,6 +22,8 @@ import { createInputDateTime } from "../../../data/input_datetime";
 import { createInputNumber } from "../../../data/input_number";
 import { createInputSelect } from "../../../data/input_select";
 import { createInputText } from "../../../data/input_text";
+import { createCounter } from "../../../data/counter";
+import { createTimer } from "../../../data/timer";
 import { haStyleDialog } from "../../../resources/styles";
 import { HomeAssistant } from "../../../types";
 import { Helper } from "./const";
@@ -29,6 +32,8 @@ import "./forms/ha-input_datetime-form";
 import "./forms/ha-input_number-form";
 import "./forms/ha-input_select-form";
 import "./forms/ha-input_text-form";
+import "./forms/ha-counter-form";
+import "./forms/ha-timer-form";
 
 const HELPERS = {
   input_boolean: createInputBoolean,
@@ -36,21 +41,23 @@ const HELPERS = {
   input_number: createInputNumber,
   input_datetime: createInputDateTime,
   input_select: createInputSelect,
+  counter: createCounter,
+  timer: createTimer,
 };
 
 @customElement("dialog-helper-detail")
 export class DialogHelperDetail extends LitElement {
-  @property() public hass!: HomeAssistant;
+  @property({ attribute: false }) public hass!: HomeAssistant;
 
-  @property() private _item?: Helper;
+  @internalProperty() private _item?: Helper;
 
-  @property() private _opened = false;
+  @internalProperty() private _opened = false;
 
-  @property() private _platform?: string;
+  @internalProperty() private _platform?: string;
 
-  @property() private _error?: string;
+  @internalProperty() private _error?: string;
 
-  @property() private _submitting = false;
+  @internalProperty() private _submitting = false;
 
   @query(".form") private _form?: HTMLDivElement;
 
@@ -135,7 +142,7 @@ export class DialogHelperDetail extends LitElement {
                     </paper-icon-item>
                     ${!isLoaded
                       ? html`
-                          <paper-tooltip
+                          <paper-tooltip animation-delay="0"
                             >${this.hass.localize(
                               "ui.dialogs.helper_settings.platform_not_loaded",
                               "platform",

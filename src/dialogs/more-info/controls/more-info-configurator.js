@@ -2,7 +2,7 @@ import "@material/mwc-button";
 import "@polymer/iron-flex-layout/iron-flex-layout-classes";
 import "@polymer/iron-input/iron-input";
 import "@polymer/paper-input/paper-input";
-import "@polymer/paper-spinner/paper-spinner";
+import "../../../components/ha-circular-progress";
 import { html } from "@polymer/polymer/lib/utils/html-tag";
 /* eslint-plugin-disable lit */
 import { PolymerElement } from "@polymer/polymer/polymer-element";
@@ -38,7 +38,7 @@ class MoreInfoConfigurator extends PolymerElement {
           height: 41px;
         }
 
-        paper-spinner {
+        ha-circular-progress {
           width: 14px;
           height: 14px;
           margin-right: 20px;
@@ -75,11 +75,11 @@ class MoreInfoConfigurator extends PolymerElement {
               disabled="[[isConfiguring]]"
               on-click="submitClicked"
             >
-              <paper-spinner
+              <ha-circular-progress
                 active="[[isConfiguring]]"
                 hidden="[[!isConfiguring]]"
                 alt="Configuring"
-              ></paper-spinner>
+              ></ha-circular-progress>
               [[stateObj.attributes.submit_caption]]
             </mwc-button>
           </p>
@@ -123,12 +123,12 @@ class MoreInfoConfigurator extends PolymerElement {
   }
 
   fieldChanged(ev) {
-    var el = ev.target;
+    const el = ev.target;
     this.fieldInput[el.name] = el.value;
   }
 
   submitClicked() {
-    var data = {
+    const data = {
       configure_id: this.stateObj.attributes.configure_id,
       fields: this.fieldInput,
     };

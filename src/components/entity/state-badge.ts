@@ -1,20 +1,24 @@
 import type { HassEntity } from "home-assistant-js-websocket";
-import { styleMap } from "lit-html/directives/style-map";
 import {
   css,
   CSSResult,
   html,
+  internalProperty,
   LitElement,
   property,
   PropertyValues,
   TemplateResult,
 } from "lit-element";
 import { ifDefined } from "lit-html/directives/if-defined";
+import { styleMap } from "lit-html/directives/style-map";
+
 import { computeActiveState } from "../../common/entity/compute_active_state";
 import { computeStateDomain } from "../../common/entity/compute_state_domain";
 import { stateIcon } from "../../common/entity/state_icon";
 import { iconColorCSS } from "../../common/style/icon_color_css";
+
 import type { HomeAssistant } from "../../types";
+
 import "../ha-icon";
 
 export class StateBadge extends LitElement {
@@ -31,12 +35,18 @@ export class StateBadge extends LitElement {
   @property({ type: Boolean, reflect: true, attribute: "icon" })
   private _showIcon = true;
 
-  @property() private _iconStyle: { [name: string]: string } = {};
+  @internalProperty() private _iconStyle: { [name: string]: string } = {};
 
   protected render(): TemplateResult {
     const stateObj = this.stateObj;
 
-    if (!stateObj || !this._showIcon) {
+    if (!stateObj) {
+      return html`<div class="missing">
+        <ha-icon icon="hass:alert"></ha-icon>
+      </div>`;
+    }
+
+    if (!this._showIcon) {
       return html``;
     }
 
@@ -72,10 +82,15 @@ export class StateBadge extends LitElement {
     if (stateObj) {
       // hide icon if we have entity picture
       if (
-        (stateObj.attributes.entity_picture && !this.overrideIcon) ||
+        ((stateObj.attributes.entity_picture_local ||
+          stateObj.attributes.entity_picture) &&
+          !this.overrideIcon) ||
         this.overrideImage
       ) {
-        let imageUrl = this.overrideImage || stateObj.attributes.entity_picture;
+        let imageUrl =
+          this.overrideImage ||
+          stateObj.attributes.entity_picture_local ||
+          stateObj.attributes.entity_picture;
         if (this.hass) {
           imageUrl = this.hass.hassUrl(imageUrl);
         }
@@ -133,6 +148,9 @@ export class StateBadge extends LitElement {
       }
       ha-icon {
         transition: color 0.3s ease-in-out, filter 0.3s ease-in-out;
+      }
+      .missing {
+        color: #fce588;
       }
 
       ${iconColorCSS}

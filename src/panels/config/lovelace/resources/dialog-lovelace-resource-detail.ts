@@ -9,6 +9,7 @@ import {
   html,
   LitElement,
   property,
+  internalProperty,
   TemplateResult,
 } from "lit-element";
 import { createCloseHeading } from "../../../../components/ha-dialog";
@@ -22,19 +23,33 @@ import { haStyleDialog } from "../../../../resources/styles";
 import { HomeAssistant } from "../../../../types";
 import { LovelaceResourceDetailsDialogParams } from "./show-dialog-lovelace-resource-detail";
 
+const detectResourceType = (url: string) => {
+  const ext = url.split(".").pop() || "";
+
+  if (ext === "css") {
+    return "css";
+  }
+
+  if (ext === "js") {
+    return "module";
+  }
+
+  return undefined;
+};
+
 @customElement("dialog-lovelace-resource-detail")
 export class DialogLovelaceResourceDetail extends LitElement {
-  @property() public hass!: HomeAssistant;
+  @property({ attribute: false }) public hass!: HomeAssistant;
 
-  @property() private _params?: LovelaceResourceDetailsDialogParams;
+  @internalProperty() private _params?: LovelaceResourceDetailsDialogParams;
 
-  @property() private _url!: LovelaceResource["url"];
+  @internalProperty() private _url!: LovelaceResource["url"];
 
-  @property() private _type!: LovelaceResource["type"];
+  @internalProperty() private _type?: LovelaceResource["type"];
 
-  @property() private _error?: string;
+  @internalProperty() private _error?: string;
 
-  @property() private _submitting = false;
+  @internalProperty() private _submitting = false;
 
   public async showDialog(
     params: LovelaceResourceDetailsDialogParams
@@ -43,10 +58,10 @@ export class DialogLovelaceResourceDetail extends LitElement {
     this._error = undefined;
     if (this._params.resource) {
       this._url = this._params.resource.url || "";
-      this._type = this._params.resource.type || "module";
+      this._type = this._params.resource.type || undefined;
     } else {
       this._url = "";
-      this._type = "module";
+      this._type = undefined;
     }
     await this.updateComplete;
   }
@@ -105,6 +120,7 @@ export class DialogLovelaceResourceDetail extends LitElement {
                 .selected=${this._type}
                 @iron-select=${this._typeChanged}
                 attr-for-selected="type"
+                .invalid=${!this._type}
               >
                 <paper-item type="module">
                   ${this.hass!.localize(
@@ -155,7 +171,7 @@ export class DialogLovelaceResourceDetail extends LitElement {
         <mwc-button
           slot="primaryAction"
           @click="${this._updateResource}"
-          .disabled=${urlInvalid || this._submitting}
+          .disabled=${urlInvalid || !this._type || this._submitting}
         >
           ${this._params.resource
             ? this.hass!.localize(
@@ -172,6 +188,9 @@ export class DialogLovelaceResourceDetail extends LitElement {
   private _urlChanged(ev: PolymerChangedEvent<string>) {
     this._error = undefined;
     this._url = ev.detail.value;
+    if (!this._type) {
+      this._type = detectResourceType(this._url);
+    }
   }
 
   private _typeChanged(ev: CustomEvent) {
@@ -179,6 +198,10 @@ export class DialogLovelaceResourceDetail extends LitElement {
   }
 
   private async _updateResource() {
+    if (!this._type) {
+      return;
+    }
+
     this._submitting = true;
     try {
       const values: LovelaceResourcesMutableParams = {

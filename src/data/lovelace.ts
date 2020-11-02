@@ -4,6 +4,12 @@ import {
   HassEventBase,
 } from "home-assistant-js-websocket";
 import { HASSDomEvent } from "../common/dom/fire_event";
+import { HuiErrorCard } from "../panels/lovelace/cards/hui-error-card";
+import {
+  Lovelace,
+  LovelaceBadge,
+  LovelaceCard,
+} from "../panels/lovelace/types";
 import { HomeAssistant } from "../types";
 
 export interface LovelacePanelConfig {
@@ -28,7 +34,7 @@ export interface LovelaceResource {
 }
 
 export interface LovelaceResourcesMutableParams {
-  res_type: "css" | "js" | "module" | "html";
+  res_type: LovelaceResource["type"];
   url: string;
 }
 
@@ -70,6 +76,7 @@ export interface LovelaceDashboardCreateParams
 export interface LovelaceViewConfig {
   index?: number;
   title?: string;
+  type?: string;
   badges?: Array<string | LovelaceBadgeConfig>;
   cards?: LovelaceCardConfig[];
   path?: string;
@@ -78,6 +85,16 @@ export interface LovelaceViewConfig {
   panel?: boolean;
   background?: string;
   visible?: boolean | ShowViewConfig[];
+}
+
+export interface LovelaceViewElement extends HTMLElement {
+  hass?: HomeAssistant;
+  lovelace?: Lovelace;
+  narrow?: boolean;
+  index?: number;
+  cards?: Array<LovelaceCard | HuiErrorCard>;
+  badges?: LovelaceBadge[];
+  setConfig(config: LovelaceViewConfig): void;
 }
 
 export interface ShowViewConfig {
@@ -92,6 +109,7 @@ export interface LovelaceBadgeConfig {
 export interface LovelaceCardConfig {
   index?: number;
   view_index?: number;
+  layout?: any;
   type: string;
   [key: string]: any;
 }
@@ -319,10 +337,11 @@ export interface WindowWithLovelaceProm extends Window {
 export interface ActionHandlerOptions {
   hasHold?: boolean;
   hasDoubleClick?: boolean;
+  disabled?: boolean;
 }
 
 export interface ActionHandlerDetail {
-  action: string;
+  action: "hold" | "tap" | "double_tap";
 }
 
 export type ActionHandlerEvent = HASSDomEvent<ActionHandlerDetail>;

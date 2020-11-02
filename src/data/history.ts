@@ -5,13 +5,15 @@ import { computeStateName } from "../common/entity/compute_state_name";
 import { LocalizeFunc } from "../common/translations/localize";
 import { HomeAssistant } from "../types";
 
-const DOMAINS_USE_LAST_UPDATED = ["climate", "water_heater"];
+const DOMAINS_USE_LAST_UPDATED = ["climate", "humidifier", "water_heater"];
 const LINE_ATTRIBUTES_TO_KEEP = [
   "temperature",
   "current_temperature",
   "target_temp_low",
   "target_temp_high",
   "hvac_action",
+  "humidity",
+  "mode",
 ];
 
 export interface LineChartState {
@@ -83,11 +85,14 @@ export const fetchRecent = (
 export const fetchDate = (
   hass: HomeAssistant,
   startTime: Date,
-  endTime: Date
+  endTime: Date,
+  entityId
 ): Promise<HassEntity[][]> => {
   return hass.callApi(
     "GET",
-    `history/period/${startTime.toISOString()}?end_time=${endTime.toISOString()}&minimal_response`
+    `history/period/${startTime.toISOString()}?end_time=${endTime.toISOString()}&minimal_response${
+      entityId ? `&filter_entity_id=${entityId}` : ``
+    }`
   );
 };
 
@@ -224,6 +229,8 @@ export const computeHistory = (
       unit = hass.config.unit_system.temperature;
     } else if (computeStateDomain(stateInfo[0]) === "water_heater") {
       unit = hass.config.unit_system.temperature;
+    } else if (computeStateDomain(stateInfo[0]) === "humidifier") {
+      unit = "%";
     }
 
     if (!unit) {

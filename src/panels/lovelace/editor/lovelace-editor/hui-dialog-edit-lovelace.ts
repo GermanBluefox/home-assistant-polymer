@@ -1,6 +1,5 @@
 import "@material/mwc-button";
 import "@polymer/paper-dialog-scrollable/paper-dialog-scrollable";
-import "@polymer/paper-spinner/paper-spinner";
 import {
   css,
   CSSResult,
@@ -8,9 +7,11 @@ import {
   html,
   LitElement,
   property,
+  internalProperty,
   TemplateResult,
 } from "lit-element";
 import "../../../../components/dialog/ha-paper-dialog";
+import "../../../../components/ha-circular-progress";
 import type { HaPaperDialog } from "../../../../components/dialog/ha-paper-dialog";
 import type { LovelaceConfig } from "../../../../data/lovelace";
 import { haStyleDialog } from "../../../../resources/styles";
@@ -20,9 +21,9 @@ import "./hui-lovelace-editor";
 
 @customElement("hui-dialog-edit-lovelace")
 export class HuiDialogEditLovelace extends LitElement {
-  @property() public hass?: HomeAssistant;
+  @property({ attribute: false }) public hass?: HomeAssistant;
 
-  @property() private _lovelace?: Lovelace;
+  @internalProperty() private _lovelace?: Lovelace;
 
   private _config?: LovelaceConfig;
 
@@ -75,10 +76,13 @@ export class HuiDialogEditLovelace extends LitElement {
             ?disabled="${!this._config || this._saving}"
             @click="${this._save}"
           >
-            <paper-spinner
-              ?active="${this._saving}"
-              alt="Saving"
-            ></paper-spinner>
+            ${this._saving
+              ? html`<ha-circular-progress
+                  active
+                  size="small"
+                  title="Saving"
+                ></ha-circular-progress>`
+              : ""}
             ${this.hass!.localize("ui.common.save")}</mwc-button
           >
         </div>
@@ -147,17 +151,6 @@ export class HuiDialogEditLovelace extends LitElement {
         }
         ha-paper-dialog {
           max-width: 650px;
-        }
-        mwc-button paper-spinner {
-          width: 14px;
-          height: 14px;
-          margin-right: 20px;
-        }
-        paper-spinner {
-          display: none;
-        }
-        paper-spinner[active] {
-          display: block;
         }
       `,
     ];

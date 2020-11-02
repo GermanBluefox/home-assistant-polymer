@@ -6,6 +6,7 @@ import {
   html,
   LitElement,
   property,
+  internalProperty,
   PropertyValues,
   TemplateResult,
 } from "lit-element";
@@ -22,13 +23,13 @@ const isOn = (stateObj?: HassEntity) =>
   !STATES_OFF.includes(stateObj.state) &&
   !UNAVAILABLE_STATES.includes(stateObj.state);
 
-class HaEntityToggle extends LitElement {
+export class HaEntityToggle extends LitElement {
   // hass is not a property so that we only re-render on stateObj changes
   public hass?: HomeAssistant;
 
   @property() public stateObj?: HassEntity;
 
-  @property() private _isOn = false;
+  @internalProperty() private _isOn = false;
 
   protected render(): TemplateResult {
     if (!this.stateObj) {

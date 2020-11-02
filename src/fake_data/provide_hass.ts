@@ -55,7 +55,7 @@ export const provideHass = (
 
   function updateTranslations(fragment: null | string, language?: string) {
     const lang = language || getLocalLanguage();
-    getTranslation(fragment, lang).then((translation) => {
+    getTranslation(fragment, lang).then(async (translation) => {
       const resources = {
         [lang]: {
           ...(hass().resources && hass().resources[lang]),
@@ -64,7 +64,7 @@ export const provideHass = (
       };
       hass().updateHass({
         resources,
-        localize: computeLocalize(elements[0], lang, resources),
+        localize: await computeLocalize(elements[0], lang, resources),
       });
     });
   }
@@ -114,6 +114,7 @@ export const provideHass = (
   );
 
   const localLanguage = getLocalLanguage();
+  const noop = () => undefined;
 
   const hassObj: MockHomeAssistant = {
     // Home Assistant properties
@@ -123,8 +124,8 @@ export const provideHass = (
       },
     } as any,
     connection: {
-      addEventListener: () => undefined,
-      removeEventListener: () => undefined,
+      addEventListener: noop,
+      removeEventListener: noop,
       sendMessage: (msg) => {
         const callback = wsCommands[msg.type];
 
@@ -168,6 +169,8 @@ export const provideHass = (
           );
         };
       },
+      suspendReconnectUntil: noop,
+      suspend: noop,
       socket: {
         readyState: WebSocket.OPEN,
       },
@@ -177,7 +180,9 @@ export const provideHass = (
     config: demoConfig,
     themes: {
       default_theme: "default",
+      default_dark_theme: null,
       themes: {},
+      darkMode: false,
     },
     panels: demoPanels,
     services: demoServices,
@@ -200,6 +205,7 @@ export const provideHass = (
     translationMetadata: translationMetadata as any,
     dockedSidebar: "auto",
     vibrate: true,
+    suspendWhenHidden: false,
     moreInfoEntityId: null as any,
     // @ts-ignore
     async callService(domain, service, data) {
@@ -249,7 +255,7 @@ export const provideHass = (
     mockTheme(theme) {
       invalidateThemeCache();
       hass().updateHass({
-        selectedTheme: theme ? "mock" : "default",
+        selectedTheme: { theme: theme ? "mock" : "default" },
         themes: {
           ...hass().themes,
           themes: {
@@ -261,7 +267,7 @@ export const provideHass = (
       applyThemesOnElement(
         document.documentElement,
         themes,
-        selectedTheme as string
+        selectedTheme!.theme
       );
     },
 

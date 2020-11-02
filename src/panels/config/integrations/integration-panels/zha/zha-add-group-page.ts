@@ -1,7 +1,7 @@
 import "@material/mwc-button";
 import "@polymer/paper-input/paper-input";
 import type { PaperInputElement } from "@polymer/paper-input/paper-input";
-import "@polymer/paper-spinner/paper-spinner";
+import "../../../../../components/ha-circular-progress";
 import {
   css,
   CSSResult,
@@ -9,6 +9,7 @@ import {
   html,
   LitElement,
   property,
+  internalProperty,
   PropertyValues,
   query,
 } from "lit-element";
@@ -37,11 +38,11 @@ export class ZHAAddGroupPage extends LitElement {
 
   @property({ type: Array }) public deviceEndpoints: ZHADeviceEndpoint[] = [];
 
-  @property() private _processingAdd = false;
+  @internalProperty() private _processingAdd = false;
 
-  @property() private _groupName = "";
+  @internalProperty() private _groupName = "";
 
-  @query("zha-device-endpoint-data-table")
+  @query("zha-device-endpoint-data-table", true)
   private _zhaDevicesDataTable!: ZHADeviceEndpointDataTable;
 
   private _firstUpdatedCalled = false;
@@ -104,12 +105,15 @@ export class ZHAAddGroupPage extends LitElement {
               @click="${this._createGroup}"
               class="button"
             >
-              <paper-spinner
-                ?active="${this._processingAdd}"
-                alt="${this.hass!.localize(
-                  "ui.panel.config.zha.groups.creating_group"
-                )}"
-              ></paper-spinner>
+              ${this._processingAdd
+                ? html`<ha-circular-progress
+                    active
+                    size="small"
+                    .title=${this.hass!.localize(
+                      "ui.panel.config.zha.groups.creating_group"
+                    )}
+                  ></ha-circular-progress>`
+                : ""}
               ${this.hass!.localize(
                 "ui.panel.config.zha.groups.create"
               )}</mwc-button
@@ -171,23 +175,12 @@ export class ZHAAddGroupPage extends LitElement {
         ha-config-section *:last-child {
           padding-bottom: 24px;
         }
-        mwc-button paper-spinner {
-          width: 14px;
-          height: 14px;
-          margin-right: 20px;
-        }
-        paper-spinner {
-          display: none;
-        }
-        paper-spinner[active] {
-          display: block;
-        }
         .paper-dialog-buttons {
           align-items: flex-end;
           padding: 8px;
         }
         .paper-dialog-buttons .warning {
-          --mdc-theme-primary: var(--google-red-500);
+          --mdc-theme-primary: var(--error-color);
         }
       `,
     ];

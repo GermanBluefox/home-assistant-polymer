@@ -5,6 +5,7 @@ import {
   html,
   LitElement,
   property,
+  internalProperty,
   query,
   TemplateResult,
 } from "lit-element";
@@ -26,11 +27,11 @@ export interface ToastActionParams {
 }
 
 class NotificationManager extends LitElement {
-  @property() public hass!: HomeAssistant;
+  @property({ attribute: false }) public hass!: HomeAssistant;
 
-  @property() private _action?: ToastActionParams;
+  @internalProperty() private _action?: ToastActionParams;
 
-  @property() private _noCancelOnOutsideClick = false;
+  @internalProperty() private _noCancelOnOutsideClick = false;
 
   @query("ha-toast") private _toast!: HaToast;
 
@@ -85,10 +86,12 @@ class NotificationManager extends LitElement {
         display: flex;
         align-items: center;
         justify-content: space-between;
+        padding: 8px 12px;
       }
       mwc-button {
         color: var(--primary-color);
         font-weight: bold;
+        margin-left: 8px;
       }
     `;
   }

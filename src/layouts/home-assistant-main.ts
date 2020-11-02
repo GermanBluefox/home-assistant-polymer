@@ -2,20 +2,21 @@ import "@polymer/app-layout/app-drawer-layout/app-drawer-layout";
 import type { AppDrawerLayoutElement } from "@polymer/app-layout/app-drawer-layout/app-drawer-layout";
 // import "@polymer/app-layout/app-drawer/app-drawer"; // IoB
 import type { AppDrawerElement } from "@polymer/app-layout/app-drawer/app-drawer";
-import "@polymer/iron-media-query/iron-media-query";
 import {
   css,
   CSSResult,
+  customElement,
   html,
+  internalProperty,
   LitElement,
   property,
   PropertyValues,
   TemplateResult,
 } from "lit-element";
-import { fireEvent } from "../common/dom/fire_event";
+import { fireEvent, HASSDomEvent } from "../common/dom/fire_event";
+import { listenMediaQuery } from "../common/dom/media_query";
 import { toggleAttribute } from "../common/dom/toggle_attribute";
 import { showNotificationDrawer } from "../dialogs/notifications/show-notification-drawer";
-import type { PolymerChangedEvent } from "../polymer-types";
 import type { HomeAssistant, Route } from "../types";
 import "./partial-panel-resolver";
 
@@ -25,16 +26,27 @@ declare global {
   // for fire event
   interface HASSDomEvents {
     "hass-toggle-menu": undefined;
+    "hass-edit-sidebar": EditSideBarEvent;
     "hass-show-notifications": undefined;
+  }
+  interface HTMLElementEventMap {
+    "hass-edit-sidebar": HASSDomEvent<EditSideBarEvent>;
   }
 }
 
+interface EditSideBarEvent {
+  editMode: boolean;
+}
+
+@customElement("home-assistant-main")
 class HomeAssistantMain extends LitElement {
-  @property() public hass!: HomeAssistant;
+  @property({ attribute: false }) public hass!: HomeAssistant;
 
   @property() public route?: Route;
 
-  @property({ type: Boolean }) private narrow?: boolean;
+  @property({ type: Boolean }) public narrow?: boolean;
+
+  @internalProperty() private _sidebarEditMode = false;
 
   protected render(): TemplateResult {
     const hass = this.hass;
@@ -46,14 +58,19 @@ class HomeAssistantMain extends LitElement {
     const sidebarNarrow = this._sidebarNarrow;
 
     const disableSwipe =
-      !sidebarNarrow || NON_SWIPABLE_PANELS.indexOf(hass.panelUrl) !== -1;
+      this._sidebarEditMode ||
+      !sidebarNarrow ||
+      NON_SWIPABLE_PANELS.indexOf(hass.panelUrl) !== -1;
 
+    // Style block in render because of the mixin that is not supported
     return html`
-      <iron-media-query
-        query="(max-width: 870px)"
-        @query-matches-changed=${this._narrowChanged}
-      ></iron-media-query>
-
+      <style>
+        app-drawer {
+          --app-drawer-content-container: {
+            background-color: var(--primary-background-color, #fff);
+          }
+        }
+      </style>
       <app-drawer-layout
         fullbleed
         .forceNarrow=${sidebarNarrow}
@@ -67,13 +84,14 @@ class HomeAssistantMain extends LitElement {
           .disableSwipe=${disableSwipe}
           .swipeOpen=${!disableSwipe}
           .persistent=${!this.narrow &&
-          this.hass.dockedSidebar !== "always_hidden"}
+        this.hass.dockedSidebar !== "always_hidden"}
         >
           <ha-sidebar
             .hass=${hass}
             .narrow=${sidebarNarrow}
+            .editMode=${this._sidebarEditMode}
             .alwaysExpand=${sidebarNarrow ||
-            this.hass.dockedSidebar === "docked"}
+        this.hass.dockedSidebar === "docked"}
           ></ha-sidebar>
         </app-drawer-->
 
@@ -89,7 +107,28 @@ class HomeAssistantMain extends LitElement {
   protected firstUpdated() {
     // import(/* webpackChunkName: "ha-sidebar" */ "../components/ha-sidebar"); // IoB
 
+    this.addEventListener(
+      "hass-edit-sidebar",
+      (ev: HASSDomEvent<EditSideBarEvent>) => {
+        this._sidebarEditMode = ev.detail.editMode;
+
+        if (this._sidebarEditMode) {
+          if (this._sidebarNarrow) {
+            this.drawer.open();
+          } else {
+            fireEvent(this, "hass-dock-sidebar", {
+              dock: "docked",
+            });
+            setTimeout(() => this.appLayout.resetLayout());
+          }
+        }
+      }
+    );
+
     this.addEventListener("hass-toggle-menu", () => {
+      if (this._sidebarEditMode) {
+        return;
+      }
       if (this._sidebarNarrow) {
         if (this.drawer.opened) {
           this.drawer.close();
@@ -108,6 +147,10 @@ class HomeAssistantMain extends LitElement {
       showNotificationDrawer(this, {
         narrow: this.narrow!,
       });
+    });
+
+    listenMediaQuery("(max-width: 870px)", (matches) => {
+      this.narrow = matches;
     });
   }
 
@@ -132,10 +175,6 @@ class HomeAssistantMain extends LitElement {
     }
   }
 
-  private _narrowChanged(ev: PolymerChangedEvent<boolean>) {
-    this.narrow = ev.detail.value;
-  }
-
   private get _sidebarNarrow() {
     return this.narrow || this.hass.dockedSidebar === "always_hidden";
   }
@@ -157,18 +196,19 @@ class HomeAssistantMain extends LitElement {
         --app-drawer-width: 64px;
       }
       :host([expanded]) {
-        --app-drawer-width: 256px;
+        --app-drawer-width: calc(256px + env(safe-area-inset-left));
       }
       partial-panel-resolver,
       ha-sidebar {
         /* allow a light tap highlight on the actual interface elements  */
         -webkit-tap-highlight-color: rgba(0, 0, 0, 0.1);
       }
-      partial-panel-resolver {
-        height: 100%;
-      }
     `;
   }
 }
 
-customElements.define("home-assistant-main", HomeAssistantMain);
+declare global {
+  interface HTMLElementTagNameMap {
+    "home-assistant-main": HomeAssistantMain;
+  }
+}
