@@ -77,6 +77,7 @@ class HuiWeatherEntityRow extends LitElement implements LovelaceRow {
     const weatherStateIcon = getWeatherStateIcon(
       stateObj.state,
       this,
+      false,
       this.hass.auth.accessToken
     );
 
