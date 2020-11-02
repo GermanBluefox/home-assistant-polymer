@@ -142,7 +142,8 @@ export class MoreInfoDialog extends LitElement {
             <div slot="title" class="main-title" @click=${this._enlarge}>
               ${computeStateName(stateObj)}
             </div>
-            ${this.hass.user!.is_admin
+            <!-- entity settings in more_info deactivated for IoB -->
+            ${false && this.hass.user!.is_admin
               ? html`
                   <mwc-icon-button
                     slot="actionItems"
