@@ -98,9 +98,6 @@
                 "tabs": {
                     "mqtt": {
                         "title": "MQTT"
-                    },
-                    "states": {
-                        "copied": "копирано у међуспремник"
                     }
                 }
             },
