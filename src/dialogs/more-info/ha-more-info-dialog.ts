@@ -39,8 +39,9 @@ import "./ha-more-info-history";
 import "./ha-more-info-logbook";
 import "./controls/more-info-default";
 import { CONTINUOUS_DOMAINS } from "../../data/logbook";
+import { weatherStateIsImage } from "../../data/weather"; // IoB
 
-const DOMAINS_NO_INFO = ["camera", "configurator"];
+const DOMAINS_NO_INFO = ["camera", "configurator", "weather"]; // IoB added weather, because state is URL which would be printed here. So leave it out.
 /**
  * Entity domains that should be editable *if* they have an id present;
  * {@see shouldShowEditIcon}.
@@ -269,9 +270,17 @@ export class MoreInfoDialog extends LitElement {
   }
 
   private _computeShowHistoryComponent(entityId) {
+    // IoB prevent history for weahter:
+    const domain = computeDomain(entityId);
+    if (domain === "weather") {
+      const stateObj = this.hass.states[entityId];
+      if (stateObj && weatherStateIsImage(stateObj.state)) {
+        return false;
+      }
+    }
     return (
       isComponentLoaded(this.hass, "history") &&
-      !DOMAINS_MORE_INFO_NO_HISTORY.includes(computeDomain(entityId))
+      !DOMAINS_MORE_INFO_NO_HISTORY.includes(domain)
     );
   }
 

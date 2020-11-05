@@ -26,6 +26,7 @@ import {
   getWind,
   weatherAttrIcons,
   weatherSVGStyles,
+  weatherStateIsImage, // IoB
 } from "../../../data/weather";
 import type { HomeAssistant, WeatherEntity } from "../../../types";
 import { actionHandler } from "../common/directives/action-handler-directive";
@@ -190,9 +191,7 @@ class HuiWeatherForecastCard extends LitElement implements LovelaceCard {
       this.hass.auth.accessToken // IoB weather icon with auth
     );
     // IoB weather icon.
-    const isImage = !!stateObj.state
-      .toString()
-      .match(/\.png|\.svg|\.jpg|\.jpeg/i);
+    const isImage = weatherStateIsImage(stateObj.state);
 
     return html`
       <ha-card
@@ -213,6 +212,7 @@ class HuiWeatherForecastCard extends LitElement implements LovelaceCard {
           <div class="info">
             <div class="name-state">
               <div class="state">
+                <!-- IoB print name instead of state which is an URL -->
                 ${isImage
                   ? this._config.name || computeStateName(stateObj)
                   : computeStateDisplay(
@@ -222,6 +222,7 @@ class HuiWeatherForecastCard extends LitElement implements LovelaceCard {
                     )}
               </div>
               <div class="name">
+                <!-- IoB name is already printed once -->
                 ${isImage
                   ? ""
                   : this._config.name || computeStateName(stateObj)}

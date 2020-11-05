@@ -386,6 +386,12 @@ const getWeatherStateSVG = (
   </svg>`;
 };
 
+// IoB
+export const weatherStateIsImage = (state: string): boolean => {
+  const imageRexExt = /.+\.png|\.svg|\.jpg|\.jpeg/i;
+  return imageRexExt.test(state);
+};
+
 export const getWeatherStateIcon = (
   state: string,
   element: HTMLElement,
@@ -407,7 +413,7 @@ export const getWeatherStateIcon = (
   }
 
   // IoB weather icon
-  if (state.toString().match(/\.png|\.svg|\.jpg|\.jpeg/i)) {
+  if (weatherStateIsImage(state)) {
     let imgUrl = state.toString();
     if (imgUrl.startsWith("/adapter")) {
       // make sure we do not send token to 3rd parties!
@@ -415,7 +421,10 @@ export const getWeatherStateIcon = (
     }
     return html`
       <div
-        style="background-size: cover; 
+        style="
+            min-width: 32px;
+            min-height: 32px;
+            background-size: cover; 
                background-image: url(${imgUrl});"
       ></div>
     `;

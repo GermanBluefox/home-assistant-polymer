@@ -11,7 +11,12 @@ import {
 import { html, TemplateResult } from "lit-html";
 import { HomeAssistant } from "../../../types";
 
-import { getWind, getWeatherUnit } from "../../../data/weather";
+import {
+  getWind,
+  getWeatherUnit,
+  getWeatherStateIcon,
+  weatherStateIsImage,
+} from "../../../data/weather"; //IoB
 
 import {
   mdiAlertCircleOutline,
@@ -80,6 +85,9 @@ class MoreInfoWeather extends LitElement {
     if (!this.hass || !this.stateObj) {
       return html``;
     }
+
+    // for IoB weather icon.
+    const isImage = weatherStateIsImage(this.stateObj.state);
 
     return html`
       <div class="flex">
@@ -156,12 +164,27 @@ class MoreInfoWeather extends LitElement {
             ${this.stateObj.attributes.forecast.map((item) => {
               return html`
                 <div class="flex">
+                  <!-- // IoB weather icon from URL - change below in ha-svg-icon is IoB, too. -->
                   ${item.condition
-                    ? html`
-                        <ha-svg-icon
-                          .path="${weatherIcons[item.condition]}"
-                        ></ha-svg-icon>
-                      `
+                    ? isImage
+                      ? html`
+                          <div
+                            class="icon-image"
+                            style="min-width: 32px; min-height: 32px;"
+                          >
+                            ${getWeatherStateIcon(
+                              item.condition,
+                              this,
+                              false,
+                              this.hass.auth.accessToken
+                            )}
+                          </div>
+                        `
+                      : html`
+                          <ha-svg-icon
+                            .path="${weatherIcons[item.condition]}"
+                          ></ha-svg-icon>
+                        `
                     : ""}
                   ${!this._showValue(item.templow)
                     ? html`
