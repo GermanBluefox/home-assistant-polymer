@@ -186,6 +186,7 @@ class HuiWeatherForecastCard extends LitElement implements LovelaceCard {
     const weatherStateIcon = getWeatherStateIcon(
       stateObj.state,
       this,
+      false,
       this.hass.auth.accessToken // IoB weather icon with auth
     );
     // IoB weather icon.
@@ -313,7 +314,7 @@ class HuiWeatherForecastCard extends LitElement implements LovelaceCard {
                                 item.condition,
                                 this,
                                 !(item.daytime || item.daytime === undefined),
-                                this.hass.auth.accessToken // IoB - weather icon with auth
+                                this.hass!.auth.accessToken // IoB - weather icon with auth
                               )}
                             </div>
                           `
