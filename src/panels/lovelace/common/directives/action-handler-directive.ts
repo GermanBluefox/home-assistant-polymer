@@ -1,10 +1,12 @@
-import { directive, PropertyPart } from "lit-html";
 import "@material/mwc-ripple";
-import {
-  ActionHandlerOptions,
-  ActionHandlerDetail,
-} from "../../../../data/lovelace";
+import type { Ripple } from "@material/mwc-ripple";
+import { directive, PropertyPart } from "lit-html";
 import { fireEvent } from "../../../../common/dom/fire_event";
+import { deepEqual } from "../../../../common/util/deep-equal";
+import {
+  ActionHandlerDetail,
+  ActionHandlerOptions,
+} from "../../../../data/lovelace";
 
 const isTouch =
   "ontouchstart" in window ||
@@ -16,32 +18,39 @@ interface ActionHandler extends HTMLElement {
   bind(element: Element, options): void;
 }
 interface ActionHandlerElement extends HTMLElement {
-  actionHandler?: boolean;
+  actionHandler?: {
+    options: ActionHandlerOptions;
+    start?: (ev: Event) => void;
+    end?: (ev: Event) => void;
+    handleEnter?: (ev: KeyboardEvent) => void;
+  };
 }
 
 declare global {
+  interface HTMLElementTagNameMap {
+    "action-handler": ActionHandler;
+  }
   interface HASSDomEvents {
     action: ActionHandlerDetail;
   }
 }
 
 class ActionHandler extends HTMLElement implements ActionHandler {
-  public holdTime: number;
-  public ripple: any;
-  protected timer: number | undefined;
-  protected held: boolean;
-  protected cooldownStart: boolean;
-  protected cooldownEnd: boolean;
-  private dblClickTimeout: number | undefined;
+  public holdTime = 500;
+
+  public ripple: Ripple;
+
+  protected timer?: number;
+
+  protected held = false;
+
+  private cancelled = false;
+
+  private dblClickTimeout?: number;
 
   constructor() {
     super();
-    this.holdTime = 500;
     this.ripple = document.createElement("mwc-ripple");
-    this.timer = undefined;
-    this.held = false;
-    this.cooldownStart = false;
-    this.cooldownEnd = false;
   }
 
   public connectedCallback() {
@@ -51,6 +60,7 @@ class ActionHandler extends HTMLElement implements ActionHandler {
       height: isTouch ? "100px" : "50px",
       transform: "translate(-50%, -50%)",
       pointerEvents: "none",
+      zIndex: "999",
     });
 
     this.appendChild(this.ripple);
@@ -68,39 +78,58 @@ class ActionHandler extends HTMLElement implements ActionHandler {
       document.addEventListener(
         ev,
         () => {
-          clearTimeout(this.timer);
-          this.stopAnimation();
-          this.timer = undefined;
+          this.cancelled = true;
+          if (this.timer) {
+            this.stopAnimation();
+            clearTimeout(this.timer);
+            this.timer = undefined;
+          }
         },
         { passive: true }
       );
     });
   }
 
-  public bind(element: ActionHandlerElement, options) {
-    if (element.actionHandler) {
+  public bind(element: ActionHandlerElement, options: ActionHandlerOptions) {
+    if (
+      element.actionHandler &&
+      deepEqual(options, element.actionHandler.options)
+    ) {
       return;
     }
-    element.actionHandler = true;
 
-    element.addEventListener("contextmenu", (ev: Event) => {
-      const e = ev || window.event;
-      if (e.preventDefault) {
-        e.preventDefault();
-      }
-      if (e.stopPropagation) {
-        e.stopPropagation();
-      }
-      e.cancelBubble = true;
-      e.returnValue = false;
-      return false;
-    });
+    if (element.actionHandler) {
+      element.removeEventListener("touchstart", element.actionHandler.start!);
+      element.removeEventListener("touchend", element.actionHandler.end!);
+      element.removeEventListener("touchcancel", element.actionHandler.end!);
 
-    const clickStart = (ev: Event) => {
-      if (this.cooldownStart) {
-        return;
-      }
-      this.held = false;
+      element.removeEventListener("mousedown", element.actionHandler.start!);
+      element.removeEventListener("click", element.actionHandler.end!);
+
+      element.removeEventListener("keyup", element.actionHandler.handleEnter!);
+    } else {
+      element.addEventListener("contextmenu", (ev: Event) => {
+        const e = ev || window.event;
+        if (e.preventDefault) {
+          e.preventDefault();
+        }
+        if (e.stopPropagation) {
+          e.stopPropagation();
+        }
+        e.cancelBubble = true;
+        e.returnValue = false;
+        return false;
+      });
+    }
+
+    element.actionHandler = { options };
+
+    if (options.disabled) {
+      return;
+    }
+
+    element.actionHandler.start = (ev: Event) => {
+      this.cancelled = false;
       let x;
       let y;
       if ((ev as TouchEvent).touches) {
@@ -111,64 +140,70 @@ class ActionHandler extends HTMLElement implements ActionHandler {
         y = (ev as MouseEvent).pageY;
       }
 
-      this.timer = window.setTimeout(() => {
-        this.startAnimation(x, y);
-        this.held = true;
-      }, this.holdTime);
-
-      this.cooldownStart = true;
-      window.setTimeout(() => (this.cooldownStart = false), 100);
+      if (options.hasHold) {
+        this.held = false;
+        this.timer = window.setTimeout(() => {
+          this.startAnimation(x, y);
+          this.held = true;
+        }, this.holdTime);
+      }
     };
 
-    const clickEnd = (ev: Event) => {
-      if (
-        this.cooldownEnd ||
-        (["touchend", "touchcancel"].includes(ev.type) &&
-          this.timer === undefined)
-      ) {
+    element.actionHandler.end = (ev: Event) => {
+      // Don't respond when moved or scrolled while touch
+      if (["touchend", "touchcancel"].includes(ev.type) && this.cancelled) {
         return;
       }
-      clearTimeout(this.timer);
-      this.stopAnimation();
-      this.timer = undefined;
-      if (this.held) {
-        fireEvent(element, "action", { action: "hold" });
+      const target = ev.target as HTMLElement;
+      // Prevent mouse event if touch event
+      if (ev.cancelable) {
+        ev.preventDefault();
+      }
+      if (options.hasHold) {
+        clearTimeout(this.timer);
+        this.stopAnimation();
+        this.timer = undefined;
+      }
+      if (options.hasHold && this.held) {
+        fireEvent(target, "action", { action: "hold" });
       } else if (options.hasDoubleClick) {
-        if ((ev as MouseEvent).detail === 1 || ev.type === "keyup") {
+        if (
+          (ev.type === "click" && (ev as MouseEvent).detail < 2) ||
+          !this.dblClickTimeout
+        ) {
           this.dblClickTimeout = window.setTimeout(() => {
-            fireEvent(element, "action", { action: "tap" });
+            this.dblClickTimeout = undefined;
+            fireEvent(target, "action", { action: "tap" });
           }, 250);
         } else {
           clearTimeout(this.dblClickTimeout);
-          fireEvent(element, "action", { action: "double_tap" });
+          this.dblClickTimeout = undefined;
+          fireEvent(target, "action", { action: "double_tap" });
         }
       } else {
-        fireEvent(element, "action", { action: "tap" });
-      }
-      this.cooldownEnd = true;
-      window.setTimeout(() => (this.cooldownEnd = false), 100);
-    };
-
-    const handleEnter = (ev: Event) => {
-      if ((ev as KeyboardEvent).keyCode === 13) {
-        return clickEnd(ev);
+        fireEvent(target, "action", { action: "tap" });
       }
     };
 
-    element.addEventListener("touchstart", clickStart, { passive: true });
-    element.addEventListener("touchend", clickEnd);
-    element.addEventListener("touchcancel", clickEnd);
-    element.addEventListener("keyup", handleEnter);
+    element.actionHandler.handleEnter = (ev: KeyboardEvent) => {
+      if (ev.keyCode !== 13) {
+        return;
+      }
+      (ev.currentTarget as ActionHandlerElement).actionHandler!.end!(ev);
+    };
 
-    // iOS 13 sends a complete normal touchstart-touchend series of events followed by a mousedown-click series.
-    // That might be a bug, but until it's fixed, this should make action-handler work.
-    // If it's not a bug that is fixed, this might need updating with the next iOS version.
-    // Note that all events (both touch and mouse) must be listened for in order to work on computers with both mouse and touchscreen.
-    const isIOS13 = /iPhone OS 13_/.test(window.navigator.userAgent);
-    if (!isIOS13) {
-      element.addEventListener("mousedown", clickStart, { passive: true });
-      element.addEventListener("click", clickEnd);
-    }
+    element.addEventListener("touchstart", element.actionHandler.start, {
+      passive: true,
+    });
+    element.addEventListener("touchend", element.actionHandler.end);
+    element.addEventListener("touchcancel", element.actionHandler.end);
+
+    element.addEventListener("mousedown", element.actionHandler.start, {
+      passive: true,
+    });
+    element.addEventListener("click", element.actionHandler.end);
+
+    element.addEventListener("keyup", element.actionHandler.handleEnter);
   }
 
   private startAnimation(x: number, y: number) {
@@ -178,12 +213,12 @@ class ActionHandler extends HTMLElement implements ActionHandler {
       display: null,
     });
     this.ripple.disabled = false;
-    this.ripple.active = true;
+    this.ripple.startPress();
     this.ripple.unbounded = true;
   }
 
   private stopAnimation() {
-    this.ripple.active = false;
+    this.ripple.endPress();
     this.ripple.disabled = true;
     this.style.display = "none";
   }

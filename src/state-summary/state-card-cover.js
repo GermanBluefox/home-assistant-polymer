@@ -1,7 +1,7 @@
 import "@polymer/iron-flex-layout/iron-flex-layout-classes";
 import { html } from "@polymer/polymer/lib/utils/html-tag";
+/* eslint-plugin-disable lit */
 import { PolymerElement } from "@polymer/polymer/polymer-element";
-
 import "../components/entity/state-info";
 import "../components/ha-cover-controls";
 import "../components/ha-cover-tilt-controls";
@@ -61,7 +61,7 @@ class StateCardCover extends PolymerElement {
   }
 
   computeEntityObj(hass, stateObj) {
-    var entity = new CoverEntity(hass, stateObj);
+    const entity = new CoverEntity(hass, stateObj);
     return entity;
   }
 }

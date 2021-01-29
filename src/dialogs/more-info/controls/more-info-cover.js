@@ -1,18 +1,16 @@
 import "@polymer/iron-flex-layout/iron-flex-layout-classes";
-import "@polymer/paper-icon-button/paper-icon-button";
 import { html } from "@polymer/polymer/lib/utils/html-tag";
+/* eslint-plugin-disable lit */
 import { PolymerElement } from "@polymer/polymer/polymer-element";
-
+import { attributeClassNames } from "../../../common/entity/attribute_class_names";
+import { featureClassNames } from "../../../common/entity/feature_class_names";
 import "../../../components/ha-cover-tilt-controls";
 import "../../../components/ha-labeled-slider";
-
-import CoverEntity from "../../../util/cover-model";
-import { featureClassNames } from "../../../common/entity/feature_class_names";
 import LocalizeMixin from "../../../mixins/localize-mixin";
-
-import { attributeClassNames } from "../../../common/entity/attribute_class_names";
+import CoverEntity from "../../../util/cover-model";
 
 const FEATURE_CLASS_NAMES = {
+  4: "has-set_position",
   128: "has-set_tilt_position",
 };
 class MoreInfoCover extends LocalizeMixin(PolymerElement) {
@@ -26,6 +24,7 @@ class MoreInfoCover extends LocalizeMixin(PolymerElement) {
           overflow: hidden;
         }
 
+        .has-set_position .current_position,
         .has-current_position .current_position,
         .has-set_tilt_position .tilt,
         .has-current_tilt_position .tilt {
@@ -98,7 +97,7 @@ class MoreInfoCover extends LocalizeMixin(PolymerElement) {
   }
 
   computeClassNames(stateObj) {
-    var classes = [
+    const classes = [
       attributeClassNames(stateObj, [
         "current_position",
         "current_tilt_position",

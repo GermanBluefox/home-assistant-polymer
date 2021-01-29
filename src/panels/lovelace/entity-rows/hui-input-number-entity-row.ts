@@ -1,29 +1,30 @@
+import "@polymer/paper-input/paper-input";
 import {
-  html,
-  LitElement,
-  TemplateResult,
-  property,
-  customElement,
   css,
   CSSResult,
+  customElement,
+  html,
+  LitElement,
+  property,
+  internalProperty,
   PropertyValues,
+  TemplateResult,
 } from "lit-element";
-
-import "../components/hui-generic-entity-row";
-import "../../../components/ha-slider";
-import "../components/hui-warning";
-
 import { computeRTLDirection } from "../../../common/util/compute_rtl";
-import { EntityRow, EntityConfig } from "./types";
-import { HomeAssistant } from "../../../types";
+import "../../../components/ha-slider";
+import { UNAVAILABLE_STATES } from "../../../data/entity";
 import { setValue } from "../../../data/input_text";
+import { HomeAssistant } from "../../../types";
 import { hasConfigOrEntityChanged } from "../common/has-changed";
+import "../components/hui-generic-entity-row";
+import { EntityConfig, LovelaceRow } from "./types";
+import { createEntityNotFoundWarning } from "../components/hui-warning";
 
 @customElement("hui-input-number-entity-row")
-class HuiInputNumberEntityRow extends LitElement implements EntityRow {
-  @property() public hass?: HomeAssistant;
+class HuiInputNumberEntityRow extends LitElement implements LovelaceRow {
+  @property({ attribute: false }) public hass?: HomeAssistant;
 
-  @property() private _config?: EntityConfig;
+  @internalProperty() private _config?: EntityConfig;
 
   private _loaded?: boolean;
 
@@ -54,7 +55,7 @@ class HuiInputNumberEntityRow extends LitElement implements EntityRow {
     return hasConfigOrEntityChanged(this, changedProps);
   }
 
-  protected render(): TemplateResult | void {
+  protected render(): TemplateResult {
     if (!this._config || !this.hass) {
       return html``;
     }
@@ -63,44 +64,42 @@ class HuiInputNumberEntityRow extends LitElement implements EntityRow {
 
     if (!stateObj) {
       return html`
-        <hui-warning
-          >${this.hass.localize(
-            "ui.panel.lovelace.warning.entity_not_found",
-            "entity",
-            this._config.entity
-          )}</hui-warning
-        >
+        <hui-warning>
+          ${createEntityNotFoundWarning(this.hass, this._config.entity)}
+        </hui-warning>
       `;
     }
 
     return html`
-      <hui-generic-entity-row .hass="${this.hass}" .config="${this._config}">
-        <div>
-          ${stateObj.attributes.mode === "slider"
-            ? html`
-                <div class="flex">
-                  <ha-slider
-                    .dir="${computeRTLDirection(this.hass!)}"
-                    .step="${Number(stateObj.attributes.step)}"
-                    .min="${Number(stateObj.attributes.min)}"
-                    .max="${Number(stateObj.attributes.max)}"
-                    .value="${Number(stateObj.state)}"
-                    pin
-                    @change="${this._selectedValueChanged}"
-                    ignore-bar-touch
-                    id="input"
-                  ></ha-slider>
-                  <span class="state">
-                    ${Number(stateObj.state)}
-                    ${stateObj.attributes.unit_of_measurement}
-                  </span>
-                </div>
-              `
-            : html`
+      <hui-generic-entity-row .hass=${this.hass} .config=${this._config}>
+        ${stateObj.attributes.mode === "slider"
+          ? html`
+              <div class="flex">
+                <ha-slider
+                  .disabled=${UNAVAILABLE_STATES.includes(stateObj.state)}
+                  .dir=${computeRTLDirection(this.hass)}
+                  .step="${Number(stateObj.attributes.step)}"
+                  .min="${Number(stateObj.attributes.min)}"
+                  .max="${Number(stateObj.attributes.max)}"
+                  .value="${Number(stateObj.state)}"
+                  pin
+                  @change="${this._selectedValueChanged}"
+                  ignore-bar-touch
+                  id="input"
+                ></ha-slider>
+                <span class="state">
+                  ${Number(stateObj.state)}
+                  ${stateObj.attributes.unit_of_measurement}
+                </span>
+              </div>
+            `
+          : html`
+              <div class="flex state">
                 <paper-input
                   no-label-float
                   auto-validate
-                  .pattern="[0-9]+([\\.][0-9]+)?"
+                  .disabled=${UNAVAILABLE_STATES.includes(stateObj.state)}
+                  pattern="[0-9]+([\\.][0-9]+)?"
                   .step="${Number(stateObj.attributes.step)}"
                   .min="${Number(stateObj.attributes.min)}"
                   .max="${Number(stateObj.attributes.max)}"
@@ -109,8 +108,9 @@ class HuiInputNumberEntityRow extends LitElement implements EntityRow {
                   @change="${this._selectedValueChanged}"
                   id="input"
                 ></paper-input>
-              `}
-        </div>
+                ${stateObj.attributes.unit_of_measurement}
+              </div>
+            `}
       </hui-generic-entity-row>
     `;
   }
@@ -120,6 +120,8 @@ class HuiInputNumberEntityRow extends LitElement implements EntityRow {
       .flex {
         display: flex;
         align-items: center;
+        justify-content: flex-end;
+        flex-grow: 2;
       }
       .state {
         min-width: 45px;
@@ -127,6 +129,10 @@ class HuiInputNumberEntityRow extends LitElement implements EntityRow {
       }
       paper-input {
         text-align: end;
+      }
+      ha-slider {
+        width: 100%;
+        max-width: 200px;
       }
     `;
   }

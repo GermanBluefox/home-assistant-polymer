@@ -1,17 +1,16 @@
 import {
+  css,
+  CSSResult,
+  customElement,
   html,
   LitElement,
   TemplateResult,
-  customElement,
-  css,
-  CSSResult,
 } from "lit-element";
-
 import "../../components/ha-card";
 
 @customElement("notification-item-template")
 export class HuiNotificationItemTemplate extends LitElement {
-  protected render(): TemplateResult | void {
+  protected render(): TemplateResult {
     return html`
       <ha-card>
         <div class="header"><slot name="header"></slot></div>

@@ -1,26 +1,28 @@
 import "@polymer/paper-input/paper-input";
-import "../../../../../components/ha-yaml-editor";
-
-import { LitElement, property, customElement } from "lit-element";
-import {
-  TriggerElement,
-  handleChangeEvent,
-} from "../ha-automation-trigger-row";
-import { HomeAssistant } from "../../../../../types";
+import { customElement, LitElement, property } from "lit-element";
 import { html } from "lit-html";
+import "../../../../../components/ha-yaml-editor";
+import { fireEvent } from "../../../../../common/dom/fire_event";
 import { EventTrigger } from "../../../../../data/automation";
+import { HomeAssistant } from "../../../../../types";
+import {
+  handleChangeEvent,
+  TriggerElement,
+} from "../ha-automation-trigger-row";
+import "../../../../../components/user/ha-users-picker";
 
 @customElement("ha-automation-trigger-event")
 export class HaEventTrigger extends LitElement implements TriggerElement {
-  @property() public hass!: HomeAssistant;
+  @property({ attribute: false }) public hass!: HomeAssistant;
+
   @property() public trigger!: EventTrigger;
 
   public static get defaultConfig() {
-    return { event_type: "", event_data: {} };
+    return { event_type: "" };
   }
 
-  public render() {
-    const { event_type, event_data } = this.trigger;
+  protected render() {
+    const { event_type, event_data, context } = this.trigger;
     return html`
       <paper-input
         .label=${this.hass.localize(
@@ -35,14 +37,64 @@ export class HaEventTrigger extends LitElement implements TriggerElement {
           "ui.panel.config.automation.editor.triggers.type.event.event_data"
         )}
         .name=${"event_data"}
-        .value=${event_data}
-        @value-changed=${this._valueChanged}
+        .defaultValue=${event_data}
+        @value-changed=${this._dataChanged}
       ></ha-yaml-editor>
+      <br />
+      ${this.hass.localize(
+        "ui.panel.config.automation.editor.triggers.type.event.context_users"
+      )}
+      <ha-users-picker
+        .pickedUserLabel=${this.hass.localize(
+          "ui.panel.config.automation.editor.triggers.type.event.context_user_picked"
+        )}
+        .pickUserLabel=${this.hass.localize(
+          "ui.panel.config.automation.editor.triggers.type.event.context_user_pick"
+        )}
+        .hass=${this.hass}
+        .value=${this._wrapUsersInArray(context?.user_id)}
+        @value-changed=${this._usersChanged}
+      ></ha-users-picker>
     `;
   }
 
+  private _wrapUsersInArray(user_id: string | string[] | undefined): string[] {
+    if (!user_id) {
+      return [];
+    }
+    if (typeof user_id === "string") {
+      return [user_id];
+    }
+    return user_id;
+  }
+
   private _valueChanged(ev: CustomEvent): void {
+    ev.stopPropagation();
     handleChangeEvent(this, ev);
+  }
+
+  private _dataChanged(ev: CustomEvent): void {
+    ev.stopPropagation();
+    if (!ev.detail.isValid) {
+      return;
+    }
+    handleChangeEvent(this, ev);
+  }
+
+  private _usersChanged(ev) {
+    ev.stopPropagation();
+    const value = { ...this.trigger };
+    if (!ev.detail.value.length && value.context) {
+      delete value.context.user_id;
+    } else {
+      if (!value.context) {
+        value.context = {};
+      }
+      value.context.user_id = ev.detail.value;
+    }
+    fireEvent(this, "value-changed", {
+      value,
+    });
   }
 }
 

@@ -1,17 +1,17 @@
+/* eslint-disable no-undef, no-console */
+import {
+  CastStateEventData,
+  SessionStateEventData,
+} from "chromecast-caf-receiver/cast.framework";
+import { Auth } from "home-assistant-js-websocket";
 import { castApiAvailable } from "./cast_framework";
-import { CAST_APP_ID, CAST_NS, CAST_DEV } from "./const";
+import { CAST_APP_ID, CAST_DEV, CAST_NS } from "./const";
 import { CAST_DEV_HASS_URL } from "./dev_const";
 import {
   castSendAuth,
   HassMessage as ReceiverMessage,
 } from "./receiver_messages";
-import {
-  SessionStateEventData,
-  CastStateEventData,
-  // tslint:disable-next-line: no-implicit-dependencies
-} from "chromecast-caf-receiver/cast.framework";
-import { SenderMessage, ReceiverStatusMessage } from "./sender_messages";
-import { Auth } from "home-assistant-js-websocket";
+import { ReceiverStatusMessage, SenderMessage } from "./sender_messages";
 
 let managerProm: Promise<CastManager> | undefined;
 
@@ -29,14 +29,14 @@ a user presses the cast button we send auth if not connected yet, then send
 command as usual.
 */
 
-/* tslint:disable:no-console */
-
 type CastEvent = "connection-changed" | "state-changed";
 
 export class CastManager {
   public auth?: Auth;
+
   // If the cast connection is connected to our Hass.
   public status?: ReceiverStatusMessage;
+
   private _eventListeners: { [event: string]: CastEventListener[] } = {};
 
   constructor(auth?: Auth) {
@@ -44,7 +44,6 @@ export class CastManager {
     const context = this.castContext;
     context.setOptions({
       receiverApplicationId: CAST_APP_ID,
-      // @ts-ignore
       autoJoinPolicy: chrome.cast.AutoJoinPolicy.ORIGIN_SCOPED,
     });
     context.addEventListener(
@@ -92,6 +91,7 @@ export class CastManager {
   }
 
   public get castContext() {
+    // @ts-ignore
     return cast.framework.CastContext.getInstance();
   }
 

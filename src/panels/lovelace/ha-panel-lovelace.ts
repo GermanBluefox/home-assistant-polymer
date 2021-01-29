@@ -1,151 +1,66 @@
 import "@material/mwc-button";
-
+import deepFreeze from "deep-freeze";
 import {
+  html,
+  LitElement,
+  property,
+  internalProperty,
+  TemplateResult,
+} from "lit-element";
+import { domainToName } from "../../data/integration";
+import {
+  deleteConfig,
   fetchConfig,
+  fetchResources,
   LovelaceConfig,
   saveConfig,
   subscribeLovelaceUpdates,
   WindowWithLovelaceProm,
-  deleteConfig,
 } from "../../data/lovelace";
-import "../../layouts/hass-loading-screen";
 import "../../layouts/hass-error-screen";
-import "./hui-root";
+import "../../layouts/hass-loading-screen";
 import { HomeAssistant, PanelInfo, Route } from "../../types";
-import { Lovelace } from "./types";
-import {
-  LitElement,
-  html,
-  PropertyValues,
-  TemplateResult,
-  property,
-} from "lit-element";
-import { showSaveDialog } from "./editor/show-save-config-dialog";
-import { generateLovelaceConfigFromHass } from "./common/generate-lovelace-config";
 import { showToast } from "../../util/toast";
+import { generateLovelaceConfigFromHass } from "./common/generate-lovelace-config";
+import { loadLovelaceResources } from "./common/load-resources";
+import { showSaveDialog } from "./editor/show-save-config-dialog";
+import "./hui-root";
+import { Lovelace } from "./types";
+
+(window as any).loadCardHelpers = () => import("./custom-card-helpers");
 
 interface LovelacePanelConfig {
   mode: "yaml" | "storage";
 }
 
 let editorLoaded = false;
+let resourcesLoaded = false;
 
 class LovelacePanel extends LitElement {
   @property() public panel?: PanelInfo<LovelacePanelConfig>;
 
-  @property() public hass?: HomeAssistant;
+  @property({ attribute: false }) public hass?: HomeAssistant;
 
   @property() public narrow?: boolean;
 
   @property() public route?: Route;
 
-  @property() private _columns?: number;
-
   @property()
   private _state?: "loading" | "loaded" | "error" | "yaml-editor" = "loading";
 
-  @property() private _errorMsg?: string;
+  @internalProperty() private _errorMsg?: string;
 
-  @property() private lovelace?: Lovelace;
-
-  private mqls?: MediaQueryList[];
+  @internalProperty() private lovelace?: Lovelace;
 
   private _ignoreNextUpdateEvent = false;
+
   private _fetchConfigOnConnect = false;
+
+  private _unsubUpdates?;
 
   constructor() {
     super();
     this._closeEditor = this._closeEditor.bind(this);
-  }
-
-  public render(): TemplateResult | void {
-    const state = this._state!;
-
-    if (state === "loaded") {
-      return html`
-        <hui-root
-          .hass="${this.hass}"
-          .lovelace="${this.lovelace}"
-          .route="${this.route}"
-          .columns="${this._columns}"
-          .narrow=${this.narrow}
-          @config-refresh="${this._forceFetchConfig}"
-        ></hui-root>
-      `;
-    }
-
-    if (state === "error") {
-      return html`
-        <hass-error-screen
-          title="${this.hass!.localize("domain.lovelace")}"
-          .error="${this._errorMsg}"
-        >
-          <mwc-button on-click="_forceFetchConfig"
-            >${this.hass!.localize(
-              "ui.panel.lovelace.reload_lovelace"
-            )}</mwc-button
-          >
-        </hass-error-screen>
-      `;
-    }
-
-    if (state === "yaml-editor") {
-      return html`
-        <hui-editor
-          .hass="${this.hass}"
-          .lovelace="${this.lovelace}"
-          .closeEditor="${this._closeEditor}"
-        ></hui-editor>
-      `;
-    }
-
-    return html`
-      <hass-loading-screen
-        rootnav
-        .hass=${this.hass}
-        .narrow=${this.narrow}
-      ></hass-loading-screen>
-    `;
-  }
-
-  public updated(changedProps: PropertyValues): void {
-    super.updated(changedProps);
-
-    if (changedProps.has("narrow")) {
-      this._updateColumns();
-      return;
-    }
-
-    if (!changedProps.has("hass")) {
-      return;
-    }
-
-    const oldHass = changedProps.get("hass") as this["hass"];
-
-    if (oldHass && this.hass!.dockedSidebar !== oldHass.dockedSidebar) {
-      this._updateColumns();
-    }
-  }
-
-  public firstUpdated() {
-    this._fetchConfig(false);
-    // we don't want to unsub as we want to stay informed of updates
-    subscribeLovelaceUpdates(this.hass!.connection, () =>
-      this._lovelaceChanged()
-    );
-    // reload lovelace on reconnect so we are sure we have the latest config
-    window.addEventListener("connection-status", (ev) => {
-      if (ev.detail === "connected") {
-        this._fetchConfig(false);
-      }
-    });
-    this._updateColumns = this._updateColumns.bind(this);
-    this.mqls = [300, 600, 900, 1200].map((width) => {
-      const mql = matchMedia(`(min-width: ${width}px)`);
-      mql.addListener(this._updateColumns);
-      return mql;
-    });
-    this._updateColumns();
   }
 
   public connectedCallback(): void {
@@ -168,27 +83,90 @@ class LovelacePanel extends LitElement {
     }
   }
 
+  public disconnectedCallback(): void {
+    super.disconnectedCallback();
+    // On the main dashboard we want to stay subscribed as that one is cached.
+    if (this.urlPath !== null && this._unsubUpdates) {
+      this._unsubUpdates();
+    }
+  }
+
+  protected render(): TemplateResult | void {
+    const state = this._state!;
+
+    if (state === "loaded") {
+      return html`
+        <hui-root
+          .hass=${this.hass}
+          .lovelace=${this.lovelace}
+          .route=${this.route}
+          .narrow=${this.narrow}
+          @config-refresh=${this._forceFetchConfig}
+        ></hui-root>
+      `;
+    }
+
+    if (state === "error") {
+      return html`
+        <hass-error-screen
+          title="${domainToName(this.hass!.localize, "lovelace")}"
+          .error="${this._errorMsg}"
+        >
+          <mwc-button raised @click=${this._forceFetchConfig}>
+            ${this.hass!.localize("ui.panel.lovelace.reload_lovelace")}
+          </mwc-button>
+        </hass-error-screen>
+      `;
+    }
+
+    if (state === "yaml-editor") {
+      return html`
+        <hui-editor
+          .hass=${this.hass}
+          .lovelace="${this.lovelace}"
+          .closeEditor="${this._closeEditor}"
+        ></hui-editor>
+      `;
+    }
+
+    return html`
+      <hass-loading-screen
+        rootnav
+        .hass=${this.hass}
+        .narrow=${this.narrow}
+      ></hass-loading-screen>
+    `;
+  }
+
+  protected firstUpdated() {
+    this._fetchConfig(false);
+    if (!this._unsubUpdates) {
+      this._subscribeUpdates();
+    }
+    // reload lovelace on reconnect so we are sure we have the latest config
+    window.addEventListener("connection-status", (ev) => {
+      if (ev.detail === "connected") {
+        this._fetchConfig(false);
+      }
+    });
+  }
+
   private async _regenerateConfig() {
     const conf = await generateLovelaceConfigFromHass(this.hass!);
     this._setLovelaceConfig(conf, "generated");
     this._state = "loaded";
   }
 
-  private _closeEditor() {
-    this._state = "loaded";
+  private async _subscribeUpdates() {
+    this._unsubUpdates = await subscribeLovelaceUpdates(
+      this.hass!.connection,
+      this.urlPath,
+      () => this._lovelaceChanged()
+    );
   }
 
-  private _updateColumns() {
-    const matchColumns = this.mqls!.reduce(
-      (cols, mql) => cols + Number(mql.matches),
-      0
-    );
-    // Do -1 column if the menu is docked and open
-    this._columns = Math.max(
-      1,
-      matchColumns -
-        Number(!this.narrow && this.hass!.dockedSidebar === "docked")
-    );
+  private _closeEditor() {
+    this._state = "loaded";
   }
 
   private _lovelaceChanged() {
@@ -197,7 +175,7 @@ class LovelacePanel extends LitElement {
       return;
     }
     if (!this.isConnected) {
-      // We can't fire events from an element that is connected
+      // We can't fire events from an element that is not connected
       // Make sure we fetch the config as soon as the user goes back to Lovelace
       this._fetchConfigOnConnect = true;
       return;
@@ -213,6 +191,10 @@ class LovelacePanel extends LitElement {
     });
   }
 
+  public get urlPath() {
+    return this.panel!.url_path === "lovelace" ? null : this.panel!.url_path;
+  }
+
   private _forceFetchConfig() {
     this._fetchConfig(true);
   }
@@ -220,35 +202,50 @@ class LovelacePanel extends LitElement {
   private async _fetchConfig(forceDiskRefresh: boolean) {
     let conf: LovelaceConfig;
     let confMode: Lovelace["mode"] = this.panel!.config.mode;
-    let confProm: Promise<LovelaceConfig>;
+    let confProm: Promise<LovelaceConfig> | undefined;
     const llWindow = window as WindowWithLovelaceProm;
 
     // On first load, we speed up loading page by having LL promise ready
     if (llWindow.llConfProm) {
       confProm = llWindow.llConfProm;
       llWindow.llConfProm = undefined;
-    } else {
+    }
+    if (!resourcesLoaded) {
+      resourcesLoaded = true;
+      (
+        llWindow.llConfProm || fetchResources(this.hass!.connection)
+      ).then((resources) =>
+        loadLovelaceResources(resources, this.hass!.auth.data.hassUrl)
+      );
+    }
+
+    if (this.urlPath !== null || !confProm) {
       // Refreshing a YAML config can trigger an update event. We will ignore
-      // all update events while fetching the config and for 2 seconds after the cnofig is back.
+      // all update events while fetching the config and for 2 seconds after the config is back.
       // We ignore because we already have the latest config.
       if (this.lovelace && this.lovelace.mode === "yaml") {
         this._ignoreNextUpdateEvent = true;
       }
 
-      confProm = fetchConfig(this.hass!.connection, forceDiskRefresh);
+      confProm = fetchConfig(
+        this.hass!.connection,
+        this.urlPath,
+        forceDiskRefresh
+      );
     }
 
     try {
-      conf = await confProm;
+      conf = await confProm!;
     } catch (err) {
       if (err.code !== "config_not_found") {
-        // tslint:disable-next-line
+        // eslint-disable-next-line
         console.log(err);
         this._state = "error";
         this._errorMsg = err.message;
         return;
       }
-      conf = await generateLovelaceConfigFromHass(this.hass!);
+      const localize = await this.hass!.loadBackendTranslation("title");
+      conf = await generateLovelaceConfigFromHass(this.hass!, localize);
       confMode = "generated";
     } finally {
       // Ignore updates for another 2 seconds.
@@ -265,18 +262,27 @@ class LovelacePanel extends LitElement {
 
   private _checkLovelaceConfig(config: LovelaceConfig) {
     // Somehow there can be badges with value null, we remove those
-    config.views.forEach((view) => {
-      if (view.badges) {
-        view.badges = view.badges.filter(Boolean);
+    let checkedConfig = !Object.isFrozen(config) ? config : undefined;
+    config.views.forEach((view, index) => {
+      if (view.badges && !view.badges.every(Boolean)) {
+        checkedConfig = checkedConfig || {
+          ...config,
+          views: [...config.views],
+        };
+        checkedConfig.views[index] = { ...view };
+        checkedConfig.views[index].badges = view.badges.filter(Boolean);
       }
     });
+    return checkedConfig ? deepFreeze(checkedConfig) : config;
   }
 
   private _setLovelaceConfig(config: LovelaceConfig, mode: Lovelace["mode"]) {
-    this._checkLovelaceConfig(config);
+    config = this._checkLovelaceConfig(config);
+    const urlPath = this.urlPath;
     this.lovelace = {
       config,
       mode,
+      urlPath: this.urlPath,
       editMode: this.lovelace ? this.lovelace.editMode : false,
       language: this.hass!.language,
       enableFullEditMode: () => {
@@ -293,11 +299,12 @@ class LovelacePanel extends LitElement {
         }
         showSaveDialog(this, {
           lovelace: this.lovelace!,
+          mode: this.panel!.config.mode,
         });
       },
       saveConfig: async (newConfig: LovelaceConfig): Promise<void> => {
         const { config: previousConfig, mode: previousMode } = this.lovelace!;
-        this._checkLovelaceConfig(newConfig);
+        newConfig = this._checkLovelaceConfig(newConfig);
         try {
           // Optimistic update
           this._updateLovelace({
@@ -305,9 +312,9 @@ class LovelacePanel extends LitElement {
             mode: "storage",
           });
           this._ignoreNextUpdateEvent = true;
-          await saveConfig(this.hass!, newConfig);
+          await saveConfig(this.hass!, urlPath, newConfig);
         } catch (err) {
-          // tslint:disable-next-line
+          // eslint-disable-next-line
           console.error(err);
           // Rollback the optimistic update
           this._updateLovelace({
@@ -321,15 +328,16 @@ class LovelacePanel extends LitElement {
         const { config: previousConfig, mode: previousMode } = this.lovelace!;
         try {
           // Optimistic update
+          const localize = await this.hass!.loadBackendTranslation("title");
           this._updateLovelace({
-            config: await generateLovelaceConfigFromHass(this.hass!),
+            config: await generateLovelaceConfigFromHass(this.hass!, localize),
             mode: "generated",
             editMode: false,
           });
           this._ignoreNextUpdateEvent = true;
-          await deleteConfig(this.hass!);
+          await deleteConfig(this.hass!, urlPath);
         } catch (err) {
-          // tslint:disable-next-line
+          // eslint-disable-next-line
           console.error(err);
           // Rollback the optimistic update
           this._updateLovelace({

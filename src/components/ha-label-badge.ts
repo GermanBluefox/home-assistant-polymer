@@ -1,23 +1,27 @@
 import {
+  css,
+  CSSResult,
   html,
   LitElement,
+  property,
   PropertyValues,
   TemplateResult,
-  CSSResult,
-  css,
-  property,
 } from "lit-element";
 import { classMap } from "lit-html/directives/class-map";
 import "./ha-icon";
 
 class HaLabelBadge extends LitElement {
   @property() public value?: string;
+
   @property() public icon?: string;
+
   @property() public label?: string;
+
   @property() public description?: string;
+
   @property() public image?: string;
 
-  protected render(): TemplateResult | void {
+  protected render(): TemplateResult {
     return html`
       <div class="badge-container">
         <div class="label-badge" id="badge">
@@ -27,16 +31,14 @@ class HaLabelBadge extends LitElement {
               big: Boolean(this.value && this.value.length > 4),
             })}"
           >
-            ${this.icon && !this.value && !this.image
-              ? html`
-                  <ha-icon .icon="${this.icon}"></ha-icon>
-                `
-              : ""}
-            ${this.value && !this.image
-              ? html`
-                  <span>${this.value}</span>
-                `
-              : ""}
+            <slot>
+              ${this.icon && !this.value && !this.image
+                ? html` <ha-icon .icon=${this.icon}></ha-icon> `
+                : ""}
+              ${this.value && !this.image
+                ? html` <span>${this.value}</span> `
+                : ""}
+            </slot>
           </div>
           ${this.label
             ? html`
@@ -52,9 +54,7 @@ class HaLabelBadge extends LitElement {
             : ""}
         </div>
         ${this.description
-          ? html`
-              <div class="title">${this.description}</div>
-            `
+          ? html` <div class="title">${this.description}</div> `
           : ""}
       </div>
     `;
@@ -67,6 +67,7 @@ class HaLabelBadge extends LitElement {
           display: inline-block;
           text-align: center;
           vertical-align: top;
+          padding: var(--ha-label-badge-padding, 0 0 0 0);
         }
         .label-badge {
           position: relative;

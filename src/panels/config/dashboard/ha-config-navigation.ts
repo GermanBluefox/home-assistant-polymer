@@ -1,85 +1,84 @@
-import "@polymer/iron-icon/iron-icon";
+import "@polymer/paper-item/paper-icon-item";
 import "@polymer/paper-item/paper-item-body";
-import "@polymer/paper-item/paper-item";
-
+import {
+  css,
+  CSSResult,
+  customElement,
+  html,
+  LitElement,
+  property,
+  TemplateResult,
+} from "lit-element";
 import { isComponentLoaded } from "../../../common/config/is_component_loaded";
-
 import "../../../components/ha-card";
 import "../../../components/ha-icon-next";
-import {
-  LitElement,
-  html,
-  TemplateResult,
-  property,
-  customElement,
-  CSSResult,
-  css,
-} from "lit-element";
-import { HomeAssistant } from "../../../types";
 import { CloudStatus, CloudStatusLoggedIn } from "../../../data/cloud";
-
-export interface ConfigPageNavigation {
-  page: string;
-  core?: boolean;
-  advanced?: boolean;
-  info?: any;
-}
+import { PageNavigation } from "../../../layouts/hass-tabs-subpage";
+import { HomeAssistant } from "../../../types";
 
 @customElement("ha-config-navigation")
 class HaConfigNavigation extends LitElement {
-  @property() public hass!: HomeAssistant;
-  @property() public showAdvanced!: boolean;
-  @property() public pages!: ConfigPageNavigation[];
-  @property() public curPage!: string;
+  @property({ attribute: false }) public hass!: HomeAssistant;
 
-  protected render(): TemplateResult | void {
+  @property() public showAdvanced!: boolean;
+
+  @property() public pages!: PageNavigation[];
+
+  protected render(): TemplateResult {
     return html`
-      <paper-listbox attr-for-selected="data-page" .selected=${this.curPage}>
-        ${this.pages.map(({ page, core, advanced, info }) =>
-          (core || isComponentLoaded(this.hass, page)) &&
-          (!advanced || this.showAdvanced)
-            ? html`
-                <a
-                  href=${`/config/${page}`}
-                  aria-role="option"
-                  data-page="${page}"
-                  tabindex="-1"
-                >
-                  <paper-item>
-                    <paper-item-body two-line>
-                      ${this.hass.localize(`ui.panel.config.${page}.caption`)}
-                      ${page === "cloud" && (info as CloudStatus)
-                        ? info.logged_in
-                          ? html`
-                              <div secondary>
-                                ${this.hass.localize(
-                                  "ui.panel.config.cloud.description_login",
-                                  "email",
-                                  (info as CloudStatusLoggedIn).email
-                                )}
-                              </div>
-                            `
-                          : html`
-                              <div secondary>
-                                ${this.hass.localize(
-                                  "ui.panel.config.cloud.description_features"
-                                )}
-                              </div>
-                            `
+      ${this.pages.map((page) =>
+        (!page.component ||
+          page.core ||
+          isComponentLoaded(this.hass, page.component)) &&
+        (!page.advancedOnly || this.showAdvanced)
+          ? html`
+              <a
+                href=${`/config/${page.component}`}
+                aria-role="option"
+                tabindex="-1"
+              >
+                <paper-icon-item>
+                  <ha-svg-icon
+                    .path=${page.iconPath}
+                    slot="item-icon"
+                  ></ha-svg-icon>
+                  <paper-item-body two-line>
+                    ${this.hass.localize(
+                      page.translationKey ||
+                        `ui.panel.config.${page.component}.caption`
+                    )}
+                    ${page.component === "cloud" && (page.info as CloudStatus)
+                      ? page.info.logged_in
+                        ? html`
+                            <div secondary>
+                              ${this.hass.localize(
+                                "ui.panel.config.cloud.description_login",
+                                "email",
+                                (page.info as CloudStatusLoggedIn).email
+                              )}
+                            </div>
+                          `
                         : html`
                             <div secondary>
                               ${this.hass.localize(
-                                `ui.panel.config.${page}.description`
+                                "ui.panel.config.cloud.description_features"
                               )}
                             </div>
-                          `}
-                    </paper-item-body>
-                  </paper-item>
-                </a>
-              `
-            : ""
-        )}
-      </paper-listbox>
+                          `
+                      : html`
+                          <div secondary>
+                            ${this.hass.localize(
+                              `ui.panel.config.${page.component}.description`
+                            )}
+                          </div>
+                        `}
+                  </paper-item-body>
+                  <ha-icon-next></ha-icon-next>
+                </paper-icon-item>
+              </a>
+            `
+          : ""
+      )}
     `;
   }
 
@@ -88,9 +87,16 @@ class HaConfigNavigation extends LitElement {
       a {
         text-decoration: none;
         color: var(--primary-text-color);
+        position: relative;
+        display: block;
+        outline: 0;
       }
-      .iron-selected paper-item:before {
-        border-radius: 4px;
+      ha-svg-icon,
+      ha-icon-next {
+        color: var(--secondary-text-color);
+      }
+      .iron-selected paper-item::before,
+      a:not(.iron-selected):focus::before {
         position: absolute;
         top: 0;
         right: 0;
@@ -98,14 +104,16 @@ class HaConfigNavigation extends LitElement {
         left: 0;
         pointer-events: none;
         content: "";
-        background-color: var(--sidebar-selected-icon-color);
-        opacity: 0.12;
         transition: opacity 15ms linear;
         will-change: opacity;
       }
-
-      .iron-selected paper-item[pressed]:before {
-        opacity: 0.37;
+      a:not(.iron-selected):focus::before {
+        background-color: currentColor;
+        opacity: var(--dark-divider-opacity);
+      }
+      .iron-selected paper-item:focus::before,
+      .iron-selected:focus paper-item::before {
+        opacity: 0.2;
       }
     `;
   }

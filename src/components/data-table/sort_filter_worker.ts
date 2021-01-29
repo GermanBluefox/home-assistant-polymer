@@ -1,65 +1,25 @@
-import {
-  DataTableColumnContainer,
-  DataTableColumnData,
+// To use comlink under ES5
+import { expose } from "comlink";
+import "proxy-polyfill";
+import type {
   DataTableRowData,
+  DataTableSortColumnData,
+  SortableColumnContainer,
   SortingDirection,
 } from "./ha-data-table";
 
-import memoizeOne from "memoize-one";
-
-export const filterSortData = memoizeOne(
-  async (
-    data: DataTableRowData[],
-    columns: DataTableColumnContainer,
-    filter: string,
-    direction: SortingDirection,
-    sortColumn?: string
-  ) =>
-    sortColumn
-      ? _memSortData(
-          await _memFilterData(data, columns, filter),
-          columns,
-          direction,
-          sortColumn
-        )
-      : _memFilterData(data, columns, filter)
-);
-
-const _memFilterData = memoizeOne(
-  async (
-    data: DataTableRowData[],
-    columns: DataTableColumnContainer,
-    filter: string
-  ) => {
-    if (!filter) {
-      return data;
-    }
-    return filterData(data, columns, filter.toUpperCase());
-  }
-);
-
-const _memSortData = memoizeOne(
-  (
-    data: DataTableRowData[],
-    columns: DataTableColumnContainer,
-    direction: SortingDirection,
-    sortColumn: string
-  ) => {
-    return sortData(data, columns[sortColumn], direction, sortColumn);
-  }
-);
-
-export const filterData = (
+const filterData = (
   data: DataTableRowData[],
-  columns: DataTableColumnContainer,
+  columns: SortableColumnContainer,
   filter: string
-) =>
-  data.filter((row) => {
+) => {
+  filter = filter.toUpperCase();
+  return data.filter((row) => {
     return Object.entries(columns).some((columnEntry) => {
       const [key, column] = columnEntry;
       if (column.filterable) {
         if (
-          (column.filterKey ? row[key][column.filterKey] : row[key])
+          String(column.filterKey ? row[key][column.filterKey] : row[key])
             .toUpperCase()
             .includes(filter)
         ) {
@@ -69,10 +29,11 @@ export const filterData = (
       return false;
     });
   });
+};
 
-export const sortData = (
+const sortData = (
   data: DataTableRowData[],
-  column: DataTableColumnData,
+  column: DataTableSortColumnData,
   direction: SortingDirection,
   sortColumn: string
 ) =>
@@ -105,3 +66,12 @@ export const sortData = (
     }
     return 0;
   });
+
+const api = {
+  filterData,
+  sortData,
+};
+
+export type api = typeof api;
+
+expose(api);

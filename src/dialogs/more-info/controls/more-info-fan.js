@@ -1,17 +1,15 @@
 import "@polymer/iron-flex-layout/iron-flex-layout-classes";
-import "@polymer/paper-icon-button/paper-icon-button";
+import "../../../components/ha-icon-button";
 import "@polymer/paper-item/paper-item";
 import "@polymer/paper-listbox/paper-listbox";
 import { html } from "@polymer/polymer/lib/utils/html-tag";
+/* eslint-plugin-disable lit */
 import { PolymerElement } from "@polymer/polymer/polymer-element";
-
+import { attributeClassNames } from "../../../common/entity/attribute_class_names";
 import "../../../components/ha-attributes";
 import "../../../components/ha-paper-dropdown-menu";
 import "../../../components/ha-switch";
-
 import { EventsMixin } from "../../../mixins/events-mixin";
-import { attributeClassNames } from "../../../common/entity/attribute_class_names";
-
 import LocalizeMixin from "../../../mixins/localize-mixin";
 
 /*
@@ -80,18 +78,18 @@ class MoreInfoFan extends LocalizeMixin(EventsMixin(PolymerElement)) {
         <div class="container-direction">
           <div class="direction">
             <div>[[localize('ui.card.fan.direction')]]</div>
-            <paper-icon-button
+            <ha-icon-button
               icon="hass:rotate-left"
               on-click="onDirectionReverse"
               title="[[localize('ui.card.fan.reverse')]]"
               disabled="[[computeIsRotatingReverse(stateObj)]]"
-            ></paper-icon-button>
-            <paper-icon-button
+            ></ha-icon-button>
+            <ha-icon-button
               icon="hass:rotate-right"
               on-click="onDirectionForward"
               title="[[localize('ui.card.fan.forward')]]"
               disabled="[[computeIsRotatingForward(stateObj)]]"
-            ></paper-icon-button>
+            ></ha-icon-button>
           </div>
         </div>
       </div>
@@ -142,8 +140,8 @@ class MoreInfoFan extends LocalizeMixin(EventsMixin(PolymerElement)) {
   }
 
   speedChanged(ev) {
-    var oldVal = this.stateObj.attributes.speed;
-    var newVal = ev.detail.value;
+    const oldVal = this.stateObj.attributes.speed;
+    const newVal = ev.detail.value;
 
     if (!newVal || oldVal === newVal) return;
 
@@ -154,8 +152,8 @@ class MoreInfoFan extends LocalizeMixin(EventsMixin(PolymerElement)) {
   }
 
   oscillationToggleChanged(ev) {
-    var oldVal = this.stateObj.attributes.oscillating;
-    var newVal = ev.target.checked;
+    const oldVal = this.stateObj.attributes.oscillating;
+    const newVal = ev.target.checked;
 
     if (oldVal === newVal) return;
 

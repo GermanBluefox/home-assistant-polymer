@@ -3,20 +3,21 @@ import "@polymer/paper-item/paper-item";
 import "@polymer/paper-item/paper-item-body";
 import "@polymer/paper-listbox/paper-listbox";
 import {
-  LitElement,
-  TemplateResult,
-  html,
   css,
   CSSResult,
+  html,
+  LitElement,
   property,
+  internalProperty,
+  TemplateResult,
 } from "lit-element";
-import { HomeAssistant } from "../../types";
 import { fireEvent } from "../../common/dom/fire_event";
 import {
   DeviceAutomation,
   deviceAutomationsEqual,
 } from "../../data/device_automation";
-import "../../components/ha-paper-dropdown-menu";
+import { HomeAssistant } from "../../types";
+import "../ha-paper-dropdown-menu";
 
 const NO_AUTOMATION_KEY = "NO_AUTOMATION";
 const UNKNOWN_AUTOMATION_KEY = "UNKNOWN_AUTOMATION";
@@ -24,26 +25,42 @@ const UNKNOWN_AUTOMATION_KEY = "UNKNOWN_AUTOMATION";
 export abstract class HaDeviceAutomationPicker<
   T extends DeviceAutomation
 > extends LitElement {
-  @property() public hass!: HomeAssistant;
+  @property({ attribute: false }) public hass!: HomeAssistant;
+
   @property() public label?: string;
+
   @property() public deviceId?: string;
+
   @property() public value?: T;
-  protected NO_AUTOMATION_TEXT = "No automations";
-  protected UNKNOWN_AUTOMATION_TEXT = "Unknown automation";
-  @property() private _automations: T[] = [];
+
+  @internalProperty() private _automations: T[] = [];
 
   // Trigger an empty render so we start with a clean DOM.
   // paper-listbox does not like changing things around.
-  @property() private _renderEmpty = false;
+  @internalProperty() private _renderEmpty = false;
+
+  protected get NO_AUTOMATION_TEXT() {
+    return this.hass.localize(
+      "ui.panel.config.devices.automation.actions.no_actions"
+    );
+  }
+
+  protected get UNKNOWN_AUTOMATION_TEXT() {
+    return this.hass.localize(
+      "ui.panel.config.devices.automation.actions.unknown_action"
+    );
+  }
 
   private _localizeDeviceAutomation: (
     hass: HomeAssistant,
     automation: T
   ) => string;
+
   private _fetchDeviceAutomations: (
     hass: HomeAssistant,
     deviceId: string
   ) => Promise<T[]>;
+
   private _createNoAutomation: (deviceId?: string) => T;
 
   constructor(
@@ -83,7 +100,7 @@ export abstract class HaDeviceAutomationPicker<
     return `${this._automations[idx].device_id}_${idx}`;
   }
 
-  protected render(): TemplateResult | void {
+  protected render(): TemplateResult {
     if (this._renderEmpty) {
       return html``;
     }
@@ -108,11 +125,7 @@ export abstract class HaDeviceAutomationPicker<
           >
             ${this.NO_AUTOMATION_TEXT}
           </paper-item>
-          <paper-item
-            key=${UNKNOWN_AUTOMATION_KEY}
-            .automation=${this.value}
-            hidden
-          >
+          <paper-item key=${UNKNOWN_AUTOMATION_KEY} hidden>
             ${this.UNKNOWN_AUTOMATION_TEXT}
           </paper-item>
           ${this._automations.map(
@@ -166,18 +179,17 @@ export abstract class HaDeviceAutomationPicker<
   }
 
   private _automationChanged(ev) {
-    this._setValue(ev.detail.item.automation);
+    if (ev.detail.item.automation) {
+      this._setValue(ev.detail.item.automation);
+    }
   }
 
   private _setValue(automation: T) {
     if (this.value && deviceAutomationsEqual(automation, this.value)) {
       return;
     }
-    this.value = automation;
-    setTimeout(() => {
-      fireEvent(this, "change");
-      fireEvent(this, "value-changed", { value: automation });
-    }, 0);
+    fireEvent(this, "change");
+    fireEvent(this, "value-changed", { value: automation });
   }
 
   static get styles(): CSSResult {

@@ -1,12 +1,14 @@
 import { html } from "@polymer/polymer/lib/utils/html-tag";
+import "@polymer/paper-tooltip/paper-tooltip";
+/* eslint-plugin-disable lit */
+import LocalizeMixin from "../../mixins/localize-mixin";
 import { PolymerElement } from "@polymer/polymer/polymer-element";
-
-import "../ha-relative-time";
-import "./state-badge";
 import { computeStateName } from "../../common/entity/compute_state_name";
 import { computeRTL } from "../../common/util/compute_rtl";
+import "../ha-relative-time";
+import "./state-badge";
 
-class StateInfo extends PolymerElement {
+class StateInfo extends LocalizeMixin(PolymerElement) {
   static get template() {
     return html`
       ${this.styleTemplate} ${this.stateBadgeTemplate} ${this.infoTemplate}
@@ -62,9 +64,7 @@ class StateInfo extends PolymerElement {
   }
 
   static get stateBadgeTemplate() {
-    return html`
-      <state-badge state-obj="[[stateObj]]"></state-badge>
-    `;
+    return html` <state-badge state-obj="[[stateObj]]"></state-badge> `;
   }
 
   static get infoTemplate() {
@@ -73,13 +73,20 @@ class StateInfo extends PolymerElement {
         <div class="name" in-dialog$="[[inDialog]]">
           [[computeStateName(stateObj)]]
         </div>
-
         <template is="dom-if" if="[[inDialog]]">
           <div class="time-ago">
             <ha-relative-time
+              id="last_changed"
               hass="[[hass]]"
               datetime="[[stateObj.last_changed]]"
             ></ha-relative-time>
+            <paper-tooltip animation-delay="0" for="last_changed">
+              [[localize('ui.dialogs.more_info_control.last_updated')]]:
+              <ha-relative-time
+                hass="[[hass]]"
+                datetime="[[stateObj.last_updated]]"
+              ></ha-relative-time>
+            </paper-tooltip>
           </div>
         </template>
         <template is="dom-if" if="[[!inDialog]]">

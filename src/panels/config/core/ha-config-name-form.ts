@@ -1,30 +1,30 @@
-import {
-  LitElement,
-  customElement,
-  property,
-  TemplateResult,
-  html,
-} from "lit-element";
 import "@material/mwc-button/mwc-button";
 import "@polymer/paper-input/paper-input";
-import "@polymer/paper-radio-group/paper-radio-group";
+import type { PaperInputElement } from "@polymer/paper-input/paper-input";
 import "@polymer/paper-radio-button/paper-radio-button";
-import { HomeAssistant } from "../../../types";
+import "@polymer/paper-radio-group/paper-radio-group";
+import {
+  customElement,
+  html,
+  LitElement,
+  property,
+  internalProperty,
+  TemplateResult,
+} from "lit-element";
 import "../../../components/ha-card";
-import { PolymerChangedEvent } from "../../../polymer-types";
-// tslint:disable-next-line: no-duplicate-imports
-import { PaperInputElement } from "@polymer/paper-input/paper-input";
 import { ConfigUpdateValues, saveCoreConfig } from "../../../data/core";
+import type { PolymerChangedEvent } from "../../../polymer-types";
+import type { HomeAssistant } from "../../../types";
 
 @customElement("ha-config-name-form")
 class ConfigNameForm extends LitElement {
-  @property() public hass!: HomeAssistant;
+  @property({ attribute: false }) public hass!: HomeAssistant;
 
-  @property() private _working = false;
+  @internalProperty() private _working = false;
 
-  @property() private _name!: ConfigUpdateValues["location_name"];
+  @internalProperty() private _name!: ConfigUpdateValues["location_name"];
 
-  protected render(): TemplateResult | void {
+  protected render(): TemplateResult {
     const canEdit = ["storage", "default"].includes(
       this.hass.config.config_source
     );

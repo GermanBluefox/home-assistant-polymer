@@ -63,8 +63,7 @@ export const demoLovelaceTeachingbirds: DemoConfig["lovelace"] = () => ({
                   elements: [
                     {
                       style: {
-                        "--iron-icon-width": "100px",
-                        "--iron-icon-height": "100px",
+                        "--mdc-icon-size": "100%",
                         top: "50%",
                         left: "50%",
                       },
@@ -395,7 +394,7 @@ export const demoLovelaceTeachingbirds: DemoConfig["lovelace"] = () => ({
           cards: [
             {
               entity: "script.air_cleaner_quiet",
-              type: "entity-button",
+              type: "button",
               name: "AC bed",
               tap_action: {
                 action: "call-service",
@@ -408,7 +407,7 @@ export const demoLovelaceTeachingbirds: DemoConfig["lovelace"] = () => ({
             },
             {
               entity: "script.air_cleaner_auto",
-              type: "entity-button",
+              type: "button",
               name: "AC bed",
               tap_action: {
                 action: "call-service",
@@ -421,7 +420,7 @@ export const demoLovelaceTeachingbirds: DemoConfig["lovelace"] = () => ({
             },
             {
               entity: "script.air_cleaner_turbo",
-              type: "entity-button",
+              type: "button",
               name: "AC bed",
               tap_action: {
                 action: "call-service",
@@ -434,7 +433,7 @@ export const demoLovelaceTeachingbirds: DemoConfig["lovelace"] = () => ({
             },
             {
               entity: "script.ac_off",
-              type: "entity-button",
+              type: "button",
               name: "AC",
               tap_action: {
                 action: "call-service",
@@ -447,7 +446,7 @@ export const demoLovelaceTeachingbirds: DemoConfig["lovelace"] = () => ({
             },
             {
               entity: "script.ac_on",
-              type: "entity-button",
+              type: "button",
               name: "AC",
               tap_action: {
                 action: "call-service",
@@ -658,7 +657,7 @@ export const demoLovelaceTeachingbirds: DemoConfig["lovelace"] = () => ({
                     action: "call-service",
                     service: "script.goodnight",
                   },
-                  type: "entity-button",
+                  type: "button",
                   icon: "mdi:weather-night",
                 },
                 {
@@ -670,7 +669,7 @@ export const demoLovelaceTeachingbirds: DemoConfig["lovelace"] = () => ({
                     },
                     service: "scene.turn_on",
                   },
-                  type: "entity-button",
+                  type: "button",
                   icon: "mdi:coffee-outline",
                 },
                 {
@@ -682,7 +681,7 @@ export const demoLovelaceTeachingbirds: DemoConfig["lovelace"] = () => ({
                     },
                     service: "scene.turn_on",
                   },
-                  type: "entity-button",
+                  type: "button",
                   icon: "mdi:television-classic",
                 },
               ],
@@ -743,7 +742,7 @@ export const demoLovelaceTeachingbirds: DemoConfig["lovelace"] = () => ({
                     },
                     service: "light.toggle",
                   },
-                  type: "entity-button",
+                  type: "button",
                   icon: "mdi:page-layout-footer",
                 },
                 {
@@ -755,7 +754,7 @@ export const demoLovelaceTeachingbirds: DemoConfig["lovelace"] = () => ({
                     },
                     service: "light.toggle",
                   },
-                  type: "entity-button",
+                  type: "button",
                   icon: "mdi:page-layout-header",
                 },
               ],

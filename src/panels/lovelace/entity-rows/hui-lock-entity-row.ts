@@ -1,26 +1,27 @@
+import "@material/mwc-button/mwc-button";
 import {
-  html,
-  LitElement,
-  TemplateResult,
-  property,
   css,
   CSSResult,
   customElement,
+  html,
+  LitElement,
+  property,
+  internalProperty,
   PropertyValues,
+  TemplateResult,
 } from "lit-element";
-
-import "../components/hui-generic-entity-row";
-import "../components/hui-warning";
-
+import { UNAVAILABLE_STATES } from "../../../data/entity";
 import { HomeAssistant } from "../../../types";
-import { EntityRow, EntityConfig } from "./types";
 import { hasConfigOrEntityChanged } from "../common/has-changed";
+import "../components/hui-generic-entity-row";
+import { createEntityNotFoundWarning } from "../components/hui-warning";
+import { EntityConfig, LovelaceRow } from "./types";
 
 @customElement("hui-lock-entity-row")
-class HuiLockEntityRow extends LitElement implements EntityRow {
-  @property() public hass?: HomeAssistant;
+class HuiLockEntityRow extends LitElement implements LovelaceRow {
+  @property({ attribute: false }) public hass?: HomeAssistant;
 
-  @property() private _config?: EntityConfig;
+  @internalProperty() private _config?: EntityConfig;
 
   public setConfig(config: EntityConfig): void {
     if (!config) {
@@ -33,7 +34,7 @@ class HuiLockEntityRow extends LitElement implements EntityRow {
     return hasConfigOrEntityChanged(this, changedProps);
   }
 
-  protected render(): TemplateResult | void {
+  protected render(): TemplateResult {
     if (!this._config || !this.hass) {
       return html``;
     }
@@ -42,19 +43,19 @@ class HuiLockEntityRow extends LitElement implements EntityRow {
 
     if (!stateObj) {
       return html`
-        <hui-warning
-          >${this.hass.localize(
-            "ui.panel.lovelace.warning.entity_not_found",
-            "entity",
-            this._config.entity
-          )}</hui-warning
-        >
+        <hui-warning>
+          ${createEntityNotFoundWarning(this.hass, this._config.entity)}
+        </hui-warning>
       `;
     }
 
     return html`
-      <hui-generic-entity-row .hass="${this.hass}" .config="${this._config}">
-        <mwc-button @click="${this._callService}">
+      <hui-generic-entity-row .hass=${this.hass} .config=${this._config}>
+        <mwc-button
+          @click="${this._callService}"
+          .disabled=${UNAVAILABLE_STATES.includes(stateObj.state)}
+          class="text-content"
+        >
           ${stateObj.state === "locked"
             ? this.hass!.localize("ui.card.lock.unlock")
             : this.hass!.localize("ui.card.lock.lock")}

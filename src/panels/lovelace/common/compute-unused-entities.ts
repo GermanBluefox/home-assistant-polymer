@@ -1,7 +1,7 @@
-import { LovelaceConfig, ActionConfig } from "../../../data/lovelace";
+import { ActionConfig, LovelaceConfig } from "../../../data/lovelace";
 import { HomeAssistant } from "../../../types";
 
-const EXCLUDED_DOMAINS = ["zone", "persistent_notification"];
+export const EXCLUDED_DOMAINS = ["zone", "persistent_notification"];
 
 const addFromAction = (entities: Set<string>, actionConfig: ActionConfig) => {
   if (
@@ -44,39 +44,52 @@ const addEntities = (entities: Set<string>, obj) => {
   if (obj.entity) {
     addEntityId(entities, obj.entity);
   }
-  if (obj.entities) {
+  if (obj.entities && Array.isArray(obj.entities)) {
     obj.entities.forEach((entity) => addEntityId(entities, entity));
   }
   if (obj.card) {
     addEntities(entities, obj.card);
   }
-  if (obj.cards) {
+  if (obj.cards && Array.isArray(obj.cards)) {
     obj.cards.forEach((card) => addEntities(entities, card));
   }
-  if (obj.elements) {
+  if (obj.elements && Array.isArray(obj.elements)) {
     obj.elements.forEach((card) => addEntities(entities, card));
   }
-  if (obj.badges) {
+  if (obj.badges && Array.isArray(obj.badges)) {
     obj.badges.forEach((badge) => addEntityId(entities, badge));
   }
 };
 
-const computeUsedEntities = (config) => {
+export const computeUsedEntities = (config: LovelaceConfig): Set<string> => {
   const entities = new Set<string>();
   config.views.forEach((view) => addEntities(entities, view));
   return entities;
 };
 
+export const calcUnusedEntities = (
+  hass: HomeAssistant,
+  usedEntities: Set<string>
+): Set<string> => {
+  const unusedEntities: Set<string> = new Set();
+
+  for (const entity of Object.keys(hass.states)) {
+    if (
+      !usedEntities.has(entity) &&
+      !EXCLUDED_DOMAINS.includes(entity.split(".", 1)[0])
+    ) {
+      unusedEntities.add(entity);
+    }
+  }
+
+  return unusedEntities;
+};
+
 export const computeUnusedEntities = (
   hass: HomeAssistant,
   config: LovelaceConfig
-): string[] => {
+): Set<string> => {
   const usedEntities = computeUsedEntities(config);
-  return Object.keys(hass.states)
-    .filter(
-      (entity) =>
-        !usedEntities.has(entity) &&
-        !EXCLUDED_DOMAINS.includes(entity.split(".", 1)[0])
-    )
-    .sort();
+  const unusedEntities = calcUnusedEntities(hass, usedEntities);
+  return unusedEntities;
 };

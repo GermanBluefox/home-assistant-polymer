@@ -1,23 +1,25 @@
-import {
-  html,
-  LitElement,
-  TemplateResult,
-  customElement,
-  property,
-  CSSResult,
-  css,
-} from "lit-element";
 import "@polymer/paper-input/paper-input";
-
-import { EditorTarget } from "../types";
-import { HomeAssistant } from "../../../../types";
+import {
+  css,
+  CSSResultArray,
+  customElement,
+  html,
+  internalProperty,
+  LitElement,
+  property,
+  TemplateResult,
+} from "lit-element";
 import { fireEvent } from "../../../../common/dom/fire_event";
-import { configElementStyle } from "../config-elements/config-elements-style";
-import { LovelaceViewConfig } from "../../../../data/lovelace";
 import { slugify } from "../../../../common/string/slugify";
-
-import "../../components/hui-theme-select-editor";
+import { computeRTLDirection } from "../../../../common/util/compute_rtl";
+import "../../../../components/ha-formfield";
+import "../../../../components/ha-icon-input";
 import "../../../../components/ha-switch";
+import { LovelaceViewConfig } from "../../../../data/lovelace";
+import { HomeAssistant } from "../../../../types";
+import "../../components/hui-theme-select-editor";
+import { configElementStyle } from "../config-elements/config-elements-style";
+import { EditorTarget } from "../types";
 
 declare global {
   interface HASSDomEvents {
@@ -29,9 +31,12 @@ declare global {
 
 @customElement("hui-view-editor")
 export class HuiViewEditor extends LitElement {
-  @property() public hass!: HomeAssistant;
+  @property({ attribute: false }) public hass!: HomeAssistant;
+
   @property() public isNew!: boolean;
-  @property() private _config!: LovelaceViewConfig;
+
+  @internalProperty() private _config!: LovelaceViewConfig;
+
   private _suggestedPath = false;
 
   get _path(): string {
@@ -73,13 +78,12 @@ export class HuiViewEditor extends LitElement {
     this._config = config;
   }
 
-  protected render(): TemplateResult | void {
+  protected render(): TemplateResult {
     if (!this.hass) {
       return html``;
     }
 
     return html`
-      ${configElementStyle}
       <div class="card-config">
         <paper-input
           .label="${this.hass.localize(
@@ -92,16 +96,17 @@ export class HuiViewEditor extends LitElement {
           @value-changed=${this._valueChanged}
           @blur=${this._handleTitleBlur}
         ></paper-input>
-        <paper-input
+        <ha-icon-input
           .label="${this.hass.localize(
             "ui.panel.lovelace.editor.card.generic.icon"
-          )}  (${this.hass.localize(
+          )} (${this.hass.localize(
             "ui.panel.lovelace.editor.card.config.optional"
           )})"
           .value=${this._icon}
+          .placeholder=${this._icon}
           .configValue=${"icon"}
           @value-changed=${this._valueChanged}
-        ></paper-input>
+        ></ha-icon-input>
         <paper-input
           .label="${this.hass.localize(
             "ui.panel.lovelace.editor.card.generic.url"
@@ -116,21 +121,25 @@ export class HuiViewEditor extends LitElement {
           .hass=${this.hass}
           .value=${this._theme}
           .configValue=${"theme"}
-          @theme-changed=${this._valueChanged}
+          @value-changed=${this._valueChanged}
         ></hui-theme-select-editor>
-        <ha-switch
-          ?checked=${this._panel !== false}
-          .configValue=${"panel"}
-          @change=${this._valueChanged}
-          >${this.hass.localize(
+        <ha-formfield
+          .label=${this.hass.localize(
             "ui.panel.lovelace.editor.view.panel_mode.title"
-          )}</ha-switch
+          )}
+          .dir=${computeRTLDirection(this.hass)}
         >
-        <span class="panel"
-          >${this.hass.localize(
+          <ha-switch
+            .checked=${this._panel !== false}
+            .configValue=${"panel"}
+            @change=${this._valueChanged}
+          ></ha-switch
+        ></ha-formfield>
+        <span class="panel">
+          ${this.hass.localize(
             "ui.panel.lovelace.editor.view.panel_mode.description"
-          )}</span
-        >
+          )}
+        </span>
       </div>
     `;
   }
@@ -165,16 +174,23 @@ export class HuiViewEditor extends LitElement {
       return;
     }
 
-    const config = { ...this._config, path: slugify(ev.currentTarget.value) };
+    const config = {
+      ...this._config,
+      path: slugify(ev.currentTarget.value, "-"),
+    };
     fireEvent(this, "view-config-changed", { config });
   }
 
-  static get styles(): CSSResult {
-    return css`
-      .panel {
-        color: var(--secondary-text-color);
-      }
-    `;
+  static get styles(): CSSResultArray {
+    return [
+      configElementStyle,
+      css`
+        .panel {
+          color: var(--secondary-text-color);
+          display: block;
+        }
+      `,
+    ];
   }
 }
 

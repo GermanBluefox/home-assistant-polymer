@@ -1,40 +1,51 @@
 import {
+  css,
+  CSSResult,
+  customElement,
+  html,
   LitElement,
   property,
   TemplateResult,
-  html,
-  customElement,
-  css,
-  CSSResult,
+  eventOptions,
 } from "lit-element";
-import "../components/ha-menu-button";
-import "../components/ha-paper-icon-button-arrow-prev";
 import { classMap } from "lit-html/directives/class-map";
+import "../components/ha-menu-button";
+import "../components/ha-icon-button-arrow-prev";
+import { restoreScroll } from "../common/decorators/restore-scroll";
 
 @customElement("hass-subpage")
 class HassSubpage extends LitElement {
   @property()
   public header?: string;
+
   @property({ type: Boolean })
   public showBackButton = true;
+
   @property({ type: Boolean })
   public hassio = false;
 
-  protected render(): TemplateResult | void {
+  // @ts-ignore
+  @restoreScroll(".content") private _savedScrollPos?: number;
+
+  protected render(): TemplateResult {
     return html`
       <div class="toolbar">
-        <ha-paper-icon-button-arrow-prev
+        <ha-icon-button-arrow-prev
           aria-label="Back"
-          .hassio=${this.hassio}
           @click=${this._backTapped}
           class=${classMap({ hidden: !this.showBackButton })}
-        ></ha-paper-icon-button-arrow-prev>
+        ></ha-icon-button-arrow-prev>
 
-        <div main-title>${this.header}</div>
+        <div class="main-title">${this.header}</div>
         <slot name="toolbar-icon"></slot>
       </div>
-      <div class="content"><slot></slot></div>
+      <div class="content" @scroll=${this._saveScrollPos}><slot></slot></div>
     `;
+  }
+
+  @eventOptions({ passive: true })
+  private _saveScrollPos(e: Event) {
+    this._savedScrollPos = (e.target as HTMLDivElement).scrollTop;
   }
 
   private _backTapped(): void {
@@ -49,29 +60,35 @@ class HassSubpage extends LitElement {
         background-color: var(--primary-background-color);
       }
 
+      :host([narrow]) {
+        width: 100%;
+        position: fixed;
+      }
+
       .toolbar {
         display: flex;
         align-items: center;
         font-size: 20px;
-        height: 64px;
+        height: 65px;
         padding: 0 16px;
         pointer-events: none;
         background-color: var(--app-header-background-color);
         font-weight: 400;
         color: var(--app-header-text-color, white);
+        border-bottom: var(--app-header-border-bottom, none);
+        box-sizing: border-box;
       }
 
-      ha-menu-button,
-      ha-paper-icon-button-arrow-prev,
+      ha-icon-button-arrow-prev,
       ::slotted([slot="toolbar-icon"]) {
         pointer-events: auto;
       }
 
-      ha-paper-icon-button-arrow-prev.hidden {
+      ha-icon-button-arrow-prev.hidden {
         visibility: hidden;
       }
 
-      [main-title] {
+      .main-title {
         margin: 0 0 0 24px;
         line-height: 20px;
         flex-grow: 1;
@@ -80,7 +97,7 @@ class HassSubpage extends LitElement {
       .content {
         position: relative;
         width: 100%;
-        height: calc(100% - 64px);
+        height: calc(100% - 1px - var(--header-height));
         overflow-y: auto;
         overflow: auto;
         -webkit-overflow-scrolling: touch;

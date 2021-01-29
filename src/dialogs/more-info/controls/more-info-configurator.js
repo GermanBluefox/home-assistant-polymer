@@ -1,11 +1,11 @@
+import "@material/mwc-button";
 import "@polymer/iron-flex-layout/iron-flex-layout-classes";
 import "@polymer/iron-input/iron-input";
-import "@material/mwc-button";
 import "@polymer/paper-input/paper-input";
-import "@polymer/paper-spinner/paper-spinner";
+import "../../../components/ha-circular-progress";
 import { html } from "@polymer/polymer/lib/utils/html-tag";
+/* eslint-plugin-disable lit */
 import { PolymerElement } from "@polymer/polymer/polymer-element";
-
 import "../../../components/ha-markdown";
 
 class MoreInfoConfigurator extends PolymerElement {
@@ -38,7 +38,7 @@ class MoreInfoConfigurator extends PolymerElement {
           height: 41px;
         }
 
-        paper-spinner {
+        ha-circular-progress {
           width: 14px;
           height: 14px;
           margin-right: 20px;
@@ -52,6 +52,7 @@ class MoreInfoConfigurator extends PolymerElement {
       <div class="layout vertical">
         <template is="dom-if" if="[[isConfigurable]]">
           <ha-markdown
+            breaks
             content="[[stateObj.attributes.description]]"
           ></ha-markdown>
 
@@ -74,11 +75,11 @@ class MoreInfoConfigurator extends PolymerElement {
               disabled="[[isConfiguring]]"
               on-click="submitClicked"
             >
-              <paper-spinner
+              <ha-circular-progress
                 active="[[isConfiguring]]"
                 hidden="[[!isConfiguring]]"
                 alt="Configuring"
-              ></paper-spinner>
+              ></ha-circular-progress>
               [[stateObj.attributes.submit_caption]]
             </mwc-button>
           </p>
@@ -110,7 +111,7 @@ class MoreInfoConfigurator extends PolymerElement {
 
       fieldInput: {
         type: Object,
-        value: function() {
+        value: function () {
           return {};
         },
       },
@@ -122,12 +123,12 @@ class MoreInfoConfigurator extends PolymerElement {
   }
 
   fieldChanged(ev) {
-    var el = ev.target;
+    const el = ev.target;
     this.fieldInput[el.name] = el.value;
   }
 
   submitClicked() {
-    var data = {
+    const data = {
       configure_id: this.stateObj.attributes.configure_id,
       fields: this.fieldInput,
     };
@@ -135,10 +136,10 @@ class MoreInfoConfigurator extends PolymerElement {
     this.isConfiguring = true;
 
     this.hass.callService("configurator", "configure", data).then(
-      function() {
+      function () {
         this.isConfiguring = false;
       }.bind(this),
-      function() {
+      function () {
         this.isConfiguring = false;
       }.bind(this)
     );

@@ -1,29 +1,27 @@
-import {
-  html,
-  LitElement,
-  TemplateResult,
-  property,
-  customElement,
-  css,
-  CSSResult,
-} from "lit-element";
 import "@material/mwc-button";
 import "@polymer/paper-tooltip/paper-tooltip";
-
-import "../../components/ha-relative-time";
+import {
+  css,
+  CSSResult,
+  customElement,
+  html,
+  LitElement,
+  property,
+  TemplateResult,
+} from "lit-element";
 import "../../components/ha-markdown";
-import "./notification-item-template";
-
-import { HomeAssistant } from "../../types";
+import "../../components/ha-relative-time";
 import { PersistentNotification } from "../../data/persistent_notification";
+import { HomeAssistant } from "../../types";
+import "./notification-item-template";
 
 @customElement("persistent-notification-item")
 export class HuiPersistentNotificationItem extends LitElement {
-  @property() public hass?: HomeAssistant;
+  @property({ attribute: false }) public hass?: HomeAssistant;
 
   @property() public notification?: PersistentNotification;
 
-  protected render(): TemplateResult | void {
+  protected render(): TemplateResult {
     if (!this.hass || !this.notification) {
       return html``;
     }
@@ -31,23 +29,23 @@ export class HuiPersistentNotificationItem extends LitElement {
     return html`
       <notification-item-template>
         <span slot="header">
-          ${this.notification.title || this.notification.notification_id}
+          ${this.notification.title}
         </span>
 
-        <ha-markdown content="${this.notification.message}"></ha-markdown>
+        <ha-markdown
+          breaks
+          content="${this.notification.message}"
+        ></ha-markdown>
 
         <div class="time">
           <span>
             <ha-relative-time
-              .hass="${this.hass}"
+              .hass=${this.hass}
               .datetime="${this.notification.created_at}"
             ></ha-relative-time>
-            <paper-tooltip
-              >${this._computeTooltip(
-                this.hass,
-                this.notification
-              )}</paper-tooltip
-            >
+            <paper-tooltip animation-delay="0">
+              ${this._computeTooltip(this.hass, this.notification)}
+            </paper-tooltip>
           </span>
         </div>
 

@@ -1,29 +1,29 @@
 import {
+  customElement,
   html,
   LitElement,
-  TemplateResult,
   property,
+  internalProperty,
   PropertyValues,
-  customElement,
+  TemplateResult,
 } from "lit-element";
-
-import "../components/hui-generic-entity-row";
-import "../../../components/paper-time-input.js";
-// tslint:disable-next-line:no-duplicate-imports
-import { PaperTimeInput } from "../../../components/paper-time-input.js";
 import "../../../components/ha-date-input";
-// tslint:disable-next-line:no-duplicate-imports
-import { HaDateInput } from "../../../components/ha-date-input";
-
-import { HomeAssistant } from "../../../types";
-import { EntityRow, EntityConfig } from "./types";
+import type { HaDateInput } from "../../../components/ha-date-input";
+import "../../../components/paper-time-input";
+import type { PaperTimeInput } from "../../../components/paper-time-input";
+import { UNAVAILABLE_STATES, UNKNOWN } from "../../../data/entity";
 import { setInputDateTimeValue } from "../../../data/input_datetime";
+import type { HomeAssistant } from "../../../types";
 import { hasConfigOrEntityChanged } from "../common/has-changed";
+import "../components/hui-generic-entity-row";
+import type { EntityConfig, LovelaceRow } from "./types";
+import { createEntityNotFoundWarning } from "../components/hui-warning";
 
 @customElement("hui-input-datetime-entity-row")
-class HuiInputDatetimeEntityRow extends LitElement implements EntityRow {
-  @property() public hass?: HomeAssistant;
-  @property() private _config?: EntityConfig;
+class HuiInputDatetimeEntityRow extends LitElement implements LovelaceRow {
+  @property({ attribute: false }) public hass?: HomeAssistant;
+
+  @internalProperty() private _config?: EntityConfig;
 
   public setConfig(config: EntityConfig): void {
     if (!config) {
@@ -36,7 +36,7 @@ class HuiInputDatetimeEntityRow extends LitElement implements EntityRow {
     return hasConfigOrEntityChanged(this, changedProps);
   }
 
-  protected render(): TemplateResult | void {
+  protected render(): TemplateResult {
     if (!this._config || !this.hass) {
       return html``;
     }
@@ -45,21 +45,18 @@ class HuiInputDatetimeEntityRow extends LitElement implements EntityRow {
 
     if (!stateObj) {
       return html`
-        <hui-warning
-          >${this.hass.localize(
-            "ui.panel.lovelace.warning.entity_not_found",
-            "entity",
-            this._config.entity
-          )}</hui-warning
-        >
+        <hui-warning>
+          ${createEntityNotFoundWarning(this.hass, this._config.entity)}
+        </hui-warning>
       `;
     }
 
     return html`
-      <hui-generic-entity-row .hass="${this.hass}" .config="${this._config}">
+      <hui-generic-entity-row .hass=${this.hass} .config=${this._config}>
         ${stateObj.attributes.has_date
           ? html`
               <ha-date-input
+                .disabled=${UNAVAILABLE_STATES.includes(stateObj.state)}
                 .year=${stateObj.attributes.year}
                 .month=${("0" + stateObj.attributes.month).slice(-2)}
                 .day=${("0" + stateObj.attributes.day).slice(-2)}
@@ -72,10 +69,11 @@ class HuiInputDatetimeEntityRow extends LitElement implements EntityRow {
         ${stateObj.attributes.has_time
           ? html`
               <paper-time-input
-                .hour=${stateObj.state === "unknown"
+                .disabled=${UNAVAILABLE_STATES.includes(stateObj.state)}
+                .hour=${stateObj.state === UNKNOWN
                   ? ""
                   : ("0" + stateObj.attributes.hour).slice(-2)}
-                .min=${stateObj.state === "unknown"
+                .min=${stateObj.state === UNKNOWN
                   ? ""
                   : ("0" + stateObj.attributes.minute).slice(-2)}
                 .amPm=${false}

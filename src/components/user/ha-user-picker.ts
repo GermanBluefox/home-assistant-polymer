@@ -1,28 +1,36 @@
-import "@polymer/paper-icon-button/paper-icon-button";
+import "@polymer/paper-dropdown-menu/paper-dropdown-menu-light";
+import "../ha-icon-button";
 import "@polymer/paper-input/paper-input";
 import "@polymer/paper-item/paper-icon-item";
 import "@polymer/paper-item/paper-item-body";
-import "@polymer/paper-dropdown-menu/paper-dropdown-menu-light";
 import "@polymer/paper-listbox/paper-listbox";
-import memoizeOne from "memoize-one";
 import {
-  LitElement,
-  TemplateResult,
-  html,
   css,
   CSSResult,
+  html,
+  LitElement,
   property,
+  TemplateResult,
 } from "lit-element";
-import { HomeAssistant } from "../../types";
+import memoizeOne from "memoize-one";
 import { fireEvent } from "../../common/dom/fire_event";
-import { User, fetchUsers } from "../../data/user";
 import { compare } from "../../common/string/compare";
+import { fetchUsers, User } from "../../data/user";
+import { HomeAssistant } from "../../types";
+import "./ha-user-badge";
 
 class HaUserPicker extends LitElement {
   public hass?: HomeAssistant;
+
   @property() public label?: string;
-  @property() public value?: string;
+
+  @property() public noUserLabel?: string;
+
+  @property() public value = "";
+
   @property() public users?: User[];
+
+  @property({ type: Boolean }) public disabled = false;
 
   private _sortedUsers = memoizeOne((users?: User[]) => {
     if (!users) {
@@ -34,22 +42,30 @@ class HaUserPicker extends LitElement {
       .sort((a, b) => compare(a.name, b.name));
   });
 
-  protected render(): TemplateResult | void {
+  protected render(): TemplateResult {
     return html`
-      <paper-dropdown-menu-light .label=${this.label}>
+      <paper-dropdown-menu-light
+        .label=${this.label}
+        .disabled=${this.disabled}
+      >
         <paper-listbox
           slot="dropdown-content"
-          .selected=${this._value}
+          .selected=${this.value}
           attr-for-selected="data-user-id"
           @iron-select=${this._userChanged}
         >
           <paper-icon-item data-user-id="">
-            No user
+            ${this.noUserLabel ||
+            this.hass?.localize("ui.components.user-picker.no_user")}
           </paper-icon-item>
           ${this._sortedUsers(this.users).map(
             (user) => html`
               <paper-icon-item data-user-id=${user.id}>
-                <ha-user-badge .user=${user} slot="item-icon"></ha-user-badge>
+                <ha-user-badge
+                  .hass=${this.hass}
+                  .user=${user}
+                  slot="item-icon"
+                ></ha-user-badge>
                 ${user.name}
               </paper-icon-item>
             `
@@ -57,10 +73,6 @@ class HaUserPicker extends LitElement {
         </paper-listbox>
       </paper-dropdown-menu-light>
     `;
-  }
-
-  private get _value() {
-    return this.value || "";
   }
 
   protected firstUpdated(changedProps) {
@@ -75,7 +87,7 @@ class HaUserPicker extends LitElement {
   private _userChanged(ev) {
     const newValue = ev.detail.item.dataset.userId;
 
-    if (newValue !== this._value) {
+    if (newValue !== this.value) {
       this.value = ev.detail.value;
       setTimeout(() => {
         fireEvent(this, "value-changed", { value: newValue });
@@ -103,3 +115,9 @@ class HaUserPicker extends LitElement {
 }
 
 customElements.define("ha-user-picker", HaUserPicker);
+
+declare global {
+  interface HTMLElementTagNameMap {
+    "ha-user-picker": HaUserPicker;
+  }
+}

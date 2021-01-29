@@ -1,17 +1,17 @@
-import {
-  customElement,
-  LitElement,
-  property,
-  TemplateResult,
-  html,
-  CSSResult,
-  css,
-} from "lit-element";
-import "@polymer/paper-listbox/paper-listbox";
 import "@polymer/paper-item/paper-icon-item";
-import "../../../../src/components/ha-icon";
-import { toggleAttribute } from "../../../../src/common/dom/toggle_attribute";
+import "@polymer/paper-listbox/paper-listbox";
+import {
+  css,
+  CSSResult,
+  customElement,
+  html,
+  LitElement,
+  internalProperty,
+  TemplateResult,
+} from "lit-element";
 import { fireEvent } from "../../../common/dom/fire_event";
+import { toggleAttribute } from "../../../common/dom/toggle_attribute";
+import "../../../components/ha-icon";
 import { LovelaceConfig } from "../../../data/lovelace";
 
 declare global {
@@ -24,10 +24,11 @@ declare global {
 
 @customElement("hui-views-list")
 class HuiViewsList extends LitElement {
-  @property() private lovelaceConfig?: LovelaceConfig | undefined;
-  @property() private selected?: number | undefined;
+  @internalProperty() private lovelaceConfig?: LovelaceConfig | undefined;
 
-  protected render(): TemplateResult | void {
+  @internalProperty() private selected?: number | undefined;
+
+  protected render(): TemplateResult {
     if (!this.lovelaceConfig) {
       return html``;
     }
@@ -42,7 +43,7 @@ class HuiViewsList extends LitElement {
                     <ha-icon .icon=${view.icon} slot="item-icon"></ha-icon>
                   `
                 : ""}
-              ${view.title || view.path}
+              ${view.title || view.path || "Unnamed view"}
             </paper-icon-item>
           `
         )}

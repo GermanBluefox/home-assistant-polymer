@@ -1,18 +1,16 @@
 import {
-  html,
-  LitElement,
-  TemplateResult,
-  customElement,
-  property,
   css,
   CSSResult,
+  customElement,
+  html,
+  LitElement,
+  internalProperty,
+  TemplateResult,
 } from "lit-element";
-
-import { LovelaceBadge } from "../types";
-import { HomeAssistant } from "../../../types";
-import { ErrorBadgeConfig } from "./types";
-
 import "../../../components/ha-label-badge";
+import { HomeAssistant } from "../../../types";
+import { LovelaceBadge } from "../types";
+import { ErrorBadgeConfig } from "./types";
 
 export const createErrorBadgeElement = (config) => {
   const el = document.createElement("hui-error-badge");
@@ -29,13 +27,13 @@ export const createErrorBadgeConfig = (error) => ({
 export class HuiErrorBadge extends LitElement implements LovelaceBadge {
   public hass?: HomeAssistant;
 
-  @property() private _config?: ErrorBadgeConfig;
+  @internalProperty() private _config?: ErrorBadgeConfig;
 
   public setConfig(config: ErrorBadgeConfig): void {
     this._config = config;
   }
 
-  protected render(): TemplateResult | void {
+  protected render(): TemplateResult {
     if (!this._config) {
       return html``;
     }

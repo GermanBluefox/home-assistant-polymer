@@ -1,25 +1,24 @@
 import {
-  html,
-  LitElement,
-  TemplateResult,
-  customElement,
-  property,
   css,
   CSSResult,
+  customElement,
+  html,
+  LitElement,
+  property,
   PropertyValues,
+  TemplateResult,
 } from "lit-element";
-
-import "../../../components/ha-card";
-
-import { LovelaceCard, LovelaceCardEditor } from "../types";
-import { HomeAssistant } from "../../../types";
 import { classMap } from "lit-html/directives/class-map";
-import { PictureCardConfig } from "./types";
+import { ifDefined } from "lit-html/directives/if-defined";
 import { applyThemesOnElement } from "../../../common/dom/apply_themes_on_element";
-import { actionHandler } from "../common/directives/action-handler-directive";
-import { hasAction } from "../common/has-action";
+import "../../../components/ha-card";
 import { ActionHandlerEvent } from "../../../data/lovelace";
+import { HomeAssistant } from "../../../types";
+import { actionHandler } from "../common/directives/action-handler-directive";
 import { handleAction } from "../common/handle-action";
+import { hasAction } from "../common/has-action";
+import { LovelaceCard, LovelaceCardEditor } from "../types";
+import { PictureCardConfig } from "./types";
 
 @customElement("hui-picture-card")
 export class HuiPictureCard extends LitElement implements LovelaceCard {
@@ -29,21 +28,22 @@ export class HuiPictureCard extends LitElement implements LovelaceCard {
     );
     return document.createElement("hui-picture-card-editor");
   }
-  public static getStubConfig(): object {
+
+  public static getStubConfig(): PictureCardConfig {
     return {
-      image:
-        "https://www.home-assistant.io/images/merchandise/shirt-frontpage.png",
+      type: "picture",
+      image: "https://demo.home-assistant.io/stub_config/t-shirt-promo.png",
       tap_action: { action: "none" },
       hold_action: { action: "none" },
     };
   }
 
-  public hass?: HomeAssistant;
+  @property({ attribute: false }) public hass?: HomeAssistant;
 
   @property() protected _config?: PictureCardConfig;
 
   public getCardSize(): number {
-    return 3;
+    return 5;
   }
 
   public setConfig(config: PictureCardConfig): void {
@@ -52,6 +52,13 @@ export class HuiPictureCard extends LitElement implements LovelaceCard {
     }
 
     this._config = config;
+  }
+
+  protected shouldUpdate(changedProps: PropertyValues): boolean {
+    if (changedProps.size === 1 && changedProps.has("hass")) {
+      return !changedProps.get("hass");
+    }
+    return true;
   }
 
   protected updated(changedProps: PropertyValues): void {
@@ -74,7 +81,7 @@ export class HuiPictureCard extends LitElement implements LovelaceCard {
     }
   }
 
-  protected render(): TemplateResult | void {
+  protected render(): TemplateResult {
     if (!this._config || !this.hass) {
       return html``;
     }
@@ -86,10 +93,14 @@ export class HuiPictureCard extends LitElement implements LovelaceCard {
           hasHold: hasAction(this._config!.hold_action),
           hasDoubleClick: hasAction(this._config!.double_tap_action),
         })}
-        tabindex="0"
+        tabindex=${ifDefined(
+          hasAction(this._config.tap_action) ? "0" : undefined
+        )}
         class="${classMap({
           clickable: Boolean(
-            this._config.tap_action || this._config.hold_action
+            this._config.tap_action ||
+              this._config.hold_action ||
+              this._config.double_tap_action
           ),
         })}"
       >
@@ -102,6 +113,7 @@ export class HuiPictureCard extends LitElement implements LovelaceCard {
     return css`
       ha-card {
         overflow: hidden;
+        height: 100%;
       }
 
       ha-card.clickable {

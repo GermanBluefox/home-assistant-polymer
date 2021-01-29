@@ -1,48 +1,51 @@
 import {
-  html,
-  LitElement,
-  TemplateResult,
-  property,
-  customElement,
   css,
   CSSResult,
+  customElement,
+  html,
+  internalProperty,
+  LitElement,
+  property,
+  TemplateResult,
 } from "lit-element";
-
-import "../components/hui-image";
-
-import { computeTooltip } from "../common/compute-tooltip";
-import { LovelaceElement, ImageElementConfig } from "./types";
-import { HomeAssistant } from "../../../types";
-import { actionHandler } from "../common/directives/action-handler-directive";
-import { hasAction } from "../common/has-action";
+import { ifDefined } from "lit-html/directives/if-defined";
 import { ActionHandlerEvent } from "../../../data/lovelace";
+import { HomeAssistant } from "../../../types";
+import { computeTooltip } from "../common/compute-tooltip";
+import { actionHandler } from "../common/directives/action-handler-directive";
 import { handleAction } from "../common/handle-action";
+import { hasAction } from "../common/has-action";
+import "../components/hui-image";
+import { ImageElementConfig, LovelaceElement } from "./types";
 
 @customElement("hui-image-element")
 export class HuiImageElement extends LitElement implements LovelaceElement {
-  @property() public hass?: HomeAssistant;
-  @property() private _config?: ImageElementConfig;
+  @property({ attribute: false }) public hass?: HomeAssistant;
+
+  @internalProperty() private _config?: ImageElementConfig;
 
   public setConfig(config: ImageElementConfig): void {
     if (!config) {
       throw Error("Error in element configuration");
     }
 
+    this._config = { hold_action: { action: "more-info" }, ...config };
+
+    // eslint-disable-next-line wc/no-self-class
     this.classList.toggle(
       "clickable",
-      config.tap_action && config.tap_action.action !== "none"
+      this._config.tap_action && this._config.tap_action.action !== "none"
     );
-    this._config = config;
   }
 
-  protected render(): TemplateResult | void {
+  protected render(): TemplateResult {
     if (!this._config || !this.hass) {
       return html``;
     }
 
     return html`
       <hui-image
-        .hass="${this.hass}"
+        .hass=${this.hass}
         .entity="${this._config.entity}"
         .image="${this._config.image}"
         .stateImage="${this._config.state_image}"
@@ -56,7 +59,9 @@ export class HuiImageElement extends LitElement implements LovelaceElement {
           hasHold: hasAction(this._config!.hold_action),
           hasDoubleClick: hasAction(this._config!.double_tap_action),
         })}
-        tabindex="0"
+        tabindex=${ifDefined(
+          hasAction(this._config.tap_action) ? "0" : undefined
+        )}
       ></hui-image>
     `;
   }

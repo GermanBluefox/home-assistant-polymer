@@ -1,36 +1,38 @@
+import "@polymer/paper-input/paper-input";
 import {
+  css,
+  CSSResult,
+  customElement,
   html,
   LitElement,
-  TemplateResult,
-  customElement,
   property,
+  internalProperty,
+  TemplateResult,
 } from "lit-element";
-import "@polymer/paper-input/paper-input";
-
-import { struct } from "../../common/structs/struct";
-import { EntitiesEditorEvent, EditorTarget } from "../types";
-import { HomeAssistant } from "../../../../types";
-import { LovelaceCardEditor } from "../../types";
+import { isComponentLoaded } from "../../../../common/config/is_component_loaded";
 import { fireEvent } from "../../../../common/dom/fire_event";
+import { HomeAssistant } from "../../../../types";
 import { ShoppingListCardConfig } from "../../cards/types";
-
 import "../../components/hui-theme-select-editor";
+import { LovelaceCardEditor } from "../../types";
+import { EditorTarget, EntitiesEditorEvent } from "../types";
+import { string, assert, object, optional } from "superstruct";
 
-const cardConfigStruct = struct({
-  type: "string",
-  title: "string?",
-  theme: "string?",
+const cardConfigStruct = object({
+  type: string(),
+  title: optional(string()),
+  theme: optional(string()),
 });
 
 @customElement("hui-shopping-list-card-editor")
 export class HuiShoppingListEditor extends LitElement
   implements LovelaceCardEditor {
-  @property() public hass?: HomeAssistant;
+  @property({ attribute: false }) public hass?: HomeAssistant;
 
-  @property() private _config?: ShoppingListCardConfig;
+  @internalProperty() private _config?: ShoppingListCardConfig;
 
   public setConfig(config: ShoppingListCardConfig): void {
-    config = cardConfigStruct(config);
+    assert(config, cardConfigStruct);
     this._config = config;
   }
 
@@ -39,16 +41,25 @@ export class HuiShoppingListEditor extends LitElement
   }
 
   get _theme(): string {
-    return this._config!.theme || "Backend-selected";
+    return this._config!.theme || "";
   }
 
-  protected render(): TemplateResult | void {
-    if (!this.hass) {
+  protected render(): TemplateResult {
+    if (!this.hass || !this._config) {
       return html``;
     }
 
     return html`
       <div class="card-config">
+        ${!isComponentLoaded(this.hass, "shopping_list")
+          ? html`
+              <div class="error">
+                ${this.hass.localize(
+                  "ui.panel.lovelace.editor.card.shopping-list.integration_not_loaded"
+                )}
+              </div>
+            `
+          : ""}
         <paper-input
           .label="${this.hass.localize(
             "ui.panel.lovelace.editor.card.generic.title"
@@ -60,10 +71,10 @@ export class HuiShoppingListEditor extends LitElement
           @value-changed="${this._valueChanged}"
         ></paper-input>
         <hui-theme-select-editor
-          .hass="${this.hass}"
+          .hass=${this.hass}
           .value="${this._theme}"
           .configValue="${"theme"}"
-          @theme-changed="${this._valueChanged}"
+          @value-changed="${this._valueChanged}"
         ></hui-theme-select-editor>
       </div>
     `;
@@ -80,6 +91,7 @@ export class HuiShoppingListEditor extends LitElement
     }
     if (target.configValue) {
       if (target.value === "") {
+        this._config = { ...this._config };
         delete this._config[target.configValue!];
       } else {
         this._config = {
@@ -89,6 +101,14 @@ export class HuiShoppingListEditor extends LitElement
       }
     }
     fireEvent(this, "config-changed", { config: this._config });
+  }
+
+  static get styles(): CSSResult {
+    return css`
+      .error {
+        color: var(--error-color);
+      }
+    `;
   }
 }
 

@@ -1,22 +1,33 @@
+import {
+  customElement,
+  html,
+  LitElement,
+  property,
+  internalProperty,
+} from "lit-element";
+import { fireEvent } from "../../../../../common/dom/fire_event";
 import "../../../../../components/device/ha-device-picker";
 import "../../../../../components/device/ha-device-trigger-picker";
 import "../../../../../components/ha-form/ha-form";
-
 import {
-  fetchDeviceTriggerCapabilities,
   deviceAutomationsEqual,
   DeviceTrigger,
+  fetchDeviceTriggerCapabilities,
+  DeviceCapabilities,
 } from "../../../../../data/device_automation";
-import { LitElement, customElement, property, html } from "lit-element";
-import { fireEvent } from "../../../../../common/dom/fire_event";
 import { HomeAssistant } from "../../../../../types";
+import memoizeOne from "memoize-one";
 
 @customElement("ha-automation-trigger-device")
 export class HaDeviceTrigger extends LitElement {
-  @property() public hass!: HomeAssistant;
-  @property() public trigger!: DeviceTrigger;
-  @property() private _deviceId?: string;
-  @property() private _capabilities?;
+  @property({ attribute: false }) public hass!: HomeAssistant;
+
+  @property({ type: Object }) public trigger!: DeviceTrigger;
+
+  @internalProperty() private _deviceId?: string;
+
+  @internalProperty() private _capabilities?: DeviceCapabilities;
+
   private _origTrigger?: DeviceTrigger;
 
   public static get defaultConfig() {
@@ -27,34 +38,43 @@ export class HaDeviceTrigger extends LitElement {
     };
   }
 
+  private _extraFieldsData = memoizeOne(
+    (trigger: DeviceTrigger, capabilities: DeviceCapabilities) => {
+      const extraFieldsData: { [key: string]: any } = {};
+      capabilities.extra_fields.forEach((item) => {
+        if (trigger[item.name] !== undefined) {
+          extraFieldsData![item.name] = trigger[item.name];
+        }
+      });
+      return extraFieldsData;
+    }
+  );
+
   protected render() {
     const deviceId = this._deviceId || this.trigger.device_id;
-
-    const extraFieldsData =
-      this._capabilities && this._capabilities.extra_fields
-        ? this._capabilities.extra_fields.map((item) => {
-            return { [item.name]: this.trigger[item.name] };
-          })
-        : undefined;
 
     return html`
       <ha-device-picker
         .value=${deviceId}
         @value-changed=${this._devicePicked}
         .hass=${this.hass}
-        label="Device"
+        label=${this.hass.localize(
+          "ui.panel.config.automation.editor.triggers.type.device.label"
+        )}
       ></ha-device-picker>
       <ha-device-trigger-picker
         .value=${this.trigger}
         .deviceId=${deviceId}
         @value-changed=${this._deviceTriggerPicked}
         .hass=${this.hass}
-        label="Trigger"
+        label=${this.hass.localize(
+          "ui.panel.config.automation.editor.triggers.type.device.trigger"
+        )}
       ></ha-device-trigger-picker>
-      ${extraFieldsData
+      ${this._capabilities?.extra_fields
         ? html`
             <ha-form
-              .data=${Object.assign({}, ...extraFieldsData)}
+              .data=${this._extraFieldsData(this.trigger, this._capabilities)}
               .schema=${this._capabilities.extra_fields}
               .computeLabel=${this._extraFieldsComputeLabelCallback(
                 this.hass.localize
@@ -87,7 +107,7 @@ export class HaDeviceTrigger extends LitElement {
 
     this._capabilities = trigger.domain
       ? await fetchDeviceTriggerCapabilities(this.hass, trigger)
-      : null;
+      : undefined;
   }
 
   private _devicePicked(ev) {
@@ -107,7 +127,7 @@ export class HaDeviceTrigger extends LitElement {
     fireEvent(this, "value-changed", { value: trigger });
   }
 
-  private _extraFieldsChanged(ev) {
+  private _extraFieldsChanged(ev: CustomEvent) {
     ev.stopPropagation();
     fireEvent(this, "value-changed", {
       value: {
@@ -123,5 +143,11 @@ export class HaDeviceTrigger extends LitElement {
       localize(
         `ui.panel.config.automation.editor.triggers.type.device.extra_fields.${schema.name}`
       ) || schema.name;
+  }
+}
+
+declare global {
+  interface HTMLElementTagNameMap {
+    "ha-automation-trigger-device": HaDeviceTrigger;
   }
 }

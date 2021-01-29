@@ -1,4 +1,7 @@
 export const UNAVAILABLE = "unavailable";
+export const UNKNOWN = "unknown";
+
+export const UNAVAILABLE_STATES = [UNAVAILABLE, UNKNOWN];
 
 export const ENTITY_COMPONENT_DOMAINS = [
   "air_quality",
@@ -14,7 +17,6 @@ export const ENTITY_COMPONENT_DOMAINS = [
   "fan",
   "geo_location",
   "group",
-  "history_graph",
   "image_processing",
   "input_boolean",
   "input_datetime",

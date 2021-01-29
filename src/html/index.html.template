@@ -1,29 +1,20 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
   <head>
     <link rel="preload" href="<%= latestCoreJS %>" as="script" crossorigin="use-credentials" />
-    <link
-      rel="preload"
-      href="/static/fonts/roboto/Roboto-Regular.woff2"
-      as="font"
-      crossorigin
-    />
-    <link
-      rel="preload"
-      href="/static/fonts/roboto/Roboto-Medium.woff2"
-      as="font"
-      crossorigin
-    />
+    <link rel="preload" href="<%= latestAppJS %>" as="script" crossorigin="use-credentials" />
     <%= renderTemplate('_header') %>
     <title>Home Assistant</title>
+    <link rel="mask-icon" href="/static/icons/mask-icon.svg" color="#03a9f4" />
     <link
       rel="apple-touch-icon"
       sizes="180x180"
       href="/static/icons/favicon-apple-180x180.png"
     />
-    <link rel="mask-icon" href="/static/icons/mask-icon.svg" color="#03a9f4" />
     <meta name="apple-itunes-app" content="app-id=1099568401" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="apple-mobile-web-app-title" content="Home Assistant">
     <meta
       name="msapplication-square70x70logo"
       content="/static/icons/tile-win-70x70.png"
@@ -44,12 +35,24 @@
     <meta name="mobile-web-app-capable" content="yes" />
     <meta name="referrer" content="same-origin" />
     <meta name="theme-color" content="#THEMEC" />
+    <meta name="color-scheme" content="dark light" />
     <style>
       #ha-init-skeleton::before {
         display: block;
         content: "";
         height: 112px;
         background-color: #THEMEC;
+      }
+      html {
+        background-color: var(--primary-background-color);
+      }
+      @media (prefers-color-scheme: dark) {
+        html {
+          background-color: #111111;
+        }
+        #ha-init-skeleton::before {
+          background-color: #1c1c1c;
+        }
       }
     </style>
   </head>
@@ -58,37 +61,44 @@
     <home-assistant> </home-assistant>
 
     <%= renderTemplate('_js_base') %>
+    <%= renderTemplate('_preload_roboto') %>
 
-    <script type="module" crossorigin="use-credentials">
-      import "<%= latestCoreJS %>";
-      import "<%= latestAppJS %>";
-      import "<%= latestHassIconsJS %>";
+    <script crossorigin="use-credentials">
+      import("<%= latestCoreJS %>");
+      import("<%= latestAppJS %>");
       window.customPanelJS = "<%= latestCustomPanelJS %>";
+      window.latestJS = true;
     </script>
+    <script>
     {% for extra_module in extra_modules -%}
-    <script type="module" crossorigin="use-credentials" src="{{ extra_module }}"></script>
+    import("{{ extra_module }}");
     {% endfor -%}
-    
-
-    <script nomodule>
-      (function() {
-        // // Safari 10.1 supports type=module but ignores nomodule, so we add this check.
-        if (!isS101) {
-          window.customPanelJS = "<%= es5CustomPanelJS %>";
-          _ls("/static/polyfills/custom-elements-es5-adapter.js");
-          _ls("<%= es5Compatibility %>");
-          _ls("<%= es5CoreJS %>");
-          _ls("<%= es5AppJS %>");
-          _ls("<%= es5HassIconsJS %>");
-          {% for extra_script in extra_js_es5 -%}
-          _ls("{{ extra_script }}");
-          {% endfor -%}
-        }
-      })();
     </script>
 
-    {% for extra_url in extra_urls -%}
-    <link rel="import" href="{{ extra_url }}" async />
-    {% endfor -%}
+    <script>
+        if (!window.latestJS) {
+          window.customPanelJS = "<%= es5CustomPanelJS %>";
+
+          <% if (useRollup) { %>
+            _ls("/static/js/s.min.js").onload = function() {
+              // Although core and app can load in any order, we need to
+              // force loading core first because it contains polyfills
+              return System.import("<%= es5CoreJS %>").then(function() {
+                System.import("<%= es5AppJS %>");
+              });
+            }
+          <% } else { %>
+            _ls("<%= es5CoreJS %>");
+            _ls("<%= es5AppJS %>");
+          <% } %>
+        }
+    </script>
+    <script>
+      if (!window.latestJS) {
+        {% for extra_script in extra_js_es5 -%}
+        _ls("{{ extra_script }}");
+        {% endfor -%}
+      }
+    </script>
   </body>
 </html>

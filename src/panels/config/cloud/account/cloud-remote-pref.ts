@@ -1,35 +1,34 @@
-import {
-  html,
-  LitElement,
-  TemplateResult,
-  customElement,
-  CSSResult,
-  css,
-  property,
-} from "lit-element";
 import "@material/mwc-button";
 import "@polymer/paper-item/paper-item-body";
-
+import {
+  css,
+  CSSResult,
+  customElement,
+  html,
+  LitElement,
+  property,
+  TemplateResult,
+} from "lit-element";
+import { fireEvent } from "../../../../common/dom/fire_event";
 import "../../../../components/ha-card";
 import "../../../../components/ha-switch";
-
-// tslint:disable-next-line
-import { HaSwitch } from "../../../../components/ha-switch";
-import { fireEvent } from "../../../../common/dom/fire_event";
-import { HomeAssistant } from "../../../../types";
+// eslint-disable-next-line
+import type { HaSwitch } from "../../../../components/ha-switch";
 import {
+  CloudStatusLoggedIn,
   connectCloudRemote,
   disconnectCloudRemote,
-  CloudStatusLoggedIn,
 } from "../../../../data/cloud";
+import type { HomeAssistant } from "../../../../types";
 import { showCloudCertificateDialog } from "../dialog-cloud-certificate/show-dialog-cloud-certificate";
 
 @customElement("cloud-remote-pref")
 export class CloudRemotePref extends LitElement {
-  @property() public hass?: HomeAssistant;
+  @property({ attribute: false }) public hass?: HomeAssistant;
+
   @property() public cloudStatus?: CloudStatusLoggedIn;
 
-  protected render(): TemplateResult | void {
+  protected render(): TemplateResult {
     if (!this.cloudStatus) {
       return html``;
     }
@@ -77,12 +76,21 @@ export class CloudRemotePref extends LitElement {
             : this.hass!.localize(
                 "ui.panel.config.cloud.account.remote.instance_will_be_available"
               )}
-          <a href="https://${remote_domain}" target="_blank" class="break-word">
+          <a
+            href="https://${remote_domain}"
+            target="_blank"
+            class="break-word"
+            rel="noreferrer"
+          >
             https://${remote_domain}</a
           >.
         </div>
         <div class="card-actions">
-          <a href="https://www.nabucasa.com/config/remote/" target="_blank">
+          <a
+            href="https://www.nabucasa.com/config/remote/"
+            target="_blank"
+            rel="noreferrer"
+          >
             <mwc-button
               >${this.hass!.localize(
                 "ui.panel.config.cloud.account.remote.link_learn_how_it_works"
@@ -141,6 +149,10 @@ export class CloudRemotePref extends LitElement {
         position: absolute;
         right: 24px;
         top: 32px;
+      }
+      :host([dir="rtl"]) .switch {
+        right: auto;
+        left: 24px;
       }
       .card-actions {
         display: flex;

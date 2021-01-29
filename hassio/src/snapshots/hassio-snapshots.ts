@@ -1,45 +1,57 @@
-import {
-  LitElement,
-  TemplateResult,
-  html,
-  CSSResultArray,
-  css,
-  property,
-  PropertyValues,
-  customElement,
-} from "lit-element";
 import "@material/mwc-button";
-import "@polymer/paper-card/paper-card";
+import "@material/mwc-icon-button";
+import { ActionDetail } from "@material/mwc-list/mwc-list-foundation";
+import "@material/mwc-list/mwc-list-item";
+import {
+  mdiDotsVertical,
+  mdiPackageVariant,
+  mdiPackageVariantClosed,
+} from "@mdi/js";
 import "@polymer/paper-checkbox/paper-checkbox";
+import type { PaperCheckboxElement } from "@polymer/paper-checkbox/paper-checkbox";
 import "@polymer/paper-input/paper-input";
+import type { PaperInputElement } from "@polymer/paper-input/paper-input";
 import "@polymer/paper-radio-button/paper-radio-button";
 import "@polymer/paper-radio-group/paper-radio-group";
-
-import "../components/hassio-card-content";
-import { hassioStyle } from "../resources/hassio-style";
-
-import { showHassioSnapshotDialog } from "../dialogs/snapshot/show-dialog-hassio-snapshot";
-import { HomeAssistant } from "../../../src/types";
+import type { PaperRadioGroupElement } from "@polymer/paper-radio-group/paper-radio-group";
 import {
-  HassioSnapshot,
-  HassioSupervisorInfo,
-  fetchHassioSnapshots,
-  reloadHassioSnapshots,
-  HassioFullSnapshotCreateParams,
-  HassioPartialSnapshotCreateParams,
+  css,
+  CSSResultArray,
+  customElement,
+  html,
+  internalProperty,
+  LitElement,
+  property,
+  PropertyValues,
+  TemplateResult,
+} from "lit-element";
+import { atLeastVersion } from "../../../src/common/config/version";
+import { fireEvent } from "../../../src/common/dom/fire_event";
+import "../../../src/components/buttons/ha-progress-button";
+import "../../../src/components/ha-button-menu";
+import "../../../src/components/ha-card";
+import "../../../src/components/ha-svg-icon";
+import { extractApiErrorMessage } from "../../../src/data/hassio/common";
+import {
   createHassioFullSnapshot,
   createHassioPartialSnapshot,
-} from "../../../src/data/hassio";
+  fetchHassioSnapshots,
+  HassioFullSnapshotCreateParams,
+  HassioPartialSnapshotCreateParams,
+  HassioSnapshot,
+  reloadHassioSnapshots,
+} from "../../../src/data/hassio/snapshot";
+import { HassioSupervisorInfo } from "../../../src/data/hassio/supervisor";
+import "../../../src/layouts/hass-tabs-subpage";
 import { PolymerChangedEvent } from "../../../src/polymer-types";
-import { fireEvent } from "../../../src/common/dom/fire_event";
-
-// Not duplicate, used for typing
-// tslint:disable-next-line
-import { PaperInputElement } from "@polymer/paper-input/paper-input";
-// tslint:disable-next-line
-import { PaperRadioGroupElement } from "@polymer/paper-radio-group/paper-radio-group";
-// tslint:disable-next-line
-import { PaperCheckboxElement } from "@polymer/paper-checkbox/paper-checkbox";
+import { haStyle } from "../../../src/resources/styles";
+import { HomeAssistant, Route } from "../../../src/types";
+import "../components/hassio-card-content";
+import "../components/hassio-upload-snapshot";
+import { showHassioSnapshotDialog } from "../dialogs/snapshot/show-dialog-hassio-snapshot";
+import { showSnapshotUploadDialog } from "../dialogs/snapshot/show-dialog-snapshot-upload";
+import { supervisorTabs } from "../hassio-tabs";
+import { hassioStyle } from "../resources/hassio-style";
 
 interface CheckboxItem {
   slug: string;
@@ -49,15 +61,27 @@ interface CheckboxItem {
 
 @customElement("hassio-snapshots")
 class HassioSnapshots extends LitElement {
-  @property() public hass!: HomeAssistant;
-  @property() public supervisorInfo!: HassioSupervisorInfo;
-  @property() private _snapshotName = "";
-  @property() private _snapshotPassword = "";
-  @property() private _snapshotHasPassword = false;
-  @property() private _snapshotType: HassioSnapshot["type"] = "full";
-  @property() private _snapshots?: HassioSnapshot[] = [];
-  @property() private _addonList: CheckboxItem[] = [];
-  @property() private _folderList: CheckboxItem[] = [
+  @property({ attribute: false }) public hass!: HomeAssistant;
+
+  @property({ type: Boolean }) public narrow!: boolean;
+
+  @property({ attribute: false }) public route!: Route;
+
+  @property({ attribute: false }) public supervisorInfo!: HassioSupervisorInfo;
+
+  @internalProperty() private _snapshotName = "";
+
+  @internalProperty() private _snapshotPassword = "";
+
+  @internalProperty() private _snapshotHasPassword = false;
+
+  @internalProperty() private _snapshotType: HassioSnapshot["type"] = "full";
+
+  @internalProperty() private _snapshots?: HassioSnapshot[] = [];
+
+  @internalProperty() private _addonList: CheckboxItem[] = [];
+
+  @internalProperty() private _folderList: CheckboxItem[] = [
     {
       slug: "homeassistant",
       name: "Home Assistant configuration",
@@ -65,156 +89,179 @@ class HassioSnapshots extends LitElement {
     },
     { slug: "ssl", name: "SSL", checked: true },
     { slug: "share", name: "Share", checked: true },
+    { slug: "media", name: "Media", checked: true },
     { slug: "addons/local", name: "Local add-ons", checked: true },
   ];
-  @property() private _creatingSnapshot = false;
-  @property() private _error = "";
+
+  @internalProperty() private _error = "";
 
   public async refreshData() {
     await reloadHassioSnapshots(this.hass);
     await this._updateSnapshots();
   }
 
-  protected render(): TemplateResult | void {
+  protected render(): TemplateResult {
     return html`
-      <div class="content">
-        <div class="card-group">
-          <div class="title">
-            Create snapshot
-            <div class="description">
-              Snapshots allow you to easily backup and restore all data of your
-              Hass.io instance.
-            </div>
-          </div>
-          <paper-card>
-            <div class="card-content">
-              <paper-input
-                autofocus
-                label="Name"
-                name="snapshotName"
-                .value=${this._snapshotName}
-                @value-changed=${this._handleTextValueChanged}
-              ></paper-input>
-              Type:
-              <paper-radio-group
-                name="snapshotType"
-                .selected=${this._snapshotType}
-                @selected-changed=${this._handleRadioValueChanged}
-              >
-                <paper-radio-button name="full">
-                  Full snapshot
-                </paper-radio-button>
-                <paper-radio-button name="partial">
-                  Partial snapshot
-                </paper-radio-button>
-              </paper-radio-group>
-              ${this._snapshotType === "full"
-                ? undefined
-                : html`
-                    Folders:
-                    ${this._folderList.map(
-                      (folder, idx) => html`
-                        <paper-checkbox
-                          .idx=${idx}
-                          .checked=${folder.checked}
-                          @checked-changed=${this._folderChecked}
-                        >
-                          ${folder.name}
-                        </paper-checkbox>
-                      `
-                    )}
-                    Add-ons:
-                    ${this._addonList.map(
-                      (addon, idx) => html`
-                        <paper-checkbox
-                          .idx=${idx}
-                          .checked="{{item.checked}}"
-                          @checked-changed=${this._addonChecked}
-                        >
-                          ${addon.name}
-                        </paper-checkbox>
-                      `
-                    )}
-                  `}
-              Security:
-              <paper-checkbox
-                name="snapshotHasPassword"
-                .checked=${this._snapshotHasPassword}
-                @checked-changed=${this._handleCheckboxValueChanged}
-              >
-                Password protection
-              </paper-checkbox>
-              ${this._snapshotHasPassword
-                ? html`
-                    <paper-input
-                      label="Password"
-                      type="password"
-                      name="snapshotPassword"
-                      .value=${this._snapshotPassword}
-                      @value-changed=${this._handleTextValueChanged}
-                    ></paper-input>
-                  `
-                : undefined}
-              ${this._error !== ""
-                ? html`
-                    <p class="error">${this._error}</p>
-                  `
-                : undefined}
-            </div>
-            <div class="card-actions">
-              <mwc-button
-                .disabled=${this._creatingSnapshot}
-                @click=${this._createSnapshot}
-              >
-                Create
-              </mwc-button>
-            </div>
-          </paper-card>
-        </div>
+      <hass-tabs-subpage
+        .hass=${this.hass}
+        .narrow=${this.narrow}
+        hassio
+        main-page
+        .route=${this.route}
+        .tabs=${supervisorTabs}
+      >
+        <span slot="header">Snapshots</span>
+        <ha-button-menu
+          corner="BOTTOM_START"
+          slot="toolbar-icon"
+          @action=${this._handleAction}
+        >
+          <mwc-icon-button slot="trigger" alt="menu">
+            <ha-svg-icon .path=${mdiDotsVertical}></ha-svg-icon>
+          </mwc-icon-button>
+          <mwc-list-item>
+            Reload
+          </mwc-list-item>
+          ${atLeastVersion(this.hass.config.version, 0, 116)
+            ? html`<mwc-list-item>
+                Upload snapshot
+              </mwc-list-item>`
+            : ""}
+        </ha-button-menu>
 
-        <div class="card-group">
-          <div class="title">Available snapshots</div>
-          ${this._snapshots === undefined
-            ? undefined
-            : this._snapshots.length === 0
-            ? html`
-                <paper-card>
-                  <div class="card-content">
-                    You don't have any snapshots yet.
-                  </div>
-                </paper-card>
-              `
-            : this._snapshots.map(
-                (snapshot) => html`
-                  <paper-card
-                    class="pointer"
-                    .snapshot=${snapshot}
-                    @click=${this._snapshotClicked}
-                  >
+        <div class="content">
+          <h1>
+            Create Snapshot
+          </h1>
+          <p class="description">
+            Snapshots allow you to easily backup and restore all data of your
+            Home Assistant instance.
+          </p>
+          <div class="card-group">
+            <ha-card>
+              <div class="card-content">
+                <paper-input
+                  autofocus
+                  label="Name"
+                  name="snapshotName"
+                  .value=${this._snapshotName}
+                  @value-changed=${this._handleTextValueChanged}
+                ></paper-input>
+                Type:
+                <paper-radio-group
+                  name="snapshotType"
+                  .selected=${this._snapshotType}
+                  @selected-changed=${this._handleRadioValueChanged}
+                >
+                  <paper-radio-button name="full">
+                    Full snapshot
+                  </paper-radio-button>
+                  <paper-radio-button name="partial">
+                    Partial snapshot
+                  </paper-radio-button>
+                </paper-radio-group>
+                ${this._snapshotType === "full"
+                  ? undefined
+                  : html`
+                      Folders:
+                      ${this._folderList.map(
+                        (folder, idx) => html`
+                          <paper-checkbox
+                            .idx=${idx}
+                            .checked=${folder.checked}
+                            @checked-changed=${this._folderChecked}
+                          >
+                            ${folder.name}
+                          </paper-checkbox>
+                        `
+                      )}
+                      Add-ons:
+                      ${this._addonList.map(
+                        (addon, idx) => html`
+                          <paper-checkbox
+                            .idx=${idx}
+                            .checked=${addon.checked}
+                            @checked-changed=${this._addonChecked}
+                          >
+                            ${addon.name}
+                          </paper-checkbox>
+                        `
+                      )}
+                    `}
+                Security:
+                <paper-checkbox
+                  name="snapshotHasPassword"
+                  .checked=${this._snapshotHasPassword}
+                  @checked-changed=${this._handleCheckboxValueChanged}
+                >
+                  Password protection
+                </paper-checkbox>
+                ${this._snapshotHasPassword
+                  ? html`
+                      <paper-input
+                        label="Password"
+                        type="password"
+                        name="snapshotPassword"
+                        .value=${this._snapshotPassword}
+                        @value-changed=${this._handleTextValueChanged}
+                      ></paper-input>
+                    `
+                  : undefined}
+                ${this._error !== ""
+                  ? html` <p class="error">${this._error}</p> `
+                  : undefined}
+              </div>
+              <div class="card-actions">
+                <ha-progress-button @click=${this._createSnapshot}>
+                  Create
+                </ha-progress-button>
+              </div>
+            </ha-card>
+          </div>
+
+          <h1>Available Snapshots</h1>
+          <div class="card-group">
+            ${this._snapshots === undefined
+              ? undefined
+              : this._snapshots.length === 0
+              ? html`
+                  <ha-card>
                     <div class="card-content">
-                      <hassio-card-content
-                        .hass=${this.hass}
-                        .title=${snapshot.name || snapshot.slug}
-                        .description=${this._computeDetails(snapshot)}
-                        .datetime=${snapshot.date}
-                        .icon=${snapshot.type === "full"
-                          ? "hassio:package-variant-closed"
-                          : "hassio:package-variant"}
-                        .
-                        .icon-class="snapshot"
-                      ></hassio-card-content>
+                      You don't have any snapshots yet.
                     </div>
-                  </paper-card>
+                  </ha-card>
                 `
-              )}
+              : this._snapshots.map(
+                  (snapshot) => html`
+                    <ha-card
+                      class="pointer"
+                      .snapshot=${snapshot}
+                      @click=${this._snapshotClicked}
+                    >
+                      <div class="card-content">
+                        <hassio-card-content
+                          .hass=${this.hass}
+                          .title=${snapshot.name || snapshot.slug}
+                          .description=${this._computeDetails(snapshot)}
+                          .datetime=${snapshot.date}
+                          .icon=${snapshot.type === "full"
+                            ? mdiPackageVariantClosed
+                            : mdiPackageVariant}
+                          icon-class="snapshot"
+                        ></hassio-card-content>
+                      </div>
+                    </ha-card>
+                  `
+                )}
+          </div>
         </div>
-      </div>
+      </hass-tabs-subpage>
     `;
   }
 
   protected firstUpdated(changedProps: PropertyValues) {
     super.firstUpdated(changedProps);
-    this._updateSnapshots();
+    this.refreshData();
   }
 
   protected updated(changedProps: PropertyValues) {
@@ -226,6 +273,17 @@ class HassioSnapshots extends LitElement {
           checked: true,
         }))
         .sort((a, b) => (a.name < b.name ? -1 : 1));
+    }
+  }
+
+  private _handleAction(ev: CustomEvent<ActionDetail>) {
+    switch (ev.detail.index) {
+      case 0:
+        this.refreshData();
+        break;
+      case 1:
+        this._showUploadSnapshotDialog();
+        break;
     }
   }
 
@@ -263,17 +321,20 @@ class HassioSnapshots extends LitElement {
       this._snapshots = await fetchHassioSnapshots(this.hass);
       this._snapshots.sort((a, b) => (a.date < b.date ? 1 : -1));
     } catch (err) {
-      this._error = err.message;
+      this._error = extractApiErrorMessage(err);
     }
   }
 
-  private async _createSnapshot() {
+  private async _createSnapshot(ev: CustomEvent): Promise<void> {
+    const button = ev.currentTarget as any;
+    button.progress = true;
+
     this._error = "";
     if (this._snapshotHasPassword && !this._snapshotPassword.length) {
       this._error = "Please enter a password.";
+      button.progress = false;
       return;
     }
-    this._creatingSnapshot = true;
     await this.updateComplete;
 
     const name =
@@ -313,10 +374,9 @@ class HassioSnapshots extends LitElement {
       this._updateSnapshots();
       fireEvent(this, "hass-api-called", { success: true, response: null });
     } catch (err) {
-      this._error = err.message;
-    } finally {
-      this._creatingSnapshot = false;
+      this._error = extractApiErrorMessage(err);
     }
+    button.progress = false;
   }
 
   private _computeDetails(snapshot: HassioSnapshot) {
@@ -332,8 +392,20 @@ class HassioSnapshots extends LitElement {
     });
   }
 
+  private _showUploadSnapshotDialog() {
+    showSnapshotUploadDialog(this, {
+      showSnapshot: (slug: string) =>
+        showHassioSnapshotDialog(this, {
+          slug,
+          onDelete: () => this._updateSnapshots(),
+        }),
+      reloadSnapshot: () => this.refreshData(),
+    });
+  }
+
   static get styles(): CSSResultArray {
     return [
+      haStyle,
       hassioStyle,
       css`
         paper-radio-group {

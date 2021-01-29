@@ -1,8 +1,10 @@
 // Parse array of entity objects from config
 import { isValidEntityId } from "../../../common/entity/valid_entity_id";
-import { EntityConfig } from "../entity-rows/types";
+import { EntityConfig, LovelaceRowConfig } from "../entity-rows/types";
 
-export const processConfigEntities = <T extends EntityConfig>(
+export const processConfigEntities = <
+  T extends EntityConfig | LovelaceRowConfig
+>(
   entities: Array<T | string>
 ): T[] => {
   if (!entities || !Array.isArray(entities)) {
@@ -22,10 +24,9 @@ export const processConfigEntities = <T extends EntityConfig>(
       let config: T;
 
       if (typeof entityConf === "string") {
-        // tslint:disable-next-line:no-object-literal-type-assertion
         config = { entity: entityConf } as T;
       } else if (typeof entityConf === "object" && !Array.isArray(entityConf)) {
-        if (!entityConf.entity) {
+        if (!("entity" in entityConf)) {
           throw new Error(
             `Entity object at position ${index} is missing entity field.`
           );
@@ -35,9 +36,11 @@ export const processConfigEntities = <T extends EntityConfig>(
         throw new Error(`Invalid entity specified at position ${index}.`);
       }
 
-      if (!isValidEntityId(config.entity)) {
+      if (!isValidEntityId((config as EntityConfig).entity!)) {
         throw new Error(
-          `Invalid entity ID at position ${index}: ${config.entity}`
+          `Invalid entity ID at position ${index}: ${
+            (config as EntityConfig).entity
+          }`
         );
       }
 

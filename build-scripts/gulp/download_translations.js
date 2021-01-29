@@ -1,9 +1,14 @@
 const del = require("del");
 const gulp = require("gulp");
+const fs = require("fs");
 const mapStream = require("map-stream");
 
-const inDir = "translations";
-const downloadDir = inDir + "/downloads";
+const inDirFrontend = "translations/frontend";
+const inDirBackend = "translations/backend";
+const downloadDir = "translations/downloads";
+const srcMeta = "src/translations/translationMetadata.json";
+
+const encoding = "utf8";
 
 const tasks = [];
 
@@ -12,7 +17,7 @@ function hasHtml(data) {
 }
 
 function recursiveCheckHasHtml(file, data, errors, recKey) {
-  Object.keys(data).forEach(function(key) {
+  Object.keys(data).forEach(function (key) {
     if (typeof data[key] === "object") {
       const nextRecKey = recKey ? `${recKey}.${key}` : key;
       recursiveCheckHasHtml(file, data[key], errors, nextRecKey);
@@ -25,7 +30,7 @@ function recursiveCheckHasHtml(file, data, errors, recKey) {
 function checkHtml() {
   const errors = [];
 
-  return mapStream(function(file, cb) {
+  return mapStream(function (file, cb) {
     const content = file.contents;
     let error;
     if (content) {
@@ -42,20 +47,36 @@ function checkHtml() {
 }
 
 let taskName = "clean-downloaded-translations";
-gulp.task(taskName, function() {
+gulp.task(taskName, function () {
   return del([`${downloadDir}/**`]);
 });
 tasks.push(taskName);
 
 taskName = "check-translations-html";
-gulp.task(taskName, function() {
+gulp.task(taskName, function () {
   return gulp.src(`${downloadDir}/*.json`).pipe(checkHtml());
 });
 tasks.push(taskName);
 
+taskName = "check-all-files-exist";
+gulp.task(taskName, function () {
+  const file = fs.readFileSync(srcMeta, { encoding });
+  const meta = JSON.parse(file);
+  Object.keys(meta).forEach((lang) => {
+    if (!fs.existsSync(`${inDirFrontend}/${lang}.json`)) {
+      fs.writeFileSync(`${inDirFrontend}/${lang}.json`, JSON.stringify({}));
+    }
+    if (!fs.existsSync(`${inDirBackend}/${lang}.json`)) {
+      fs.writeFileSync(`${inDirBackend}/${lang}.json`, JSON.stringify({}));
+    }
+  });
+  return Promise.resolve();
+});
+tasks.push(taskName);
+
 taskName = "move-downloaded-translations";
-gulp.task(taskName, function() {
-  return gulp.src(`${downloadDir}/*.json`).pipe(gulp.dest(inDir));
+gulp.task(taskName, function () {
+  return gulp.src(`${downloadDir}/*.json`).pipe(gulp.dest(inDirFrontend));
 });
 tasks.push(taskName);
 
@@ -65,6 +86,7 @@ gulp.task(
   gulp.series(
     "check-translations-html",
     "move-downloaded-translations",
+    "check-all-files-exist",
     "clean-downloaded-translations"
   )
 );

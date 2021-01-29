@@ -1,13 +1,12 @@
 import "@polymer/iron-flex-layout/iron-flex-layout-classes";
 import "@polymer/paper-input/paper-input";
 import { html } from "@polymer/polymer/lib/utils/html-tag";
+/* eslint-plugin-disable lit */
 import { PolymerElement } from "@polymer/polymer/polymer-element";
 import "@vaadin/vaadin-date-picker/theme/material/vaadin-date-picker";
-
+import { attributeClassNames } from "../../../common/entity/attribute_class_names";
 import "../../../components/ha-relative-time";
 import "../../../components/paper-time-input";
-
-import { attributeClassNames } from "../../../common/entity/attribute_class_names";
 
 class DatetimeInput extends PolymerElement {
   static get template() {
@@ -79,14 +78,14 @@ class DatetimeInput extends PolymerElement {
     if (stateObj.state === "unknown") {
       return "";
     }
-    var monthFiller;
+    let monthFiller;
     if (stateObj.attributes.month < 10) {
       monthFiller = "0";
     } else {
       monthFiller = "";
     }
 
-    var dayFiller;
+    let dayFiller;
     if (stateObj.attributes.day < 10) {
       dayFiller = "0";
     } else {
@@ -120,15 +119,18 @@ class DatetimeInput extends PolymerElement {
     };
 
     if (this.stateObj.attributes.has_time) {
-      changed |=
+      changed =
+        changed ||
         parseInt(this.selectedMinute) !== this.stateObj.attributes.minute;
-      changed |= parseInt(this.selectedHour) !== this.stateObj.attributes.hour;
+      changed =
+        changed ||
+        parseInt(this.selectedHour) !== this.stateObj.attributes.hour;
       if (this.selectedMinute < 10) {
         minuteFiller = "0";
       } else {
         minuteFiller = "";
       }
-      var timeStr =
+      const timeStr =
         this.selectedHour + ":" + minuteFiller + this.selectedMinute;
       serviceData.time = timeStr;
     }
@@ -145,7 +147,7 @@ class DatetimeInput extends PolymerElement {
         this.stateObj.attributes.day
       );
 
-      changed |= dateValState !== dateValInput;
+      changed = changed || dateValState !== dateValInput;
 
       serviceData.date = this.selectedDate;
     }

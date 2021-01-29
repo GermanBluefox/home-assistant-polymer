@@ -1,35 +1,22 @@
 import {
-  html,
-  LitElement,
-  TemplateResult,
-  customElement,
-  property,
   css,
   CSSResult,
+  customElement,
+  html,
+  LitElement,
+  internalProperty,
+  TemplateResult,
 } from "lit-element";
-import { safeDump } from "js-yaml";
-
-import { LovelaceCard } from "../types";
 import { HomeAssistant } from "../../../types";
+import { LovelaceCard } from "../types";
 import { ErrorCardConfig } from "./types";
-
-export const createErrorCardElement = (config) => {
-  const el = document.createElement("hui-error-card");
-  el.setConfig(config);
-  return el;
-};
-
-export const createErrorCardConfig = (error, origConfig) => ({
-  type: "error",
-  error,
-  origConfig,
-});
+import { safeDump } from "js-yaml";
 
 @customElement("hui-error-card")
 export class HuiErrorCard extends LitElement implements LovelaceCard {
   public hass?: HomeAssistant;
 
-  @property() private _config?: ErrorCardConfig;
+  @internalProperty() private _config?: ErrorCardConfig;
 
   public getCardSize(): number {
     return 4;
@@ -39,14 +26,16 @@ export class HuiErrorCard extends LitElement implements LovelaceCard {
     this._config = config;
   }
 
-  protected render(): TemplateResult | void {
+  protected render(): TemplateResult {
     if (!this._config) {
       return html``;
     }
 
     return html`
       ${this._config.error}
-      <pre>${safeDump(this._config.origConfig)}</pre>
+      ${this._config.origConfig
+        ? html`<pre>${safeDump(this._config.origConfig)}</pre>`
+        : ""}
     `;
   }
 
@@ -54,12 +43,15 @@ export class HuiErrorCard extends LitElement implements LovelaceCard {
     return css`
       :host {
         display: block;
-        background-color: #ef5350;
-        color: white;
+        background-color: var(--error-color);
+        color: var(--color-on-error, white);
         padding: 8px;
         font-weight: 500;
         user-select: text;
         cursor: default;
+      }
+      pre {
+        font-family: var(--code-font-family, monospace);
       }
     `;
   }

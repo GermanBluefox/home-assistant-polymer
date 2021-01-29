@@ -1,30 +1,28 @@
+import { HassEntity } from "home-assistant-js-websocket";
 import {
+  customElement,
   html,
+  internalProperty,
   LitElement,
-  TemplateResult,
   property,
   PropertyValues,
-  customElement,
+  TemplateResult,
 } from "lit-element";
-
-import "../components/hui-generic-entity-row";
-import "../components/hui-warning";
-
-import { timerTimeRemaining } from "../../../common/entity/timer_time_remaining";
 import secondsToDuration from "../../../common/datetime/seconds_to_duration";
-
+import { timerTimeRemaining } from "../../../common/entity/timer_time_remaining";
 import { HomeAssistant } from "../../../types";
-import { EntityConfig } from "./types";
-import { HassEntity } from "home-assistant-js-websocket";
 import { hasConfigOrEntityChanged } from "../common/has-changed";
+import "../components/hui-generic-entity-row";
+import { createEntityNotFoundWarning } from "../components/hui-warning";
+import { EntityConfig } from "./types";
 
 @customElement("hui-timer-entity-row")
 class HuiTimerEntityRow extends LitElement {
-  @property() public hass?: HomeAssistant;
+  @property({ attribute: false }) public hass?: HomeAssistant;
 
-  @property() private _config?: EntityConfig;
+  @internalProperty() private _config?: EntityConfig;
 
-  @property() private _timeRemaining?: number;
+  @internalProperty() private _timeRemaining?: number;
 
   private _interval?: number;
 
@@ -50,7 +48,7 @@ class HuiTimerEntityRow extends LitElement {
     }
   }
 
-  protected render(): TemplateResult | void {
+  protected render(): TemplateResult {
     if (!this._config || !this.hass) {
       return html``;
     }
@@ -59,19 +57,15 @@ class HuiTimerEntityRow extends LitElement {
 
     if (!stateObj) {
       return html`
-        <hui-warning
-          >${this.hass.localize(
-            "ui.panel.lovelace.warning.entity_not_found",
-            "entity",
-            this._config.entity
-          )}</hui-warning
-        >
+        <hui-warning>
+          ${createEntityNotFoundWarning(this.hass, this._config.entity)}
+        </hui-warning>
       `;
     }
 
     return html`
-      <hui-generic-entity-row .hass="${this.hass}" .config="${this._config}">
-        <div>${this._computeDisplay(stateObj)}</div>
+      <hui-generic-entity-row .hass=${this.hass} .config=${this._config}>
+        <div class="text-content">${this._computeDisplay(stateObj)}</div>
       </hui-generic-entity-row>
     `;
   }
@@ -131,7 +125,9 @@ class HuiTimerEntityRow extends LitElement {
     }
 
     if (stateObj.state === "idle" || this._timeRemaining === 0) {
-      return this.hass!.localize("state.timer." + stateObj.state);
+      return (
+        this.hass!.localize(`state.timer.${stateObj.state}`) || stateObj.state
+      );
     }
 
     let display = secondsToDuration(this._timeRemaining || 0);

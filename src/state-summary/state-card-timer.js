@@ -1,11 +1,10 @@
 import "@polymer/iron-flex-layout/iron-flex-layout-classes";
 import { html } from "@polymer/polymer/lib/utils/html-tag";
+/* eslint-plugin-disable lit */
 import { PolymerElement } from "@polymer/polymer/polymer-element";
-
-import "../components/entity/state-info";
-
-import { timerTimeRemaining } from "../common/entity/timer_time_remaining";
 import secondsToDuration from "../common/datetime/seconds_to_duration";
+import { timerTimeRemaining } from "../common/entity/timer_time_remaining";
+import "../components/entity/state-info";
 
 class StateCardTimer extends PolymerElement {
   static get template() {
@@ -24,7 +23,7 @@ class StateCardTimer extends PolymerElement {
 
       <div class="horizontal justified layout">
         ${this.stateInfoTemplate}
-        <div class="state">[[_secondsToDuration(timeRemaining)]]</div>
+        <div class="state">[[_displayState(timeRemaining, stateObj)]]</div>
       </div>
     `;
   }
@@ -91,8 +90,10 @@ class StateCardTimer extends PolymerElement {
     this.timeRemaining = timerTimeRemaining(stateObj);
   }
 
-  _secondsToDuration(time) {
-    return secondsToDuration(time);
+  _displayState(time, stateObj) {
+    return time
+      ? secondsToDuration(time)
+      : this.hass.localize(`state.timer.${stateObj.state}`) || stateObj.state;
   }
 }
 customElements.define("state-card-timer", StateCardTimer);

@@ -1,9 +1,9 @@
-import { UpdatingElement, property, PropertyValues } from "lit-element";
+import { property, PropertyValues, UpdatingElement } from "lit-element";
+import memoizeOne from "memoize-one";
+import { navigate } from "../common/navigate";
+import { Route } from "../types";
 import "./hass-error-screen";
 import "./hass-loading-screen";
-import { Route } from "../types";
-import { navigate } from "../common/navigate";
-import memoizeOne from "memoize-one";
 
 const extractPage = (path: string, defaultPage: string) => {
   if (path === "") {
@@ -52,9 +52,13 @@ export class HassRouterPage extends UpdatingElement {
   protected routerOptions!: RouterOptions;
 
   protected _currentPage = "";
+
   private _currentLoadProm?: Promise<void>;
+
   private _cache = {};
+
   private _initialLoadDone = false;
+
   private _computeTail = memoizeOne((route: Route) => {
     const dividerPos = route.path.indexOf("/", 1);
     return dividerPos === -1
@@ -143,9 +147,11 @@ export class HassRouterPage extends UpdatingElement {
       ? routeOptions.load()
       : Promise.resolve();
 
+    let showLoadingScreenTimeout: undefined | number;
+
     // Check when loading the page source failed.
     loadProm.catch((err) => {
-      // tslint:disable-next-line
+      // eslint-disable-next-line
       console.error("Error loading page", newPage, err);
 
       // Verify that we're still trying to show the same page.
@@ -154,12 +160,18 @@ export class HassRouterPage extends UpdatingElement {
       }
 
       // Removes either loading screen or the panel
-      this.removeChild(this.lastChild!);
+      if (this.lastChild) {
+        this.removeChild(this.lastChild!);
+      }
+
+      if (showLoadingScreenTimeout) {
+        clearTimeout(showLoadingScreenTimeout);
+      }
 
       // Show error screen
-      const errorEl = document.createElement("hass-error-screen");
-      errorEl.error = `Error while loading page ${newPage}.`;
-      this.appendChild(errorEl);
+      this.appendChild(
+        this.createErrorScreen(`Error while loading page ${newPage}.`)
+      );
     });
 
     // If we don't show loading screen, just show the panel.
@@ -173,7 +185,7 @@ export class HassRouterPage extends UpdatingElement {
     // That way we won't have a double fast flash on fast connections.
     let created = false;
 
-    setTimeout(() => {
+    showLoadingScreenTimeout = window.setTimeout(() => {
       if (created || this._currentPage !== newPage) {
         return;
       }
@@ -238,6 +250,12 @@ export class HassRouterPage extends UpdatingElement {
 
   protected createLoadingScreen() {
     return document.createElement("hass-loading-screen");
+  }
+
+  protected createErrorScreen(error: string) {
+    const errorEl = document.createElement("hass-error-screen");
+    errorEl.error = error;
+    return errorEl;
   }
 
   /**

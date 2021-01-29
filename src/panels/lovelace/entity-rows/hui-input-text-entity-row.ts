@@ -1,26 +1,26 @@
+import { PaperInputElement } from "@polymer/paper-input/paper-input";
 import {
+  customElement,
   html,
   LitElement,
-  TemplateResult,
   property,
-  customElement,
+  internalProperty,
   PropertyValues,
+  TemplateResult,
 } from "lit-element";
-import { PaperInputElement } from "@polymer/paper-input/paper-input";
-
-import "../components/hui-generic-entity-row";
-import "../components/hui-warning";
-
-import { HomeAssistant } from "../../../types";
-import { EntityRow, EntityConfig } from "./types";
+import { UNAVAILABLE_STATES } from "../../../data/entity";
 import { setValue } from "../../../data/input_text";
+import { HomeAssistant } from "../../../types";
 import { hasConfigOrEntityChanged } from "../common/has-changed";
+import "../components/hui-generic-entity-row";
+import { createEntityNotFoundWarning } from "../components/hui-warning";
+import { EntityConfig, LovelaceRow } from "./types";
 
 @customElement("hui-input-text-entity-row")
-class HuiInputTextEntityRow extends LitElement implements EntityRow {
-  @property() public hass?: HomeAssistant;
+class HuiInputTextEntityRow extends LitElement implements LovelaceRow {
+  @property({ attribute: false }) public hass?: HomeAssistant;
 
-  @property() private _config?: EntityConfig;
+  @internalProperty() private _config?: EntityConfig;
 
   public setConfig(config: EntityConfig): void {
     if (!config) {
@@ -33,7 +33,7 @@ class HuiInputTextEntityRow extends LitElement implements EntityRow {
     return hasConfigOrEntityChanged(this, changedProps);
   }
 
-  protected render(): TemplateResult | void {
+  protected render(): TemplateResult {
     if (!this._config || !this.hass) {
       return html``;
     }
@@ -42,20 +42,17 @@ class HuiInputTextEntityRow extends LitElement implements EntityRow {
 
     if (!stateObj) {
       return html`
-        <hui-warning
-          >${this.hass.localize(
-            "ui.panel.lovelace.warning.entity_not_found",
-            "entity",
-            this._config.entity
-          )}</hui-warning
-        >
+        <hui-warning>
+          ${createEntityNotFoundWarning(this.hass, this._config.entity)}
+        </hui-warning>
       `;
     }
 
     return html`
-      <hui-generic-entity-row .hass="${this.hass}" .config="${this._config}">
+      <hui-generic-entity-row .hass=${this.hass} .config=${this._config}>
         <paper-input
           no-label-float
+          .disabled=${UNAVAILABLE_STATES.includes(stateObj.state)}
           .value="${stateObj.state}"
           .minlength="${stateObj.attributes.min}"
           .maxlength="${stateObj.attributes.max}"

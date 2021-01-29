@@ -1,20 +1,18 @@
-import { PropertyValues, property, UpdatingElement } from "lit-element";
 import { UnsubscribeFunc } from "home-assistant-js-websocket";
-import { HomeAssistant, Constructor } from "../types";
+import { property, PropertyValues, UpdatingElement } from "lit-element";
+import { Constructor, HomeAssistant } from "../types";
 
 export interface HassSubscribeElement {
   hassSubscribe(): UnsubscribeFunc[];
 }
 
-/* tslint:disable-next-line:variable-name */
 export const SubscribeMixin = <T extends Constructor<UpdatingElement>>(
   superClass: T
 ) => {
   class SubscribeClass extends superClass {
-    @property() public hass?: HomeAssistant;
+    @property({ attribute: false }) public hass?: HomeAssistant;
 
-    /* tslint:disable-next-line:variable-name */
-    private __unsubs?: UnsubscribeFunc[];
+    private __unsubs?: Array<UnsubscribeFunc | Promise<UnsubscribeFunc>>;
 
     public connectedCallback() {
       super.connectedCallback();
@@ -25,7 +23,12 @@ export const SubscribeMixin = <T extends Constructor<UpdatingElement>>(
       super.disconnectedCallback();
       if (this.__unsubs) {
         while (this.__unsubs.length) {
-          this.__unsubs.pop()!();
+          const unsub = this.__unsubs.pop()!;
+          if (unsub instanceof Promise) {
+            unsub.then((unsubFunc) => unsubFunc());
+          } else {
+            unsub();
+          }
         }
         this.__unsubs = undefined;
       }
@@ -38,7 +41,9 @@ export const SubscribeMixin = <T extends Constructor<UpdatingElement>>(
       }
     }
 
-    protected hassSubscribe(): UnsubscribeFunc[] {
+    protected hassSubscribe(): Array<
+      UnsubscribeFunc | Promise<UnsubscribeFunc>
+    > {
       return [];
     }
 

@@ -1,13 +1,14 @@
 import "@polymer/paper-input/paper-input";
 import { html } from "@polymer/polymer/lib/utils/html-tag";
+/* eslint-plugin-disable lit */
 import { PolymerElement } from "@polymer/polymer/polymer-element";
-
-import "../../../../components/ha-card";
 import "../../../../components/buttons/ha-progress-button";
+import "../../../../components/ha-card";
 import "../../../../layouts/hass-subpage";
-import "../../../../resources/ha-style";
 import { EventsMixin } from "../../../../mixins/events-mixin";
 import LocalizeMixin from "../../../../mixins/localize-mixin";
+import "../../../../styles/polymer-ha-style";
+
 /*
  * @appliesMixin EventsMixin
  * @appliesMixin LocalizeMixin
@@ -18,7 +19,6 @@ class CloudForgotPassword extends LocalizeMixin(EventsMixin(PolymerElement)) {
       <style include="iron-flex ha-style">
         .content {
           padding-bottom: 24px;
-          direction: ltr;
         }
 
         ha-card {
@@ -31,7 +31,7 @@ class CloudForgotPassword extends LocalizeMixin(EventsMixin(PolymerElement)) {
           margin: 0;
         }
         .error {
-          color: var(--google-red-500);
+          color: var(--error-color);
         }
         .card-actions {
           display: flex;
@@ -45,9 +45,13 @@ class CloudForgotPassword extends LocalizeMixin(EventsMixin(PolymerElement)) {
           display: none;
         }
       </style>
-      <hass-subpage header=[[localize('ui.panel.config.cloud.forgot_password.title')]]>
+      <hass-subpage
+        header="[[localize('ui.panel.config.cloud.forgot_password.title')]]"
+      >
         <div class="content">
-          <ha-card header=[[localize('ui.panel.config.cloud.forgot_password.subtitle')]]>
+          <ha-card
+            header="[[localize('ui.panel.config.cloud.forgot_password.subtitle')]]"
+          >
             <div class="card-content">
               <p>
                 [[localize('ui.panel.config.cloud.forgot_password.instructions')]]
@@ -125,8 +129,9 @@ class CloudForgotPassword extends LocalizeMixin(EventsMixin(PolymerElement)) {
         () => {
           this._requestInProgress = false;
           this.fire("cloud-done", {
-            flashMessage:
-              "[[localize('ui.panel.config.cloud.forgot_password.check_your_email')]]",
+            flashMessage: this.hass.localize(
+              "ui.panel.config.cloud.forgot_password.check_your_email"
+            ),
           });
         },
         (err) =>

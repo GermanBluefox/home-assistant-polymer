@@ -12,10 +12,12 @@ import "../../../../components/ha-card";
 import { Action } from "../../../../data/script";
 import { HomeAssistant } from "../../../../types";
 import "./ha-automation-action-row";
+import { HaDeviceAction } from "./types/ha-automation-action-device_id";
 
 @customElement("ha-automation-action")
 export default class HaAutomationAction extends LitElement {
-  @property() public hass!: HomeAssistant;
+  @property({ attribute: false }) public hass!: HomeAssistant;
+
   @property() public actions!: Action[];
 
   protected render() {
@@ -26,6 +28,7 @@ export default class HaAutomationAction extends LitElement {
             .index=${idx}
             .totalActions=${this.actions.length}
             .action=${action}
+            @duplicate=${this._duplicateAction}
             @move-action=${this._move}
             @value-changed=${this._actionChanged}
             .hass=${this.hass}
@@ -46,7 +49,7 @@ export default class HaAutomationAction extends LitElement {
 
   private _addAction() {
     const actions = this.actions.concat({
-      service: "",
+      ...HaDeviceAction.defaultConfig,
     });
 
     fireEvent(this, "value-changed", { value: actions });
@@ -74,6 +77,14 @@ export default class HaAutomationAction extends LitElement {
     }
 
     fireEvent(this, "value-changed", { value: actions });
+  }
+
+  private _duplicateAction(ev: CustomEvent) {
+    ev.stopPropagation();
+    const index = (ev.target as any).index;
+    fireEvent(this, "value-changed", {
+      value: this.actions.concat(this.actions[index]),
+    });
   }
 
   static get styles(): CSSResult {

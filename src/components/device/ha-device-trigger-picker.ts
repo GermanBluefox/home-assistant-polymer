@@ -4,13 +4,22 @@ import {
   fetchDeviceTriggers,
   localizeDeviceAutomationTrigger,
 } from "../../data/device_automation";
-import "../../components/ha-paper-dropdown-menu";
+import "../ha-paper-dropdown-menu";
 import { HaDeviceAutomationPicker } from "./ha-device-automation-picker";
 
 @customElement("ha-device-trigger-picker")
 class HaDeviceTriggerPicker extends HaDeviceAutomationPicker<DeviceTrigger> {
-  protected NO_AUTOMATION_TEXT = "No triggers";
-  protected UNKNOWN_AUTOMATION_TEXT = "Unknown trigger";
+  protected get NO_AUTOMATION_TEXT() {
+    return this.hass.localize(
+      "ui.panel.config.devices.automation.triggers.no_triggers"
+    );
+  }
+
+  protected get UNKNOWN_AUTOMATION_TEXT() {
+    return this.hass.localize(
+      "ui.panel.config.devices.automation.triggers.unknown_trigger"
+    );
+  }
 
   constructor() {
     super(

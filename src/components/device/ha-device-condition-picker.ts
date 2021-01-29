@@ -4,15 +4,24 @@ import {
   fetchDeviceConditions,
   localizeDeviceAutomationCondition,
 } from "../../data/device_automation";
-import "../../components/ha-paper-dropdown-menu";
+import "../ha-paper-dropdown-menu";
 import { HaDeviceAutomationPicker } from "./ha-device-automation-picker";
 
 @customElement("ha-device-condition-picker")
 class HaDeviceConditionPicker extends HaDeviceAutomationPicker<
   DeviceCondition
 > {
-  protected NO_AUTOMATION_TEXT = "No conditions";
-  protected UNKNOWN_AUTOMATION_TEXT = "Unknown condition";
+  protected get NO_AUTOMATION_TEXT() {
+    return this.hass.localize(
+      "ui.panel.config.devices.automation.conditions.no_conditions"
+    );
+  }
+
+  protected get UNKNOWN_AUTOMATION_TEXT() {
+    return this.hass.localize(
+      "ui.panel.config.devices.automation.conditions.unknown_condition"
+    );
+  }
 
   constructor() {
     super(

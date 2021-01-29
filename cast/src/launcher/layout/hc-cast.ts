@@ -1,49 +1,54 @@
+import "@polymer/paper-item/paper-icon-item";
+import "@polymer/paper-listbox/paper-listbox";
+import { Auth, Connection } from "home-assistant-js-websocket";
 import {
+  css,
+  CSSResult,
   customElement,
+  html,
   LitElement,
   property,
+  internalProperty,
   TemplateResult,
-  html,
-  CSSResult,
-  css,
 } from "lit-element";
-import { Connection, Auth } from "home-assistant-js-websocket";
-import "@polymer/iron-icon";
-import "@polymer/paper-listbox/paper-listbox";
-import "@polymer/paper-item/paper-icon-item";
-import "../../../../src/components/ha-icon";
-import {
-  enableWrite,
-  askWrite,
-  saveTokens,
-} from "../../../../src/common/auth/token_storage";
-import {
-  ensureConnectedCastSession,
-  castSendShowLovelaceView,
-} from "../../../../src/cast/receiver_messages";
-import "../../../../src/layouts/loading-screen";
 import { CastManager } from "../../../../src/cast/cast_manager";
 import {
-  LovelaceConfig,
-  getLovelaceCollection,
-} from "../../../../src/data/lovelace";
-import "./hc-layout";
-import { generateDefaultViewConfig } from "../../../../src/panels/lovelace/common/generate-lovelace-config";
+  castSendShowLovelaceView,
+  ensureConnectedCastSession,
+} from "../../../../src/cast/receiver_messages";
+import {
+  askWrite,
+  enableWrite,
+  saveTokens,
+} from "../../../../src/common/auth/token_storage";
+import { atLeastVersion } from "../../../../src/common/config/version";
 import { toggleAttribute } from "../../../../src/common/dom/toggle_attribute";
+import "../../../../src/components/ha-icon";
+import {
+  getLegacyLovelaceCollection,
+  getLovelaceCollection,
+  LovelaceConfig,
+} from "../../../../src/data/lovelace";
+import "../../../../src/layouts/hass-loading-screen";
+import { generateDefaultViewConfig } from "../../../../src/panels/lovelace/common/generate-lovelace-config";
+import "./hc-layout";
+import "@material/mwc-button/mwc-button";
 
 @customElement("hc-cast")
 class HcCast extends LitElement {
   @property() public auth!: Auth;
-  @property() public connection!: Connection;
-  @property() public castManager!: CastManager;
-  @property() private askWrite = false;
-  @property() private lovelaceConfig?: LovelaceConfig | null;
 
-  protected render(): TemplateResult | void {
+  @property() public connection!: Connection;
+
+  @property() public castManager!: CastManager;
+
+  @internalProperty() private askWrite = false;
+
+  @internalProperty() private lovelaceConfig?: LovelaceConfig | null;
+
+  protected render(): TemplateResult {
     if (this.lovelaceConfig === undefined) {
-      return html`
-        <loading-screen></loading-screen>>
-      `;
+      return html` <hass-loading-screen no-toolbar></hass-loading-screen>> `;
     }
 
     const error =
@@ -73,14 +78,12 @@ class HcCast extends LitElement {
             `
           : ""}
         ${error
-          ? html`
-              <div class="card-content">${error}</div>
-            `
+          ? html` <div class="card-content">${error}</div> `
           : !this.castManager.status
           ? html`
               <p class="center-item">
                 <mwc-button raised @click=${this._handleLaunch}>
-                  <iron-icon icon="hass:cast"></iron-icon>
+                  <ha-icon icon="hass:cast"></ha-icon>
                   Start Casting
                 </mwc-button>
               </p>
@@ -118,7 +121,7 @@ class HcCast extends LitElement {
           ${this.castManager.status
             ? html`
                 <mwc-button @click=${this._handleLaunch}>
-                  <iron-icon icon="hass:cast-connected"></iron-icon>
+                  <ha-icon icon="hass:cast-connected"></ha-icon>
                   Manage
                 </mwc-button>
               `
@@ -133,7 +136,9 @@ class HcCast extends LitElement {
   protected firstUpdated(changedProps) {
     super.firstUpdated(changedProps);
 
-    const llColl = getLovelaceCollection(this.connection);
+    const llColl = atLeastVersion(this.connection.haVersion, 0, 107)
+      ? getLovelaceCollection(this.connection)
+      : getLegacyLovelaceCollection(this.connection);
     // We first do a single refresh because we need to check if there is LL
     // configuration.
     llColl.refresh().then(
@@ -238,7 +243,7 @@ class HcCast extends LitElement {
         color: var(--secondary-text-color);
       }
 
-      mwc-button iron-icon {
+      mwc-button ha-icon {
         margin-right: 8px;
         height: 18px;
       }

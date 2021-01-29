@@ -16,11 +16,12 @@ Custom property | Description | Default
 `--paper-time-input-cotnainer` | Mixin applied to the inputs | `{}`
 `--paper-time-dropdown-input-cotnainer` | Mixin applied to the dropdown input | `{}`
 */
-import "@polymer/paper-input/paper-input";
-import "@polymer/paper-listbox/paper-listbox";
-import "@polymer/paper-item/paper-item";
 import "@polymer/paper-dropdown-menu/paper-dropdown-menu";
+import "@polymer/paper-input/paper-input";
+import "@polymer/paper-item/paper-item";
+import "@polymer/paper-listbox/paper-listbox";
 import { html } from "@polymer/polymer/lib/utils/html-tag";
+/* eslint-plugin-disable lit */
 import { PolymerElement } from "@polymer/polymer/polymer-element";
 
 export class PaperTimeInput extends PolymerElement {
@@ -321,9 +322,9 @@ export class PaperTimeInput extends PolymerElement {
    * @return {boolean}
    */
   validate() {
-    var valid = true;
+    let valid = true;
     // Validate hour & min fields
-    if (!this.$.hour.validate() | !this.$.min.validate()) {
+    if (!this.$.hour.validate() || !this.$.min.validate()) {
       valid = false;
     }
     // Validate second field

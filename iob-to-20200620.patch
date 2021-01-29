@@ -1,0 +1,939 @@
+diff --git a/.gitignore b/.gitignore
+index c3c6849cd..639df670d 100644
+--- a/.gitignore
++++ b/.gitignore
+@@ -1,35 +1,39 @@
+ build
+ build-translations/*
+ node_modules/*
+ npm-debug.log
+ .DS_Store
+ hass_frontend/*
+ .reify-cache
++demo/hademo-icons.html
+
+ # Python stuff
+ *.py[cod]
+ *.egg
+ *.egg-info
+
+ # venv stuff
+ pyvenv.cfg
+ pip-selfcheck.json
+ venv
+ .venv
+ lib
+ bin
+ dist
+
+ # vscode
+ .vscode/*
+ !.vscode/extensions.json
+
+-# Cast dev settings
++# Cast dev settings
+ src/cast/dev_const.ts
+
+ # Secrets
+ .lokalise_token
+ yarn-error.log
+
+ #asdf
+ .tool-versions
++
++#IoB
++/.idea
+diff --git a/build-scripts/bundle.js b/build-scripts/bundle.js
+index 5433c4e59..88281e301 100644
+--- a/build-scripts/bundle.js
++++ b/build-scripts/bundle.js
+@@ -12,21 +12,21 @@ module.exports.ignorePackages = ({ latestBuild }) => [
+
+ // Files from NPM packages that we should replace with empty file
+ module.exports.emptyPackages = ({ latestBuild }) =>
+   [
+     // Contains all color definitions for all material color sets.
+     // We don't use it
+     require.resolve("@polymer/paper-styles/color.js"),
+     require.resolve("@polymer/paper-styles/default-theme.js"),
+     // Loads stuff from a CDN
+     require.resolve("@polymer/font-roboto/roboto.js"),
+-    require.resolve("@vaadin/vaadin-material-styles/font-roboto.js"),
++    // require.resolve("@vaadin/vaadin-material-styles/font-roboto.js"), -> somehow not found on my device?
+     // Compatibility not needed for latest builds
+     latestBuild &&
+       // wrapped in require.resolve so it blows up if file no longer exists
+       require.resolve(
+         path.resolve(paths.polymer_dir, "src/resources/compatibility.ts")
+       ),
+     // This polyfill is loaded in workers to support ES5, filter it out.
+     latestBuild && require.resolve("proxy-polyfill/src/index.js"),
+   ].filter(Boolean);
+
+diff --git a/build-scripts/gulp/app.js b/build-scripts/gulp/app.js
+index 942926061..b24f73c75 100644
+--- a/build-scripts/gulp/app.js
++++ b/build-scripts/gulp/app.js
+@@ -32,22 +32,44 @@ gulp.task(
+   )
+ );
+
+ gulp.task(
+   "build-app",
+   gulp.series(
+     async function setEnv() {
+       process.env.NODE_ENV = "production";
+     },
+     "clean",
++    "translations-enable-merge-backend", // IoB - includes backend translation in frontend files.
+     gulp.parallel("gen-icons-json", "build-translations"),
+     "copy-static-app",
+     env.useRollup() ? "rollup-prod-app" : "webpack-prod-app",
+     ...// Don't compress running tests
+     (env.isTest() ? [] : ["compress-app"]),
+     gulp.parallel(
+       "gen-pages-prod",
+       "gen-index-app-prod",
+       "gen-service-worker-app-prod"
+     )
+   )
+ );
++
++// IoB
++gulp.task(
++  "develop-iob",
++  gulp.series(
++    async function setEnv() {
++      process.env.NODE_ENV = "development";
++    },
++    "clean",
++    "translations-enable-merge-backend", // includes backend translation in frontend translations file.
++    gulp.parallel(
++      "gen-service-worker-app-dev",
++      "gen-icons-json",
++      "gen-pages-dev",
++      "gen-index-app-dev",
++      "build-translations"
++    ),
++    "copy-static-app",
++    "webpack-dev-app"
++  )
++);
+diff --git a/build-scripts/gulp/webpack.js b/build-scripts/gulp/webpack.js
+index 38fba5964..f8f146f7c 100644
+--- a/build-scripts/gulp/webpack.js
++++ b/build-scripts/gulp/webpack.js
+@@ -61,20 +61,43 @@ gulp.task("webpack-watch-app", () => {
+   webpack(createAppConfig({ isProdBuild: false, latestBuild: true })).watch(
+     { ignored: /build-translations/ },
+     handler()
+   );
+   gulp.watch(
+     path.join(paths.translations_src, "en.json"),
+     gulp.series("build-translations", "copy-translations-app")
+   );
+ });
+
++// IoB
++gulp.task(
++  "webpack-dev-app",
++  () =>
++    new Promise((resolve) =>
++      webpack(
++        [
++          createAppConfig({
++            isProdBuild: false,
++            latestBuild: true,
++            isStatsBuild: false,
++          }),
++          createAppConfig({
++            isProdBuild: false,
++            latestBuild: false,
++            isStatsBuild: false,
++          }),
++        ],
++        handler(resolve)
++      )
++    )
++);
++
+ gulp.task(
+   "webpack-prod-app",
+   () =>
+     new Promise((resolve) =>
+       webpack(
+         bothBuilds(createAppConfig, { isProdBuild: true }),
+         handler(resolve)
+       )
+     )
+ );
+diff --git a/package.json b/package.json
+index 24a13c595..9f93646a2 100644
+--- a/package.json
++++ b/package.json
+@@ -48,21 +48,21 @@
+     "@polymer/iron-input": "^3.0.1",
+     "@polymer/iron-label": "^3.0.1",
+     "@polymer/iron-media-query": "^3.0.1",
+     "@polymer/iron-overlay-behavior": "^3.0.2",
+     "@polymer/iron-resizable-behavior": "^3.0.1",
+     "@polymer/paper-card": "^3.0.1",
+     "@polymer/paper-checkbox": "^3.1.0",
+     "@polymer/paper-dialog": "^3.0.1",
+     "@polymer/paper-dialog-behavior": "^3.0.1",
+     "@polymer/paper-dialog-scrollable": "^3.0.1",
+-    "@polymer/paper-dropdown-menu": "^3.0.1",
++    "@polymer/paper-dropdown-menu": "3.0.1",
+     "@polymer/paper-input": "^3.0.1",
+     "@polymer/paper-item": "^3.0.1",
+     "@polymer/paper-listbox": "^3.0.1",
+     "@polymer/paper-menu-button": "^3.0.1",
+     "@polymer/paper-progress": "^3.0.1",
+     "@polymer/paper-radio-button": "^3.0.1",
+     "@polymer/paper-radio-group": "^3.0.1",
+     "@polymer/paper-ripple": "^3.0.1",
+     "@polymer/paper-slider": "^3.0.1",
+     "@polymer/paper-spinner": "^3.0.2",
+diff --git a/src/data/lovelace.ts b/src/data/lovelace.ts
+index 234825d01..98bf6f536 100644
+--- a/src/data/lovelace.ts
++++ b/src/data/lovelace.ts
+@@ -7,20 +7,21 @@ import { HASSDomEvent } from "../common/dom/fire_event";
+ import { HomeAssistant } from "../types";
+
+ export interface LovelacePanelConfig {
+   mode: "yaml" | "storage";
+ }
+
+ export interface LovelaceConfig {
+   title?: string;
+   views: LovelaceViewConfig[];
+   background?: string;
++  hideToolbar?: boolean; // IoB
+ }
+
+ export interface LegacyLovelaceConfig extends LovelaceConfig {
+   resources?: LovelaceResource[];
+ }
+
+ export interface LovelaceResource {
+   id: string;
+   type: "css" | "js" | "module" | "html";
+   url: string;
+diff --git a/src/data/weather.ts b/src/data/weather.ts
+index 199a5e68e..c5ebceef1 100644
+--- a/src/data/weather.ts
++++ b/src/data/weather.ts
+@@ -335,36 +335,52 @@ export const getWeatherStateSVG = (state: string): SVGTemplateResult => {
+             d="m 9.9252695,10.935875 -1.6483986,2.341014 1.1170184,0.05929 -1.2169864,2.02141 3.0450261,-2.616159 H 9.8864918 L 10.97937,11.294651 10.700323,10.79794 h -0.508706 l -0.2663475,0.137936"
+           />
+         `
+       : ""
+   }
+   </svg>`;
+ };
+
+ export const getWeatherStateIcon = (
+   state: string,
+-  element: HTMLElement
++  element: HTMLElement,
++  token?: string // IoB - weather icons with auth.
+ ): TemplateResult | undefined => {
+   const userDefinedIcon = getComputedStyle(element).getPropertyValue(
+     `--weather-icon-${state}`
+   );
+
+   if (userDefinedIcon) {
+     return html`
+       <div
+         style="background-size: cover;${styleMap({
+           "background-image": userDefinedIcon,
+         })}"
+       ></div>
+     `;
+   }
+
++  // IoB weather icon
++  if (state.toString().match(/\.png|\.svg|\.jpg|\.jpeg/i)) {
++    let imgUrl = state.toString();
++    if (imgUrl.startsWith("/adapter")) {
++      // make sure we do not send token to 3rd parties!
++      imgUrl += token ? "?token=" + token : "";
++    }
++    return html`
++      <div
++        style="background-size: cover;
++               background-image: url(${imgUrl});"
++      ></div>
++    `;
++  }
++
+   if (weatherSVGs.has(state)) {
+     return html`${getWeatherStateSVG(state)}`;
+   }
+
+   if (state in weatherIcons) {
+     return html`
+       <ha-icon class="weather-icon" .icon=${weatherIcons[state]}></ha-icon>
+     `;
+   }
+
+diff --git a/src/dialogs/more-info/more-info-controls.js b/src/dialogs/more-info/more-info-controls.js
+index 7eedf536d..f74c790ca 100644
+--- a/src/dialogs/more-info/more-info-controls.js
++++ b/src/dialogs/more-info/more-info-controls.js
+@@ -79,27 +79,28 @@ class MoreInfoControls extends LocalizeMixin(EventsMixin(PolymerElement)) {
+
+       <app-toolbar>
+         <ha-icon-button
+           aria-label$="[[localize('ui.dialogs.more_info_control.dismiss')]]"
+           icon="hass:close"
+           dialog-dismiss
+         ></ha-icon-button>
+         <div class="main-title" main-title="" on-click="enlarge">
+           [[_computeStateName(stateObj)]]
+         </div>
+-        <template is="dom-if" if="[[hass.user.is_admin]]">
++        <!-- //IoB -> we do not have entity settings/registry - so disable them here. -->
++        <!-- template is="dom-if" if="[[hass.user.is_admin]]">
+           <ha-icon-button
+             aria-label$="[[localize('ui.dialogs.more_info_control.settings')]]"
+             icon="hass:settings"
+             on-click="_gotoSettings"
+           ></ha-icon-button>
+-        </template>
++        </template -->
+         <template is="dom-if" if="[[_computeEdit(hass, stateObj)]]">
+           <ha-icon-button
+             aria-label$="[[localize('ui.dialogs.more_info_control.edit')]]"
+             icon="hass:pencil"
+             on-click="_gotoEdit"
+           ></ha-icon-button>
+         </template>
+       </app-toolbar>
+
+       <template is="dom-if" if="[[_computeShowStateInfo(stateObj)]]" restamp="">
+diff --git a/src/dialogs/notifications/notification-drawer.js b/src/dialogs/notifications/notification-drawer.js
+index e0f556274..a1d7c8ad3 100644
+--- a/src/dialogs/notifications/notification-drawer.js
++++ b/src/dialogs/notifications/notification-drawer.js
+@@ -1,17 +1,18 @@
+ import "@material/mwc-button";
+ import "@polymer/app-layout/app-drawer/app-drawer";
+ import "@polymer/app-layout/app-toolbar/app-toolbar";
+ import { html } from "@polymer/polymer/lib/utils/html-tag";
+ /* eslint-plugin-disable lit */
+ import { PolymerElement } from "@polymer/polymer/polymer-element";
+ import { computeDomain } from "../../common/entity/compute_domain";
++import "../../components/ha-icon-button"; // IoB
+ import "../../components/ha-icon-button-prev";
+ import { subscribeNotifications } from "../../data/persistent_notification";
+ import { EventsMixin } from "../../mixins/events-mixin";
+ import LocalizeMixin from "../../mixins/localize-mixin";
+ import "./notification-item";
+
+ /*
+  * @appliesMixin EventsMixin
+  * @appliesMixin LocalizeMixin
+  */
+@@ -43,20 +44,24 @@ export class HuiNotificationDrawer extends EventsMixin(
+       }
+
+       .empty {
+         padding: 16px;
+         text-align: center;
+       }
+     </style>
+     <app-drawer id="drawer" opened="{{open}}" disable-swipe align="start">
+       <app-toolbar>
+         <div main-title>[[localize('ui.notification_drawer.title')]]</div>
++        <!--IoB-->
++        <template is="dom-if" if="[[!_empty(_notificationsBackend)]]">
++          <ha-icon-button on-click="_ackAll" aria-label$="[[localize('ui.notification_drawer.ack_all]]" icon="hass:notification-clear-all"></ha-icon-button>
++        </template>
+         <ha-icon-button-prev on-click="_closeDrawer" aria-label$="[[localize('ui.notification_drawer.close')]]"></ha-icon-button-prev>
+       </app-toolbar>
+       <div class="notifications">
+         <template is="dom-if" if="[[!_empty(notifications)]]">
+           <dom-repeat items="[[notifications]]">
+             <template>
+               <div class="notification">
+                 <notification-item hass="[[hass]]" notification="[[item]]"></notification-item>
+               </div>
+             </template>
+@@ -96,20 +101,40 @@ export class HuiNotificationDrawer extends EventsMixin(
+         this.open = false;
+       }
+     });
+   }
+
+   _closeDrawer(ev) {
+     ev.stopPropagation();
+     this.open = false;
+   }
+
++  // IoB
++  async DismissAllNotifications(array, callback) {
++    for (let index = 0; index < array.length; index++) {
++      await callback(array[index], index, array);
++    }
++  }
++  // IoB
++  _ackAll(ev) {
++    ev.stopPropagation();
++    this.hass &&
++      this._notificationsBackend &&
++      this.DismissAllNotifications(
++        this._notificationsBackend,
++        async (notification) =>
++          await this.hass.callService("persistent_notification", "dismiss", {
++            notification_id: notification.notification_id,
++          })
++      );
++  }
++
+   _empty(notifications) {
+     return notifications.length === 0;
+   }
+
+   _openChanged(open) {
+     if (open) {
+       // Render closed then animate open
+       this._unsubNotifications = subscribeNotifications(
+         this.hass.connection,
+         (notifications) => {
+diff --git a/src/entrypoints/core.ts b/src/entrypoints/core.ts
+index 8a6bedf9d..6808b7d5e 100644
+--- a/src/entrypoints/core.ts
++++ b/src/entrypoints/core.ts
+@@ -22,33 +22,35 @@ import {
+ import { subscribePanels } from "../data/ws-panels";
+ import { subscribeThemes } from "../data/ws-themes";
+ import { subscribeUser } from "../data/ws-user";
+ import type { ExternalAuth } from "../external_app/external_auth";
+ import { HomeAssistant } from "../types";
+
+ declare global {
+   interface Window {
+     hassConnection: Promise<{ auth: Auth; conn: Connection }>;
+     hassConnectionReady?: (hassConnection: Window["hassConnection"]) => void;
++    hassNoAuth: string; // IoB
+   }
+ }
+
+ const authProm = isExternal
+   ? () =>
+       import(
+         /* webpackChunkName: "external_auth" */ "../external_app/external_auth"
+       ).then(({ createExternalAuth }) => createExternalAuth(hassUrl))
+   : () =>
+       getAuth({
+         hassUrl,
+         saveTokens,
+         loadTokens: () => Promise.resolve(loadTokens()),
++        authCode: window.hassNoAuth, // for IoB
+       });
+
+ const connProm = async (auth) => {
+   try {
+     const conn = await createConnection({ auth });
+
+     // Clear url if we have been able to establish a connection
+     if (location.search.includes("auth_callback=1")) {
+       history.replaceState(null, "", location.pathname);
+     }
+diff --git a/src/layouts/home-assistant-main.ts b/src/layouts/home-assistant-main.ts
+index 9959397dc..407955da4 100644
+--- a/src/layouts/home-assistant-main.ts
++++ b/src/layouts/home-assistant-main.ts
+@@ -1,13 +1,13 @@
+ import "@polymer/app-layout/app-drawer-layout/app-drawer-layout";
+ import type { AppDrawerLayoutElement } from "@polymer/app-layout/app-drawer-layout/app-drawer-layout";
+-import "@polymer/app-layout/app-drawer/app-drawer";
++// import "@polymer/app-layout/app-drawer/app-drawer"; // IoB
+ import type { AppDrawerElement } from "@polymer/app-layout/app-drawer/app-drawer";
+ import "@polymer/iron-media-query/iron-media-query";
+ import {
+   css,
+   CSSResult,
+   html,
+   LitElement,
+   property,
+   PropertyValues,
+   TemplateResult,
+@@ -52,48 +52,49 @@ class HomeAssistantMain extends LitElement {
+       <iron-media-query
+         query="(max-width: 870px)"
+         @query-matches-changed=${this._narrowChanged}
+       ></iron-media-query>
+
+       <app-drawer-layout
+         fullbleed
+         .forceNarrow=${sidebarNarrow}
+         responsive-width="0"
+       >
+-        <app-drawer
++        <!-- Disabled for IoB -->
++        <!--app-drawer
+           id="drawer"
+           align="start"
+           slot="drawer"
+           .disableSwipe=${disableSwipe}
+           .swipeOpen=${!disableSwipe}
+           .persistent=${!this.narrow &&
+           this.hass.dockedSidebar !== "always_hidden"}
+         >
+           <ha-sidebar
+             .hass=${hass}
+             .narrow=${sidebarNarrow}
+             .alwaysExpand=${sidebarNarrow ||
+             this.hass.dockedSidebar === "docked"}
+           ></ha-sidebar>
+-        </app-drawer>
++        </app-drawer-->
+
+         <partial-panel-resolver
+           .narrow=${this.narrow}
+           .hass=${hass}
+           .route=${this.route}
+         ></partial-panel-resolver>
+       </app-drawer-layout>
+     `;
+   }
+
+   protected firstUpdated() {
+-    import(/* webpackChunkName: "ha-sidebar" */ "../components/ha-sidebar");
++    // import(/* webpackChunkName: "ha-sidebar" */ "../components/ha-sidebar"); // IoB
+
+     this.addEventListener("hass-toggle-menu", () => {
+       if (this._sidebarNarrow) {
+         if (this.drawer.opened) {
+           this.drawer.close();
+         } else {
+           this.drawer.open();
+         }
+       } else {
+         fireEvent(this, "hass-dock-sidebar", {
+diff --git a/src/panels/lovelace/cards/hui-weather-forecast-card.ts b/src/panels/lovelace/cards/hui-weather-forecast-card.ts
+index f31482d02..958c0500b 100644
+--- a/src/panels/lovelace/cards/hui-weather-forecast-card.ts
++++ b/src/panels/lovelace/cards/hui-weather-forecast-card.ts
+@@ -164,49 +164,61 @@ class HuiWeatherForecastCard extends LitElement implements LovelaceCard {
+     let hourly: boolean | undefined;
+
+     if (forecast?.length && forecast?.length > 2) {
+       const date1 = new Date(forecast[1].datetime);
+       const date2 = new Date(forecast[2].datetime);
+       const timeDiff = date2.getTime() - date1.getTime();
+
+       hourly = timeDiff < DAY_IN_MILLISECONDS;
+     }
+
+-    const weatherStateIcon = getWeatherStateIcon(stateObj.state, this);
++    const weatherStateIcon = getWeatherStateIcon(
++      stateObj.state,
++      this,
++      this.hass.auth.accessToken // IoB weather icon with auth
++    );
++    // IoB weather icon.
++    const isImage = !!stateObj.state
++      .toString()
++      .match(/\.png|\.svg|\.jpg|\.jpeg/i);
+
+     return html`
+       <ha-card
+         @action=${this._handleAction}
+         .actionHandler=${actionHandler()}
+         tabindex="0"
+       >
+         <div class="content">
+           <div class="icon-image">
+             ${weatherStateIcon ||
+             html`
+               <ha-icon
+                 class="weather-icon"
+                 .icon=${stateIcon(stateObj)}
+               ></ha-icon>
+             `}
+           </div>
+           <div class="info">
+             <div class="name-state">
+               <div class="state">
+-                ${computeStateDisplay(
+-                  this.hass.localize,
+-                  stateObj,
+-                  this.hass.language
+-                )}
++                ${isImage
++                  ? this._config.name || computeStateName(stateObj)
++                  : computeStateDisplay(
++                      this.hass.localize,
++                      stateObj,
++                      this.hass.language
++                    )}
+               </div>
+               <div class="name">
+-                ${this._config.name || computeStateName(stateObj)}
++                ${isImage
++                  ? ""
++                  : this._config.name || computeStateName(stateObj)}
+               </div>
+             </div>
+             <div class="temp-attribute">
+               <div class="temp">
+                 ${stateObj.attributes.temperature}<span
+                   >${getWeatherUnit(this.hass, "temperature")}</span
+                 >
+               </div>
+               <div class="attribute">
+                 ${this._config.secondary_info_attribute !== undefined
+@@ -246,21 +258,25 @@ class HuiWeatherForecastCard extends LitElement implements LovelaceCard {
+                           : html`
+                               ${new Date(item.datetime).toLocaleDateString(
+                                 this.hass!.language,
+                                 { weekday: "short" }
+                               )}
+                             `}
+                       </div>
+                       ${item.condition !== undefined && item.condition !== null
+                         ? html`
+                             <div class="forecast-image-icon">
+-                              ${getWeatherStateIcon(item.condition, this)}
++                              ${getWeatherStateIcon(
++                                item.condition,
++                                this,
++                                this.hass.auth.accessToken // IoB - weather icon with auth
++                              )}
+                             </div>
+                           `
+                         : ""}
+                       ${item.temperature !== undefined &&
+                       item.temperature !== null
+                         ? html`
+                             <div class="temp">
+                               ${item.temperature}°
+                             </div>
+                           `
+diff --git a/src/panels/lovelace/entity-rows/hui-weather-entity-row.ts b/src/panels/lovelace/entity-rows/hui-weather-entity-row.ts
+index 7af231937..2e29476ac 100644
+--- a/src/panels/lovelace/entity-rows/hui-weather-entity-row.ts
++++ b/src/panels/lovelace/entity-rows/hui-weather-entity-row.ts
+@@ -66,21 +66,25 @@ class HuiWeatherEntityRow extends LitElement implements LovelaceRow {
+           ${createEntityNotFoundWarning(this.hass, this._config.entity)}
+         </hui-warning>
+       `;
+     }
+
+     const pointer =
+       (this._config.tap_action && this._config.tap_action.action !== "none") ||
+       (this._config.entity &&
+         !DOMAINS_HIDE_MORE_INFO.includes(computeDomain(this._config.entity)));
+
+-    const weatherStateIcon = getWeatherStateIcon(stateObj.state, this);
++    const weatherStateIcon = getWeatherStateIcon(
++      stateObj.state,
++      this,
++      this.hass.auth.accessToken
++    );
+
+     return html`
+       <div
+         class="icon-image ${classMap({
+           pointer,
+         })}"
+         @action=${this._handleAction}
+         .actionHandler=${actionHandler({
+           hasHold: hasAction(this._config!.hold_action),
+           hasDoubleClick: hasAction(this._config!.double_tap_action),
+diff --git a/src/panels/lovelace/hui-root.ts b/src/panels/lovelace/hui-root.ts
+index 95843c264..b7dd36b74 100644
+--- a/src/panels/lovelace/hui-root.ts
++++ b/src/panels/lovelace/hui-root.ts
+@@ -1,19 +1,20 @@
+ import "@material/mwc-button";
+ import "@material/mwc-list/mwc-list-item";
+ import {
+   mdiDotsVertical,
+   mdiMicrophone,
+   mdiPlus,
+   mdiClose,
+   mdiPencil,
+   mdiHelpCircle,
++  mdiBell, // IoB
+ } from "@mdi/js";
+ import "@polymer/app-layout/app-header-layout/app-header-layout";
+ import "@polymer/app-layout/app-header/app-header";
+ import "@polymer/app-layout/app-scroll-effects/effects/waterfall";
+ import "@polymer/app-layout/app-toolbar/app-toolbar";
+ import "@polymer/paper-tabs/paper-tab";
+ import "@polymer/paper-tabs/paper-tabs";
+ import {
+   css,
+   CSSResult,
+@@ -48,58 +49,95 @@ import {
+   showConfirmationDialog,
+ } from "../../dialogs/generic/show-dialog-box";
+ import { showVoiceCommandDialog } from "../../dialogs/voice-command-dialog/show-ha-voice-command-dialog";
+ import "../../layouts/ha-app-layout";
+ import { haStyle } from "../../resources/styles";
+ import type { HomeAssistant } from "../../types";
+ import { swapView } from "./editor/config-util";
+ import { showEditLovelaceDialog } from "./editor/lovelace-editor/show-edit-lovelace-dialog";
+ import { showEditViewDialog } from "./editor/view-editor/show-edit-view-dialog";
+ import type { Lovelace } from "./types";
++
++import { subscribeNotifications } from "../../data/persistent_notification"; // IoB
++import "../../dialogs/notifications/notification-drawer"; // IoB
++import { showNotificationDrawer } from "../../dialogs/notifications/show-notification-drawer"; // IoB
++
+ import "./views/hui-panel-view";
+ import type { HUIPanelView } from "./views/hui-panel-view";
+ import { HUIView } from "./views/hui-view";
+
+ class HUIRoot extends LitElement {
+   @property() public hass!: HomeAssistant;
+
+   @property() public lovelace?: Lovelace;
+
+   @property() public columns?: number;
+
+   @property() public narrow?: boolean;
+
+   @property() public route?: { path: string; prefix: string };
+
+   @property() private _curView?: number | "hass-unused-entities";
+
++  @property() private _persistentNotifications?: number; // IoB
++
++  private _unsubNotifications?: () => void; // IoB
++
+   private _viewCache?: { [viewId: string]: HUIView };
+
+   private _debouncedConfigChanged: () => void;
+
+-  private _conversation = memoizeOne((_components) =>
+-    isComponentLoaded(this.hass, "conversation")
++  // IoB
++  private _conversation = memoizeOne(
++    (_components) =>
++      "webkitSpeechRecognition" in window && // IoB
++      isComponentLoaded(this.hass, "conversation")
+   );
++  // endIoB
+
+   constructor() {
+     super();
+     // The view can trigger a re-render when it knows that certain
+     // web components have been loaded.
+     this._debouncedConfigChanged = debounce(
+       () => this._selectView(this._curView, true),
+       100,
+       false
+     );
+   }
+
+-  protected render(): TemplateResult {
++  // IoB
++  public connectedCallback(): void {
++    super.connectedCallback();
++    this._unsubNotifications = subscribeNotifications(
++      this.hass!.connection,
++      (notifications) => {
++        this._persistentNotifications = !!notifications
++          ? notifications.length
++          : 0;
++      }
++    );
++  }
++
++  public disconnectedCallback(): void {
++    super.disconnectedCallback();
++    if (this._unsubNotifications) {
++      this._unsubNotifications();
++    }
++  }
++  // IoB end
++
++  protected render(): TemplateResult | void {
+     return html`
++      <!-- Inserted for IoB -->
++      <notification-drawer .hass="${this.hass}"></notification-drawer>
++
+       <ha-app-layout id="layout">
+         <app-header
+           slot="header"
+           effects="waterfall"
+           class=${classMap({
+             "edit-mode": this._editMode,
+           })}
+           fixed
+           condenses
+         >
+@@ -168,27 +206,33 @@ class HUIRoot extends LitElement {
+                           </mwc-list-item>
+                         `}
+                     <mwc-list-item @tap="${this.lovelace!.enableFullEditMode}">
+                       ${this.hass!.localize(
+                         "ui.panel.lovelace.editor.menu.raw_editor"
+                       )}
+                     </mwc-list-item>
+                   </ha-button-menu>
+                 </app-toolbar>
+               `
++            : /* IoB */ this._hideToolbar
++            ? ""
+             : html`
+                 <app-toolbar>
+-                  <ha-menu-button
++                  <!-- Disabled for IoB -->
++                  <!--ha-menu-button
+                     .hass=${this.hass}
+                     .narrow=${this.narrow}
+-                  ></ha-menu-button>
++                  ></ha-menu-button-->
+                   <div main-title>${this.config.title || "Home Assistant"}</div>
++
++                  <!-- Enabled for IoB -->
++                  ${this.renderNotificationButton()}
+                   ${this._conversation(this.hass.config.components)
+                     ? html`
+                         <mwc-icon-button
+                           label="Start conversation"
+                           @click=${this._showVoiceCommandDialog}
+                         >
+                           <ha-svg-icon path=${mdiMicrophone}></ha-svg-icon>
+                         </mwc-icon-button>
+                       `
+                     : ""}
+@@ -344,20 +388,23 @@ class HUIRoot extends LitElement {
+                             id="add-view"
+                             @click="${this._addView}"
+                             title="${this.hass!.localize(
+                               "ui.panel.lovelace.editor.edit_view.add"
+                             )}"
+                           >
+                             <ha-svg-icon path=${mdiPlus}></ha-svg-icon>
+                           </mwc-icon-button>
+                         `
+                       : ""}
++                    ${this._hideToolbar // IoB
++                      ? this.renderNotificationButton(true)
++                      : ""}
+                   </paper-tabs>
+                 </div>
+               `
+             : ""}
+         </app-header>
+         <div
+           id="view"
+           class="${classMap({
+             "tabs-hidden":
+               !this._editMode && this.lovelace!.config.views.length < 2,
+@@ -447,20 +494,77 @@ class HUIRoot extends LitElement {
+
+     if (newSelectView !== undefined || force) {
+       if (force && newSelectView === undefined) {
+         newSelectView = this._curView;
+       }
+       // Will allow for ripples to start rendering
+       afterNextRender(() => this._selectView(newSelectView, force));
+     }
+   }
+
++  // for IoB
++  private renderNotificationButton(withVoice?: boolean): TemplateResult | void {
++    return html`
++      <mwc-icon-button
++        style="cursor: pointer; position: relative;"
++        label="${this.hass.localize("ui.notification_drawer.title")}"
++        @click=${this._handleShowNotificationDrawer}
++      >
++        <ha-svg-icon path=${mdiBell}></ha-svg-icon>
++        ${this._notificationsCount > 0
++          ? html`
++              <span
++                style="top: -4px; right: -6px; font-size: 1.0rem; position: absolute; min-width: 20px; box-sizing: border-box; border-radius: 50%; font-weight: 400; background-color: var(--accent-color); line-height: 24px; text-align: center; padding: 0 6px; color: var(--text-primary-color);"
++              >
++                ${this._notificationsCount}
++              </span>
++            `
++          : ""}
++      </mwc-icon-button>
++      ${withVoice && this._conversation(this.hass.config.components)
++        ? html`
++            <mwc-icon-button
++              label="Start conversation"
++              @click=${this._showVoiceCommandDialog}
++            >
++              <ha-svg-icon path=${mdiMicrophone}></ha-svg-icon>
++            </mwc-icon-button>
++          `
++        : ""}
++    `;
++  }
++
++  private get _notificationsCount() {
++    const states = this.hass!.states;
++
++    const len = Object.keys(states)
++      .filter(
++        (entityId) =>
++          entityId.substr(0, entityId.indexOf(".")) === "configurator"
++      )
++      .map((entityId) => states[entityId]).length;
++
++    return (this._persistentNotifications || 0) + len;
++  }
++
++  private get _hideToolbar(): boolean {
++    return (
++      this.config.hideToolbar === true &&
++      window.location.search.indexOf("toolbar") === -1
++    );
++  }
++
++  private _handleShowNotificationDrawer() {
++    showNotificationDrawer(this, { narrow: this.narrow! });
++  }
++  // end of IoB
++
+   private get config(): LovelaceConfig {
+     return this.lovelace!.config;
+   }
+
+   private get _yamlMode(): boolean {
+     return this.lovelace!.mode === "yaml";
+   }
+
+   private get _editMode() {
+     return this.lovelace!.editMode;
+@@ -493,21 +597,28 @@ class HUIRoot extends LitElement {
+
+   private _handleUnusedEntities(): void {
+     navigate(this, `${this.route?.prefix}/hass-unused-entities`);
+   }
+
+   private _showVoiceCommandDialog(): void {
+     showVoiceCommandDialog(this);
+   }
+
+   private _handleHelp(): void {
+-    window.open("https://www.home-assistant.io/lovelace/", "_blank");
++    // IoB
++    // window.open("https://www.home-assistant.io/lovelace/", "_blank");
++    window.open(
++      `https://www.iobroker.net/#${
++        this.hass!.language ? this.hass!.language.split("-")[0] || "en" : "en"
++      }/adapters/adapterref/iobroker.lovelace/README.md`,
++      "_blank"
++    );
+   }
+
+   private _editModeEnable(): void {
+     if (this._yamlMode) {
+       showAlertDialog(this, {
+         text: "The edit UI is not available when in YAML mode.",
+       });
+       return;
+     }
+     this.lovelace!.setEditMode(true);

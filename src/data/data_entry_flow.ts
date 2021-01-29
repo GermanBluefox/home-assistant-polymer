@@ -1,3 +1,5 @@
+import { HaFormSchema } from "../components/ha-form/ha-form";
+
 export interface DataEntryFlowProgressedEvent {
   type: "data_entry_flow_progressed";
   data: {
@@ -7,15 +9,10 @@ export interface DataEntryFlowProgressedEvent {
   };
 }
 
-export interface FieldSchema {
-  name: string;
-  default?: any;
-  optional: boolean;
-}
-
 export interface DataEntryFlowProgress {
   flow_id: string;
   handler: string;
+  step_id: string;
   context: {
     title_placeholders: { [key: string]: string };
     [key: string]: any;
@@ -27,7 +24,7 @@ export interface DataEntryFlowStepForm {
   flow_id: string;
   handler: string;
   step_id: string;
-  data_schema: FieldSchema[];
+  data_schema: HaFormSchema[];
   errors: { [key: string]: string };
   description_placeholders: { [key: string]: string };
 }

@@ -1,27 +1,26 @@
 import {
-  html,
-  LitElement,
-  TemplateResult,
-  property,
   css,
   CSSResult,
   customElement,
+  html,
+  LitElement,
+  property,
+  internalProperty,
   PropertyValues,
+  TemplateResult,
 } from "lit-element";
-
 import "../../../components/ha-climate-state";
-import "../components/hui-generic-entity-row";
-import "../components/hui-warning";
-
 import { HomeAssistant } from "../../../types";
-import { EntityRow, EntityConfig } from "./types";
 import { hasConfigOrEntityChanged } from "../common/has-changed";
+import "../components/hui-generic-entity-row";
+import { createEntityNotFoundWarning } from "../components/hui-warning";
+import { EntityConfig, LovelaceRow } from "./types";
 
 @customElement("hui-climate-entity-row")
-class HuiClimateEntityRow extends LitElement implements EntityRow {
-  @property() public hass?: HomeAssistant;
+class HuiClimateEntityRow extends LitElement implements LovelaceRow {
+  @property({ attribute: false }) public hass?: HomeAssistant;
 
-  @property() private _config?: EntityConfig;
+  @internalProperty() private _config?: EntityConfig;
 
   public setConfig(config: EntityConfig): void {
     if (!config || !config.entity) {
@@ -35,7 +34,7 @@ class HuiClimateEntityRow extends LitElement implements EntityRow {
     return hasConfigOrEntityChanged(this, changedProps);
   }
 
-  protected render(): TemplateResult | void {
+  protected render(): TemplateResult {
     if (!this.hass || !this._config) {
       return html``;
     }
@@ -44,21 +43,17 @@ class HuiClimateEntityRow extends LitElement implements EntityRow {
 
     if (!stateObj) {
       return html`
-        <hui-warning
-          >${this.hass.localize(
-            "ui.panel.lovelace.warning.entity_not_found",
-            "entity",
-            this._config.entity
-          )}</hui-warning
-        >
+        <hui-warning>
+          ${createEntityNotFoundWarning(this.hass, this._config.entity)}
+        </hui-warning>
       `;
     }
 
     return html`
-      <hui-generic-entity-row .hass="${this.hass}" .config="${this._config}">
+      <hui-generic-entity-row .hass=${this.hass} .config=${this._config}>
         <ha-climate-state
-          .hass="${this.hass}"
-          .stateObj="${stateObj}"
+          .hass=${this.hass}
+          .stateObj=${stateObj}
         ></ha-climate-state>
       </hui-generic-entity-row>
     `;

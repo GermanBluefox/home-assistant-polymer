@@ -1,213 +1,124 @@
+import { UnsubscribeFunc } from "home-assistant-js-websocket";
 import {
-  LitElement,
-  TemplateResult,
-  html,
-  css,
-  CSSResult,
-  property,
   customElement,
+  property,
+  internalProperty,
+  PropertyValues,
 } from "lit-element";
-import "@polymer/paper-item/paper-item";
-import "@polymer/paper-item/paper-item-body";
-
-import { HomeAssistant } from "../../../types";
+import { compare } from "../../../common/string/compare";
 import {
   AreaRegistryEntry,
-  updateAreaRegistryEntry,
-  deleteAreaRegistryEntry,
-  createAreaRegistryEntry,
   subscribeAreaRegistry,
 } from "../../../data/area_registry";
-import "../../../components/ha-card";
-import "../../../components/ha-fab";
-import "../../../layouts/hass-subpage";
-import "../../../layouts/hass-loading-screen";
-import "../ha-config-section";
+import { ConfigEntry, getConfigEntries } from "../../../data/config_entries";
 import {
-  showAreaRegistryDetailDialog,
-  loadAreaRegistryDetailDialog,
-} from "./show-dialog-area-registry-detail";
-import { classMap } from "lit-html/directives/class-map";
-import { computeRTL } from "../../../common/util/compute_rtl";
-import { UnsubscribeFunc } from "home-assistant-js-websocket";
+  DeviceRegistryEntry,
+  subscribeDeviceRegistry,
+} from "../../../data/device_registry";
+import {
+  HassRouterPage,
+  RouterOptions,
+} from "../../../layouts/hass-router-page";
+import { HomeAssistant } from "../../../types";
+import "./ha-config-area-page";
+import "./ha-config-areas-dashboard";
 
 @customElement("ha-config-areas")
-export class HaConfigAreas extends LitElement {
-  @property() public hass!: HomeAssistant;
-  @property() public isWide?: boolean;
-  @property() private _areas?: AreaRegistryEntry[];
-  private _unsubAreas?: UnsubscribeFunc;
+class HaConfigAreas extends HassRouterPage {
+  @property({ attribute: false }) public hass!: HomeAssistant;
+
+  @property() public narrow!: boolean;
+
+  @property() public isWide!: boolean;
+
+  @property() public showAdvanced!: boolean;
+
+  protected routerOptions: RouterOptions = {
+    defaultPage: "dashboard",
+    routes: {
+      dashboard: {
+        tag: "ha-config-areas-dashboard",
+        cache: true,
+      },
+      area: {
+        tag: "ha-config-area-page",
+      },
+    },
+  };
+
+  @internalProperty() private _configEntries: ConfigEntry[] = [];
+
+  @internalProperty()
+  private _deviceRegistryEntries: DeviceRegistryEntry[] = [];
+
+  @internalProperty() private _areas: AreaRegistryEntry[] = [];
+
+  private _unsubs?: UnsubscribeFunc[];
+
+  public connectedCallback() {
+    super.connectedCallback();
+
+    if (!this.hass) {
+      return;
+    }
+    this._loadData();
+  }
 
   public disconnectedCallback() {
     super.disconnectedCallback();
-    if (this._unsubAreas) {
-      this._unsubAreas();
+    if (this._unsubs) {
+      while (this._unsubs.length) {
+        this._unsubs.pop()!();
+      }
+      this._unsubs = undefined;
     }
   }
 
-  protected render(): TemplateResult | void {
-    if (!this.hass || this._areas === undefined) {
-      return html`
-        <hass-loading-screen></hass-loading-screen>
-      `;
-    }
-    return html`
-      <hass-subpage
-        .header="${this.hass.localize("ui.panel.config.area_registry.caption")}"
-        .showBackButton=${!this.isWide}
-      >
-        <ha-config-section .isWide=${this.isWide}>
-          <span slot="header">
-            ${this.hass.localize("ui.panel.config.area_registry.picker.header")}
-          </span>
-          <span slot="introduction">
-            ${this.hass.localize(
-              "ui.panel.config.area_registry.picker.introduction"
-            )}
-            <p>
-              ${this.hass.localize(
-                "ui.panel.config.area_registry.picker.introduction2"
-              )}
-            </p>
-            <a href="/config/integrations/dashboard">
-              ${this.hass.localize(
-                "ui.panel.config.area_registry.picker.integrations_page"
-              )}
-            </a>
-          </span>
-          <ha-card>
-            ${this._areas.map((entry) => {
-              return html`
-                <paper-item @click=${this._openEditEntry} .entry=${entry}>
-                  <paper-item-body>
-                    ${entry.name}
-                  </paper-item-body>
-                </paper-item>
-              `;
-            })}
-            ${this._areas.length === 0
-              ? html`
-                  <div class="empty">
-                    ${this.hass.localize(
-                      "ui.panel.config.area_registry.no_areas"
-                    )}
-                    <mwc-button @click=${this._createArea}>
-                      ${this.hass.localize(
-                        "ui.panel.config.area_registry.create_area"
-                      )}
-                    </mwc-button>
-                  </div>
-                `
-              : html``}
-          </ha-card>
-        </ha-config-section>
-      </hass-subpage>
-
-      <ha-fab
-        ?is-wide=${this.isWide}
-        icon="hass:plus"
-        title="${this.hass.localize(
-          "ui.panel.config.area_registry.create_area"
-        )}"
-        @click=${this._createArea}
-        class="${classMap({
-          rtl: computeRTL(this.hass),
-        })}"
-      ></ha-fab>
-    `;
-  }
-
-  protected firstUpdated(changedProps) {
-    super.firstUpdated(changedProps);
-    loadAreaRegistryDetailDialog();
-  }
-
-  protected updated(changedProps) {
+  protected updated(changedProps: PropertyValues) {
     super.updated(changedProps);
-    if (!this._unsubAreas) {
-      this._unsubAreas = subscribeAreaRegistry(
-        this.hass.connection,
-        (areas) => {
-          this._areas = areas;
-        }
-      );
+    if (!this._unsubs && changedProps.has("hass")) {
+      this._loadData();
     }
   }
 
-  private _createArea() {
-    this._openDialog();
+  protected updatePageEl(pageEl) {
+    pageEl.hass = this.hass;
+
+    if (this._currentPage === "area") {
+      pageEl.areaId = this.routeTail.path.substr(1);
+    }
+
+    pageEl.entries = this._configEntries;
+    pageEl.devices = this._deviceRegistryEntries;
+    pageEl.areas = this._areas;
+    pageEl.narrow = this.narrow;
+    pageEl.isWide = this.isWide;
+    pageEl.showAdvanced = this.showAdvanced;
+    pageEl.route = this.routeTail;
   }
 
-  private _openEditEntry(ev: MouseEvent) {
-    const entry: AreaRegistryEntry = (ev.currentTarget! as any).entry;
-    this._openDialog(entry);
-  }
-  private _openDialog(entry?: AreaRegistryEntry) {
-    showAreaRegistryDetailDialog(this, {
-      entry,
-      createEntry: async (values) =>
-        createAreaRegistryEntry(this.hass!, values),
-      updateEntry: async (values) =>
-        updateAreaRegistryEntry(this.hass!, entry!.area_id, values),
-      removeEntry: async () => {
-        if (
-          !confirm(`Are you sure you want to delete this area?
-
-All devices in this area will become unassigned.`)
-        ) {
-          return false;
-        }
-
-        try {
-          await deleteAreaRegistryEntry(this.hass!, entry!.area_id);
-          return true;
-        } catch (err) {
-          return false;
-        }
-      },
+  private _loadData() {
+    getConfigEntries(this.hass).then((configEntries) => {
+      this._configEntries = configEntries.sort((conf1, conf2) =>
+        compare(conf1.title, conf2.title)
+      );
     });
+    if (this._unsubs) {
+      return;
+    }
+    this._unsubs = [
+      subscribeAreaRegistry(this.hass.connection, (areas) => {
+        this._areas = areas;
+      }),
+      subscribeDeviceRegistry(this.hass.connection, (entries) => {
+        this._deviceRegistryEntries = entries;
+      }),
+    ];
   }
+}
 
-  static get styles(): CSSResult {
-    return css`
-      a {
-        color: var(--primary-color);
-      }
-      ha-card {
-        max-width: 600px;
-        margin: 16px auto;
-        overflow: hidden;
-      }
-      .empty {
-        text-align: center;
-      }
-      paper-item {
-        cursor: pointer;
-        padding-top: 4px;
-        padding-bottom: 4px;
-      }
-      ha-fab {
-        position: fixed;
-        bottom: 16px;
-        right: 16px;
-        z-index: 1;
-      }
-
-      ha-fab[is-wide] {
-        bottom: 24px;
-        right: 24px;
-      }
-
-      ha-fab.rtl {
-        right: auto;
-        left: 16px;
-      }
-
-      ha-fab[is-wide].rtl {
-        bottom: 24px;
-        right: auto;
-        left: 24px;
-      }
-    `;
+declare global {
+  interface HTMLElementTagNameMap {
+    "ha-config-areas": HaConfigAreas;
   }
 }

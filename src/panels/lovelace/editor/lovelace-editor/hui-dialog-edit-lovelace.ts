@@ -1,31 +1,29 @@
-import {
-  html,
-  css,
-  LitElement,
-  TemplateResult,
-  CSSResult,
-  customElement,
-  property,
-} from "lit-element";
-import "@polymer/paper-spinner/paper-spinner";
-import "../../../../components/dialog/ha-paper-dialog";
-// tslint:disable-next-line:no-duplicate-imports
-import { HaPaperDialog } from "../../../../components/dialog/ha-paper-dialog";
 import "@material/mwc-button";
 import "@polymer/paper-dialog-scrollable/paper-dialog-scrollable";
-
+import {
+  css,
+  CSSResult,
+  customElement,
+  html,
+  LitElement,
+  property,
+  internalProperty,
+  TemplateResult,
+} from "lit-element";
+import "../../../../components/dialog/ha-paper-dialog";
+import "../../../../components/ha-circular-progress";
+import type { HaPaperDialog } from "../../../../components/dialog/ha-paper-dialog";
+import type { LovelaceConfig } from "../../../../data/lovelace";
 import { haStyleDialog } from "../../../../resources/styles";
-
+import type { HomeAssistant } from "../../../../types";
+import type { Lovelace } from "../../types";
 import "./hui-lovelace-editor";
-import { HomeAssistant } from "../../../../types";
-import { LovelaceConfig } from "../../../../data/lovelace";
-import { Lovelace } from "../../types";
 
 @customElement("hui-dialog-edit-lovelace")
 export class HuiDialogEditLovelace extends LitElement {
-  @property() public hass?: HomeAssistant;
+  @property({ attribute: false }) public hass?: HomeAssistant;
 
-  @property() private _lovelace?: Lovelace;
+  @internalProperty() private _lovelace?: Lovelace;
 
   private _config?: LovelaceConfig;
 
@@ -52,7 +50,7 @@ export class HuiDialogEditLovelace extends LitElement {
     return this.shadowRoot!.querySelector("ha-paper-dialog")!;
   }
 
-  protected render(): TemplateResult | void {
+  protected render(): TemplateResult {
     return html`
       <ha-paper-dialog with-backdrop modal>
         <h2>
@@ -65,7 +63,7 @@ export class HuiDialogEditLovelace extends LitElement {
             "ui.panel.lovelace.editor.edit_lovelace.explanation"
           )}
           <hui-lovelace-editor
-            .hass="${this.hass}"
+            .hass=${this.hass}
             .config="${this._config}"
             @lovelace-config-changed="${this._ConfigChanged}"
           ></hui-lovelace-editor
@@ -78,10 +76,13 @@ export class HuiDialogEditLovelace extends LitElement {
             ?disabled="${!this._config || this._saving}"
             @click="${this._save}"
           >
-            <paper-spinner
-              ?active="${this._saving}"
-              alt="Saving"
-            ></paper-spinner>
+            ${this._saving
+              ? html`<ha-circular-progress
+                  active
+                  size="small"
+                  title="Saving"
+                ></ha-circular-progress>`
+              : ""}
             ${this.hass!.localize("ui.common.save")}</mwc-button
           >
         </div>
@@ -150,17 +151,6 @@ export class HuiDialogEditLovelace extends LitElement {
         }
         ha-paper-dialog {
           max-width: 650px;
-        }
-        mwc-button paper-spinner {
-          width: 14px;
-          height: 14px;
-          margin-right: 20px;
-        }
-        paper-spinner {
-          display: none;
-        }
-        paper-spinner[active] {
-          display: block;
         }
       `,
     ];

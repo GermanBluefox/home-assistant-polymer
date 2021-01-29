@@ -1,16 +1,15 @@
 import "@material/mwc-button";
 import "@polymer/paper-dialog-scrollable/paper-dialog-scrollable";
-import "@polymer/paper-spinner/paper-spinner";
+import "../../components/ha-circular-progress";
 import { html } from "@polymer/polymer/lib/utils/html-tag";
+/* eslint-plugin-disable lit */
 import { PolymerElement } from "@polymer/polymer/polymer-element";
-
 import "../../components/dialog/ha-paper-dialog";
 import "../../components/ha-form/ha-form";
 import "../../components/ha-markdown";
-import "../../resources/ha-style";
-
 import { EventsMixin } from "../../mixins/events-mixin";
 import LocalizeMixin from "../../mixins/localize-mixin";
+import "../../styles/polymer-ha-style-dialog";
 
 let instance = 0;
 
@@ -28,9 +27,12 @@ class HaMfaModuleSetupFlow extends LocalizeMixin(EventsMixin(PolymerElement)) {
         ha-paper-dialog {
           max-width: 500px;
         }
-        ha-markdown img:first-child:last-child,
-        ha-markdown svg:first-child:last-child {
-          background-color: white;
+        h2 {
+          white-space: normal;
+        }
+        ha-markdown {
+          --markdown-svg-background-color: white;
+          --markdown-svg-color: black;
           display: block;
           margin: 0 auto;
         }
@@ -68,13 +70,14 @@ class HaMfaModuleSetupFlow extends LocalizeMixin(EventsMixin(PolymerElement)) {
           </template>
           <template is="dom-if" if="[[!_step]]">
             <div class="init-spinner">
-              <paper-spinner active></paper-spinner>
+              <ha-circular-progress active></ha-circular-progress>
             </div>
           </template>
           <template is="dom-if" if="[[_step]]">
             <template is="dom-if" if="[[_equals(_step.type, 'abort')]]">
               <ha-markdown
                 allowsvg
+                breaks
                 content="[[_computeStepAbortedReason(localize, _step)]]"
               ></ha-markdown>
             </template>
@@ -93,6 +96,7 @@ class HaMfaModuleSetupFlow extends LocalizeMixin(EventsMixin(PolymerElement)) {
               >
                 <ha-markdown
                   allowsvg
+                  breaks
                   content="[[_computeStepDescription(localize, _step)]]"
                 ></ha-markdown>
               </template>
@@ -121,7 +125,7 @@ class HaMfaModuleSetupFlow extends LocalizeMixin(EventsMixin(PolymerElement)) {
           <template is="dom-if" if="[[_equals(_step.type, 'form')]]">
             <template is="dom-if" if="[[_loading]]">
               <div class="submit-spinner">
-                <paper-spinner active></paper-spinner>
+                <ha-circular-progress active></ha-circular-progress>
               </div>
             </template>
             <template is="dom-if" if="[[!_loading]]">
@@ -168,6 +172,7 @@ class HaMfaModuleSetupFlow extends LocalizeMixin(EventsMixin(PolymerElement)) {
 
   ready() {
     super.ready();
+    this.hass.loadBackendTranslation("mfa_setup", "auth");
     this.addEventListener("keypress", (ev) => {
       if (ev.keyCode === 13) {
         this._submitStep();

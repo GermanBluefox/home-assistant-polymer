@@ -1,22 +1,20 @@
+import { HassEntity } from "home-assistant-js-websocket";
 import {
+  customElement,
+  html,
   LitElement,
   property,
-  customElement,
   PropertyValues,
   TemplateResult,
-  html,
 } from "lit-element";
-import { HassEntity } from "home-assistant-js-websocket";
-
+import { PersistentNotification } from "../../data/persistent_notification";
+import { HomeAssistant } from "../../types";
 import "./configurator-notification-item";
 import "./persistent-notification-item";
 
-import { HomeAssistant } from "../../types";
-import { PersistentNotification } from "../../data/persistent_notification";
-
 @customElement("notification-item")
 export class HuiNotificationItem extends LitElement {
-  @property() public hass?: HomeAssistant;
+  @property({ attribute: false }) public hass?: HomeAssistant;
 
   @property() public notification?: HassEntity | PersistentNotification;
 
@@ -28,7 +26,7 @@ export class HuiNotificationItem extends LitElement {
     return false;
   }
 
-  protected render(): TemplateResult | void {
+  protected render(): TemplateResult {
     if (!this.hass || !this.notification) {
       return html``;
     }
@@ -36,13 +34,13 @@ export class HuiNotificationItem extends LitElement {
     return "entity_id" in this.notification
       ? html`
           <configurator-notification-item
-            .hass="${this.hass}"
+            .hass=${this.hass}
             .notification="${this.notification}"
           ></configurator-notification-item>
         `
       : html`
           <persistent-notification-item
-            .hass="${this.hass}"
+            .hass=${this.hass}
             .notification="${this.notification}"
           ></persistent-notification-item>
         `;

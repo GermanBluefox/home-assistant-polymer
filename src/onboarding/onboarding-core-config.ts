@@ -1,47 +1,53 @@
-import {
-  LitElement,
-  customElement,
-  property,
-  TemplateResult,
-  html,
-  CSSResult,
-  css,
-} from "lit-element";
 import "@material/mwc-button/mwc-button";
 import "@polymer/paper-input/paper-input";
-import "@polymer/paper-radio-group/paper-radio-group";
+import type { PaperInputElement } from "@polymer/paper-input/paper-input";
 import "@polymer/paper-radio-button/paper-radio-button";
-// tslint:disable-next-line: no-duplicate-imports
-import { PaperInputElement } from "@polymer/paper-input/paper-input";
-import { HomeAssistant } from "../types";
+import "@polymer/paper-radio-group/paper-radio-group";
+import {
+  css,
+  CSSResult,
+  customElement,
+  html,
+  internalProperty,
+  LitElement,
+  property,
+  TemplateResult,
+} from "lit-element";
+import { fireEvent } from "../common/dom/fire_event";
+import type { LocalizeFunc } from "../common/translations/localize";
+import "../components/map/ha-location-editor";
+import { createTimezoneListEl } from "../components/timezone-datalist";
 import {
   ConfigUpdateValues,
   detectCoreConfig,
   saveCoreConfig,
 } from "../data/core";
-import { PolymerChangedEvent } from "../polymer-types";
 import { onboardCoreConfigStep } from "../data/onboarding";
-import { fireEvent } from "../common/dom/fire_event";
-import { LocalizeFunc } from "../common/translations/localize";
-import { createTimezoneListEl } from "../components/timezone-datalist";
-import "../components/map/ha-location-editor";
+import type { PolymerChangedEvent } from "../polymer-types";
+import type { HomeAssistant } from "../types";
 
 const amsterdam = [52.3731339, 4.8903147];
+const mql = matchMedia("(prefers-color-scheme: dark)");
 
 @customElement("onboarding-core-config")
 class OnboardingCoreConfig extends LitElement {
-  @property() public hass!: HomeAssistant;
+  @property({ attribute: false }) public hass!: HomeAssistant;
+
   @property() public onboardingLocalize!: LocalizeFunc;
 
-  @property() private _working = false;
+  @internalProperty() private _working = false;
 
-  @property() private _name!: ConfigUpdateValues["location_name"];
-  @property() private _location!: [number, number];
-  @property() private _elevation!: string;
-  @property() private _unitSystem!: ConfigUpdateValues["unit_system"];
-  @property() private _timeZone!: string;
+  @internalProperty() private _name!: ConfigUpdateValues["location_name"];
 
-  protected render(): TemplateResult | void {
+  @internalProperty() private _location!: [number, number];
+
+  @internalProperty() private _elevation!: string;
+
+  @internalProperty() private _unitSystem!: ConfigUpdateValues["unit_system"];
+
+  @internalProperty() private _timeZone!: string;
+
+  protected render(): TemplateResult {
     return html`
       <p>
         ${this.onboardingLocalize(
@@ -85,8 +91,10 @@ class OnboardingCoreConfig extends LitElement {
       <div class="row">
         <ha-location-editor
           class="flex"
+          .hass=${this.hass}
           .location=${this._locationValue}
           .fitZoom=${14}
+          .darkMode=${mql.matches}
           @change=${this._locationChanged}
         ></ha-location-editor>
       </div>
@@ -116,13 +124,9 @@ class OnboardingCoreConfig extends LitElement {
           @value-changed=${this._handleChange}
         >
           <span slot="suffix">
-            ${this._unitSystem === "metric"
-              ? this.hass.localize(
-                  "ui.panel.config.core.section.core.core_config.elevation_meters"
-                )
-              : this.hass.localize(
-                  "ui.panel.config.core.section.core.core_config.elevation_feet"
-                )}
+            ${this.hass.localize(
+              "ui.panel.config.core.section.core.core_config.elevation_meters"
+            )}
           </span>
         </paper-input>
       </div>
@@ -270,7 +274,7 @@ class OnboardingCoreConfig extends LitElement {
       });
     } catch (err) {
       this._working = false;
-      alert("FAIL");
+      alert(`Failed to save: ${err.message}`);
     }
   }
 

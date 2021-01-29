@@ -1,68 +1,81 @@
 import "@polymer/paper-input/paper-textarea";
-
-import deepClone from "deep-clone-simple";
-
-import { createCardElement } from "../../common/create-card-element";
-import { HomeAssistant } from "../../../../types";
-import { LovelaceCardConfig } from "../../../../data/lovelace";
-import { LovelaceCard } from "../../types";
-import { ConfigError } from "../types";
-import { getCardElementTag } from "../../common/get-card-element-tag";
-import { createErrorCardConfig } from "../../cards/hui-error-card";
 import { computeRTL } from "../../../../common/util/compute_rtl";
+import { LovelaceCardConfig } from "../../../../data/lovelace";
+import { HomeAssistant } from "../../../../types";
+import { createCardElement } from "../../create-element/create-card-element";
+import { LovelaceCard } from "../../types";
+import { createErrorCardConfig } from "../../create-element/create-element-base";
+import { property, PropertyValues, UpdatingElement } from "lit-element";
 
-export class HuiCardPreview extends HTMLElement {
-  private _hass?: HomeAssistant;
+export class HuiCardPreview extends UpdatingElement {
+  @property({ attribute: false }) public hass?: HomeAssistant;
+
+  @property() public config?: LovelaceCardConfig;
+
   private _element?: LovelaceCard;
 
-  set hass(hass: HomeAssistant) {
-    if (!this._hass || this._hass.language !== hass.language) {
-      this.style.direction = computeRTL(hass) ? "rtl" : "ltr";
-    }
-
-    this._hass = hass;
-    if (this._element) {
-      this._element.hass = hass;
-    }
+  private get _error() {
+    return this._element?.tagName === "HUI-ERROR-CARD";
   }
 
-  set error(error: ConfigError) {
-    const configValue = createErrorCardConfig(
-      `${error.type}: ${error.message}`,
-      undefined
-    );
-
-    this._createCard(configValue);
-  }
-
-  set config(configValue: LovelaceCardConfig) {
-    if (!configValue) {
+  constructor() {
+    super();
+    this.addEventListener("ll-rebuild", () => {
       this._cleanup();
-      return;
-    }
-
-    if (!configValue.type) {
-      this._createCard(
-        createErrorCardConfig("No card type found", configValue)
-      );
-      return;
-    }
-
-    if (!this._element) {
-      this._createCard(configValue);
-      return;
-    }
-
-    const tag = getCardElementTag(configValue.type);
-
-    if (tag.toUpperCase() === this._element.tagName) {
-      try {
-        this._element.setConfig(deepClone(configValue));
-      } catch (err) {
-        this._createCard(createErrorCardConfig(err.message, configValue));
+      if (this.config) {
+        this._createCard(this.config);
       }
-    } else {
-      this._createCard(configValue);
+    });
+  }
+
+  protected update(changedProperties: PropertyValues) {
+    super.update(changedProperties);
+
+    if (changedProperties.has("config")) {
+      const oldConfig = changedProperties.get("config") as
+        | undefined
+        | LovelaceCardConfig;
+
+      if (!this.config) {
+        this._cleanup();
+        return;
+      }
+
+      if (!this.config.type) {
+        this._createCard(
+          createErrorCardConfig("No card type found", this.config)
+        );
+        return;
+      }
+
+      if (!this._element) {
+        this._createCard(this.config);
+        return;
+      }
+
+      // in case the element was an error element we always want to recreate it
+      if (!this._error && oldConfig && this.config.type === oldConfig.type) {
+        try {
+          this._element.setConfig(this.config);
+        } catch (err) {
+          this._createCard(createErrorCardConfig(err.message, this.config));
+        }
+      } else {
+        this._createCard(this.config);
+      }
+    }
+
+    if (changedProperties.has("hass")) {
+      const oldHass = changedProperties.get("hass") as
+        | HomeAssistant
+        | undefined;
+      if (!oldHass || oldHass.language !== this.hass!.language) {
+        this.style.direction = computeRTL(this.hass!) ? "rtl" : "ltr";
+      }
+
+      if (this._element) {
+        this._element.hass = this.hass;
+      }
     }
   }
 
@@ -70,8 +83,8 @@ export class HuiCardPreview extends HTMLElement {
     this._cleanup();
     this._element = createCardElement(configValue);
 
-    if (this._hass) {
-      this._element!.hass = this._hass;
+    if (this.hass) {
+      this._element!.hass = this.hass;
     }
 
     this.appendChild(this._element!);

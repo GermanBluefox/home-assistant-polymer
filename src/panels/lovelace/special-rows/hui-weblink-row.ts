@@ -1,23 +1,21 @@
 import {
-  html,
-  LitElement,
-  TemplateResult,
-  customElement,
-  property,
   css,
   CSSResult,
+  customElement,
+  html,
+  LitElement,
+  internalProperty,
+  TemplateResult,
 } from "lit-element";
-
-import { EntityRow, WeblinkConfig } from "../entity-rows/types";
-import { HomeAssistant } from "../../../types";
-
 import "../../../components/ha-icon";
+import { HomeAssistant } from "../../../types";
+import { LovelaceRow, WeblinkConfig } from "../entity-rows/types";
 
 @customElement("hui-weblink-row")
-class HuiWeblinkRow extends LitElement implements EntityRow {
+class HuiWeblinkRow extends LitElement implements LovelaceRow {
   public hass?: HomeAssistant;
 
-  @property() private _config?: WeblinkConfig;
+  @internalProperty() private _config?: WeblinkConfig;
 
   public setConfig(config: WeblinkConfig): void {
     if (!config || !config.url) {
@@ -31,7 +29,7 @@ class HuiWeblinkRow extends LitElement implements EntityRow {
     };
   }
 
-  protected render(): TemplateResult | void {
+  protected render(): TemplateResult {
     if (!this._config) {
       return html``;
     }
@@ -40,6 +38,7 @@ class HuiWeblinkRow extends LitElement implements EntityRow {
       <a
         href=${this._config.url}
         target=${this._config.url.indexOf("://") !== -1 ? "_blank" : ""}
+        rel="noreferrer"
       >
         <ha-icon .icon="${this._config.icon}"></ha-icon>
         <div>${this._config.name}</div>

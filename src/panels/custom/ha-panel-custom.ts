@@ -1,10 +1,13 @@
 import { property, PropertyValues, UpdatingElement } from "lit-element";
-import { loadCustomPanel } from "../../util/custom-panel/load-custom-panel";
-import { createCustomPanelElement } from "../../util/custom-panel/create-custom-panel-element";
-import { setCustomPanelProperties } from "../../util/custom-panel/set-custom-panel-properties";
-import { HomeAssistant, Route } from "../../types";
-import { CustomPanelInfo } from "../../data/panel_custom";
 import { navigate } from "../../common/navigate";
+import { CustomPanelInfo } from "../../data/panel_custom";
+import { HomeAssistant, Route } from "../../types";
+import { createCustomPanelElement } from "../../util/custom-panel/create-custom-panel-element";
+import {
+  loadCustomPanel,
+  getUrl,
+} from "../../util/custom-panel/load-custom-panel";
+import { setCustomPanelProperties } from "../../util/custom-panel/set-custom-panel-properties";
 
 declare global {
   interface Window {
@@ -13,11 +16,15 @@ declare global {
 }
 
 export class HaPanelCustom extends UpdatingElement {
-  @property() public hass!: HomeAssistant;
+  @property({ attribute: false }) public hass!: HomeAssistant;
+
   @property() public narrow!: boolean;
+
   @property() public route!: Route;
+
   @property() public panel!: CustomPanelInfo;
-  private _setProperties?: (props: {}) => void | undefined;
+
+  private _setProperties?: (props: Record<string, unknown>) => void | undefined;
 
   // Since navigate fires events on `window`, we need to expose this as a function
   // to allow custom panels to forward their location changes to the main window
@@ -39,7 +46,8 @@ export class HaPanelCustom extends UpdatingElement {
     this._cleanupPanel();
   }
 
-  protected updated(changedProps: PropertyValues) {
+  protected update(changedProps: PropertyValues) {
+    super.update(changedProps);
     if (changedProps.has("panel")) {
       // Clean up old things if we had a panel
       if (changedProps.get("panel")) {
@@ -69,9 +77,10 @@ export class HaPanelCustom extends UpdatingElement {
 
   private _createPanel(panel: CustomPanelInfo) {
     const config = panel.config!._panel_custom;
+    const panelUrl = getUrl(config);
 
     const tempA = document.createElement("a");
-    tempA.href = config.html_url || config.js_url || config.module_url || "";
+    tempA.href = panelUrl.url;
 
     if (
       !config.trust_external &&

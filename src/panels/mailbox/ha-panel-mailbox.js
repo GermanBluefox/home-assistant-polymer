@@ -1,22 +1,21 @@
-import "@polymer/app-layout/app-header-layout/app-header-layout";
+import "@material/mwc-button";
+import "../../layouts/ha-app-layout";
 import "@polymer/app-layout/app-header/app-header";
 import "@polymer/app-layout/app-toolbar/app-toolbar";
-import "@material/mwc-button";
 import "@polymer/paper-input/paper-textarea";
-import "@polymer/paper-item/paper-item-body";
 import "@polymer/paper-item/paper-item";
+import "@polymer/paper-item/paper-item-body";
 import "@polymer/paper-tabs/paper-tab";
-import "@polymer/paper-tabs/paper-tabs";
+import "../../components/ha-tabs";
 import { html } from "@polymer/polymer/lib/utils/html-tag";
+/* eslint-plugin-disable lit */
 import { PolymerElement } from "@polymer/polymer/polymer-element";
-
-import "../../components/ha-menu-button";
+import { formatDateTime } from "../../common/datetime/format_date_time";
 import "../../components/ha-card";
-import "../../resources/ha-style";
-
-import formatDateTime from "../../common/datetime/format_date_time";
-import LocalizeMixin from "../../mixins/localize-mixin";
+import "../../components/ha-menu-button";
 import { EventsMixin } from "../../mixins/events-mixin";
+import LocalizeMixin from "../../mixins/localize-mixin";
+import "../../styles/polymer-ha-style";
 
 let registeredDialog = false;
 
@@ -45,6 +44,13 @@ class HaPanelMailbox extends EventsMixin(LocalizeMixin(PolymerElement)) {
 
         paper-item {
           cursor: pointer;
+        }
+
+        ha-tabs {
+          margin-left: max(env(safe-area-inset-left), 24px);
+          margin-right: max(env(safe-area-inset-right), 24px);
+          --paper-tabs-selection-bar-color: #fff;
+          text-transform: uppercase;
         }
 
         .empty {
@@ -77,7 +83,7 @@ class HaPanelMailbox extends EventsMixin(LocalizeMixin(PolymerElement)) {
         }
       </style>
 
-      <app-header-layout has-scrolling-region>
+      <ha-app-layout>
         <app-header slot="header" fixed>
           <app-toolbar>
             <ha-menu-button
@@ -87,7 +93,7 @@ class HaPanelMailbox extends EventsMixin(LocalizeMixin(PolymerElement)) {
             <div main-title>[[localize('panel.mailbox')]]</div>
           </app-toolbar>
           <div sticky hidden$="[[areTabsHidden(platforms)]]">
-            <paper-tabs
+            <ha-tabs
               scrollable
               selected="[[_currentPlatform]]"
               on-iron-activate="handlePlatformSelected"
@@ -97,7 +103,7 @@ class HaPanelMailbox extends EventsMixin(LocalizeMixin(PolymerElement)) {
                   [[getPlatformName(item)]]
                 </paper-tab>
               </template>
-            </paper-tabs>
+            </ha-tabs>
           </div>
         </app-header>
         <div class="content">
@@ -125,7 +131,7 @@ class HaPanelMailbox extends EventsMixin(LocalizeMixin(PolymerElement)) {
             </template>
           </ha-card>
         </div>
-      </app-header-layout>
+      </ha-app-layout>
     `;
   }
 
@@ -166,12 +172,12 @@ class HaPanelMailbox extends EventsMixin(LocalizeMixin(PolymerElement)) {
     this.hass.connection
       .subscribeEvents(this.hassChanged, "mailbox_updated")
       .then(
-        function(unsub) {
+        function (unsub) {
           this._unsubEvents = unsub;
         }.bind(this)
       );
     this.computePlatforms().then(
-      function(platforms) {
+      function (platforms) {
         this.platforms = platforms;
         this.hassChanged();
       }.bind(this)
@@ -188,7 +194,7 @@ class HaPanelMailbox extends EventsMixin(LocalizeMixin(PolymerElement)) {
       this._messages = [];
     }
     this.getMessages().then(
-      function(items) {
+      function (items) {
         this._messages = items;
       }.bind(this)
     );
@@ -222,7 +228,7 @@ class HaPanelMailbox extends EventsMixin(LocalizeMixin(PolymerElement)) {
             platform: platform,
           });
         }
-        return platformItems.sort(function(a, b) {
+        return platformItems.sort(function (a, b) {
           return new Date(b.timestamp) - new Date(a.timestamp);
         });
       });

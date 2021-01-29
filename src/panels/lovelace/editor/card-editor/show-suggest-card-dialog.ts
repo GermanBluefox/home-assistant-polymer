@@ -1,8 +1,9 @@
 import { fireEvent } from "../../../../common/dom/fire_event";
-import { LovelaceConfig, LovelaceCardConfig } from "../../../../data/lovelace";
+import { LovelaceCardConfig, LovelaceConfig } from "../../../../data/lovelace";
 
 export interface SuggestCardDialogParams {
   lovelaceConfig?: LovelaceConfig;
+  yaml?: boolean;
   saveConfig?: (config: LovelaceConfig) => void;
   path?: [number];
   entities: string[]; // We can pass entity id's that will be added to the config when a card is picked

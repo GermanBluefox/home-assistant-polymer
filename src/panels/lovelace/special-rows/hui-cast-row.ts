@@ -1,33 +1,34 @@
+import "@material/mwc-button/mwc-button";
 import {
-  html,
-  LitElement,
-  TemplateResult,
-  customElement,
-  property,
   css,
   CSSResult,
+  customElement,
+  html,
+  LitElement,
+  property,
+  internalProperty,
+  TemplateResult,
+  PropertyValues,
 } from "lit-element";
 import { classMap } from "lit-html/directives/class-map";
-
-import { EntityRow, CastConfig } from "../entity-rows/types";
-import { HomeAssistant } from "../../../types";
-
-import "../../../components/ha-icon";
 import { CastManager } from "../../../cast/cast_manager";
 import {
-  ensureConnectedCastSession,
   castSendShowLovelaceView,
+  ensureConnectedCastSession,
 } from "../../../cast/receiver_messages";
+import "../../../components/ha-icon";
+import { HomeAssistant } from "../../../types";
+import { CastConfig, LovelaceRow } from "../entity-rows/types";
 
 @customElement("hui-cast-row")
-class HuiCastRow extends LitElement implements EntityRow {
-  public hass!: HomeAssistant;
+class HuiCastRow extends LitElement implements LovelaceRow {
+  @property({ attribute: false }) public hass!: HomeAssistant;
 
-  @property() private _config?: CastConfig;
+  @internalProperty() private _config?: CastConfig;
 
-  @property() private _castManager?: CastManager | null;
+  @internalProperty() private _castManager?: CastManager | null;
 
-  @property() private _noHTTPS = false;
+  @internalProperty() private _noHTTPS = false;
 
   public setConfig(config: CastConfig): void {
     if (!config || config.view === undefined || config.view === null) {
@@ -41,7 +42,11 @@ class HuiCastRow extends LitElement implements EntityRow {
     };
   }
 
-  protected render(): TemplateResult | void {
+  protected shouldUpdate(changedProperties: PropertyValues) {
+    return !(changedProperties.size === 1 && changedProperties.has("hass"));
+  }
+
+  protected render(): TemplateResult {
     if (!this._config) {
       return html``;
     }
@@ -49,32 +54,27 @@ class HuiCastRow extends LitElement implements EntityRow {
     const active =
       this._castManager &&
       this._castManager.status &&
-      this._config.view === this._castManager.status.lovelacePath;
+      this._config.view === this._castManager.status.lovelacePath &&
+      this._config.dashboard === this._castManager.status.urlPath;
 
     return html`
       <ha-icon .icon="${this._config.icon}"></ha-icon>
       <div class="flex">
         <div class="name">${this._config.name}</div>
         ${this._noHTTPS
-          ? html`
-              Cast requires HTTPS
-            `
+          ? html` Cast requires HTTPS `
           : this._castManager === undefined
           ? html``
           : this._castManager === null
-          ? html`
-              Cast API unavailable
-            `
+          ? html` Cast API unavailable `
           : this._castManager.castState === "NO_DEVICES_AVAILABLE"
-          ? html`
-              No devices found
-            `
+          ? html` No devices found `
           : html`
               <div class="controls">
                 <google-cast-launcher></google-cast-launcher>
                 <mwc-button
                   @click=${this._sendLovelace}
-                  class=${classMap({ inactive: !Boolean(active) })}
+                  class=${classMap({ inactive: !active })}
                   .unelevated=${active}
                   .disabled=${!this._castManager.status}
                 >
@@ -122,7 +122,11 @@ class HuiCastRow extends LitElement implements EntityRow {
 
   private async _sendLovelace() {
     await ensureConnectedCastSession(this._castManager!, this.hass.auth);
-    castSendShowLovelaceView(this._castManager!, this._config!.view);
+    castSendShowLovelaceView(
+      this._castManager!,
+      this._config!.view,
+      this._config!.dashboard
+    );
   }
 
   static get styles(): CSSResult {

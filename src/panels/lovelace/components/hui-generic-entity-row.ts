@@ -1,39 +1,38 @@
-import { computeStateName } from "../../../common/entity/compute_state_name";
 import {
-  LitElement,
-  html,
   css,
   CSSResult,
-  PropertyValues,
+  html,
+  LitElement,
   property,
+  PropertyValues,
   TemplateResult,
 } from "lit-element";
-
-import "../../../components/entity/state-badge";
-import "../../../components/ha-relative-time";
-import "../../../components/ha-icon";
-import "../components/hui-warning";
-
-import { HomeAssistant } from "../../../types";
-import { computeRTL } from "../../../common/util/compute_rtl";
-import { toggleAttribute } from "../../../common/dom/toggle_attribute";
-import { DOMAINS_HIDE_MORE_INFO } from "../../../common/const";
-import { computeDomain } from "../../../common/entity/compute_domain";
 import { classMap } from "lit-html/directives/class-map";
+import { ifDefined } from "lit-html/directives/if-defined";
+import { DOMAINS_HIDE_MORE_INFO } from "../../../common/const";
+import { toggleAttribute } from "../../../common/dom/toggle_attribute";
+import { computeDomain } from "../../../common/entity/compute_domain";
+import { computeStateName } from "../../../common/entity/compute_state_name";
+import { computeRTL } from "../../../common/util/compute_rtl";
+import "../../../components/entity/state-badge";
+import "../../../components/ha-icon";
+import "../../../components/ha-relative-time";
+import { ActionHandlerEvent } from "../../../data/lovelace";
+import { HomeAssistant } from "../../../types";
 import { EntitiesCardEntityConfig } from "../cards/types";
 import { actionHandler } from "../common/directives/action-handler-directive";
-import { hasAction } from "../common/has-action";
-import { ActionHandlerEvent } from "../../../data/lovelace";
 import { handleAction } from "../common/handle-action";
+import { hasAction } from "../common/has-action";
+import { createEntityNotFoundWarning } from "./hui-warning";
 
 class HuiGenericEntityRow extends LitElement {
-  @property() public hass?: HomeAssistant;
+  @property({ attribute: false }) public hass?: HomeAssistant;
 
   @property() public config?: EntitiesCardEntityConfig;
 
-  @property() public showSecondary: boolean = true;
+  @property() public secondaryText?: string;
 
-  protected render(): TemplateResult | void {
+  protected render(): TemplateResult {
     if (!this.hass || !this.config) {
       return html``;
     }
@@ -43,13 +42,9 @@ class HuiGenericEntityRow extends LitElement {
 
     if (!stateObj) {
       return html`
-        <hui-warning
-          >${this.hass.localize(
-            "ui.panel.lovelace.warning.entity_not_found",
-            "entity",
-            this.config.entity
-          )}</hui-warning
-        >
+        <hui-warning>
+          ${createEntityNotFoundWarning(this.hass, this.config.entity)}
+        </hui-warning>
       `;
     }
 
@@ -57,6 +52,8 @@ class HuiGenericEntityRow extends LitElement {
       (this.config.tap_action && this.config.tap_action.action !== "none") ||
       (this.config.entity &&
         !DOMAINS_HIDE_MORE_INFO.includes(computeDomain(this.config.entity)));
+
+    const hasSecondary = this.secondaryText || this.config.secondary_info;
 
     return html`
       <state-badge
@@ -67,63 +64,81 @@ class HuiGenericEntityRow extends LitElement {
         .stateObj=${stateObj}
         .overrideIcon=${this.config.icon}
         .overrideImage=${this.config.image}
+        .stateColor=${this.config.state_color}
         @action=${this._handleAction}
         .actionHandler=${actionHandler({
           hasHold: hasAction(this.config!.hold_action),
           hasDoubleClick: hasAction(this.config!.double_tap_action),
         })}
-        tabindex="0"
+        tabindex=${ifDefined(pointer ? "0" : undefined)}
       ></state-badge>
-      <div class="flex">
-        <div
-          class=${classMap({
-            info: true,
-            pointer,
-            padName: this.showSecondary && !this.config.secondary_info,
-            padSecondary: Boolean(
-              !this.showSecondary || this.config.secondary_info
-            ),
-          })}
-          @action=${this._handleAction}
-          .actionHandler=${actionHandler({
-            hasHold: hasAction(this.config!.hold_action),
-            hasDoubleClick: hasAction(this.config!.double_tap_action),
-          })}
-        >
-          ${this.config.name || computeStateName(stateObj)}
-          <div class="secondary">
-            ${!this.showSecondary
-              ? html`
-                  <slot name="secondary"></slot>
-                `
-              : this.config.secondary_info === "entity-id"
-              ? stateObj.entity_id
-              : this.config.secondary_info === "last-changed"
-              ? html`
-                  <ha-relative-time
-                    .hass=${this.hass}
-                    .datetime=${stateObj.last_changed}
-                  ></ha-relative-time>
-                `
-              : this.config.secondary_info === "last-triggered" &&
-                stateObj.attributes.last_triggered
-              ? html`
-                  <ha-relative-time
-                    .hass=${this.hass}
-                    .datetime=${stateObj.attributes.last_triggered}
-                  ></ha-relative-time>
-                `
-              : ""}
-          </div>
-        </div>
-
-        <slot></slot>
+      <div
+        class="info ${classMap({
+          pointer,
+          "text-content": !hasSecondary,
+        })}"
+        @action=${this._handleAction}
+        .actionHandler=${actionHandler({
+          hasHold: hasAction(this.config!.hold_action),
+          hasDoubleClick: hasAction(this.config!.double_tap_action),
+        })}
+      >
+        ${this.config.name || computeStateName(stateObj)}
+        ${hasSecondary
+          ? html`
+              <div class="secondary">
+                ${this.secondaryText ||
+                (this.config.secondary_info === "entity-id"
+                  ? stateObj.entity_id
+                  : this.config.secondary_info === "last-changed"
+                  ? html`
+                      <ha-relative-time
+                        .hass=${this.hass}
+                        .datetime=${stateObj.last_changed}
+                      ></ha-relative-time>
+                    `
+                  : this.config.secondary_info === "last-triggered"
+                  ? stateObj.attributes.last_triggered
+                    ? html`
+                        <ha-relative-time
+                          .hass=${this.hass}
+                          .datetime=${stateObj.attributes.last_triggered}
+                        ></ha-relative-time>
+                      `
+                    : this.hass.localize(
+                        "ui.panel.lovelace.cards.entities.never_triggered"
+                      )
+                  : this.config.secondary_info === "position" &&
+                    stateObj.attributes.current_position !== undefined
+                  ? `${this.hass.localize("ui.card.cover.position")}: ${
+                      stateObj.attributes.current_position
+                    }`
+                  : this.config.secondary_info === "tilt-position" &&
+                    stateObj.attributes.current_tilt_position !== undefined
+                  ? `${this.hass.localize("ui.card.cover.tilt_position")}: ${
+                      stateObj.attributes.current_tilt_position
+                    }`
+                  : this.config.secondary_info === "brightness" &&
+                    stateObj.attributes.brightness
+                  ? html`${Math.round(
+                      (stateObj.attributes.brightness / 255) * 100
+                    )}%`
+                  : "")}
+              </div>
+            `
+          : ""}
       </div>
+      <slot></slot>
     `;
   }
 
   protected updated(changedProps: PropertyValues): void {
     super.updated(changedProps);
+    toggleAttribute(
+      this,
+      "no-secondary",
+      !this.secondaryText && !this.config?.secondary_info
+    );
     if (changedProps.has("hass")) {
       toggleAttribute(this, "rtl", computeRTL(this.hass!));
     }
@@ -138,16 +153,10 @@ class HuiGenericEntityRow extends LitElement {
       :host {
         display: flex;
         align-items: center;
-      }
-      .flex {
-        flex: 1;
-        margin-left: 16px;
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        min-width: 0;
+        flex-direction: row;
       }
       .info {
+        margin-left: 16px;
         flex: 1 0 60px;
       }
       .info,
@@ -171,11 +180,6 @@ class HuiGenericEntityRow extends LitElement {
       state-badge {
         flex: 0 0 40px;
       }
-      state-badge:focus {
-        outline: none;
-        background: var(--divider-color);
-        border-radius: 100%;
-      }
       :host([rtl]) .flex {
         margin-left: 0;
         margin-right: 16px;
@@ -186,12 +190,6 @@ class HuiGenericEntityRow extends LitElement {
       }
       .pointer {
         cursor: pointer;
-      }
-      .padName {
-        padding: 12px 0px;
-      }
-      .padSecondary {
-        padding: 4px 0px;
       }
     `;
   }

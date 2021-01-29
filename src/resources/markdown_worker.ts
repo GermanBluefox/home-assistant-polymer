@@ -1,6 +1,8 @@
+// To use comlink under ES5
+import "proxy-polyfill";
+import { expose } from "comlink";
 import marked from "marked";
-// @ts-ignore
-import filterXSS from "xss";
+import { filterXSS, getDefaultWhiteList } from "xss";
 
 interface WhiteList {
   [tag: string]: string[];
@@ -9,18 +11,19 @@ interface WhiteList {
 let whiteListNormal: WhiteList | undefined;
 let whiteListSvg: WhiteList | undefined;
 
-export const renderMarkdown = (
+const renderMarkdown = (
   content: string,
-  markedOptions: object,
+  markedOptions: marked.MarkedOptions,
   hassOptions: {
     // Do not allow SVG on untrusted content, it allows XSS.
     allowSvg?: boolean;
   } = {}
-) => {
+): string => {
   if (!whiteListNormal) {
     whiteListNormal = {
-      ...filterXSS.whiteList,
+      ...(getDefaultWhiteList() as WhiteList),
       "ha-icon": ["icon"],
+      "ha-svg-icon": ["path"],
     };
   }
 
@@ -32,6 +35,7 @@ export const renderMarkdown = (
         ...whiteListNormal,
         svg: ["xmlns", "height", "width"],
         path: ["transform", "stroke", "d"],
+        img: ["src"],
       };
     }
     whiteList = whiteListSvg;
@@ -43,3 +47,11 @@ export const renderMarkdown = (
     whiteList,
   });
 };
+
+const api = {
+  renderMarkdown,
+};
+
+export type api = typeof api;
+
+expose(api);

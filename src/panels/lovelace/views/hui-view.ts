@@ -1,59 +1,45 @@
 import {
-  html,
-  LitElement,
-  PropertyValues,
-  TemplateResult,
+  customElement,
+  internalProperty,
   property,
+  PropertyValues,
+  UpdatingElement,
 } from "lit-element";
-
-import "../../../components/entity/ha-state-label-badge";
-// This one is for types
-
 import { applyThemesOnElement } from "../../../common/dom/apply_themes_on_element";
-
-import {
-  LovelaceViewConfig,
-  LovelaceCardConfig,
+import "../../../components/entity/ha-state-label-badge";
+import "../../../components/ha-svg-icon";
+import type {
   LovelaceBadgeConfig,
+  LovelaceCardConfig,
+  LovelaceViewConfig,
+  LovelaceViewElement,
 } from "../../../data/lovelace";
-import { HomeAssistant } from "../../../types";
-import { classMap } from "lit-html/directives/class-map";
-import { Lovelace, LovelaceCard, LovelaceBadge } from "../types";
-import { createCardElement } from "../common/create-card-element";
-import { computeCardSize } from "../common/compute-card-size";
-import { showEditCardDialog } from "../editor/card-editor/show-edit-card-dialog";
-import { HuiErrorCard } from "../cards/hui-error-card";
-import { computeRTL } from "../../../common/util/compute_rtl";
-import { createBadgeElement } from "../common/create-badge-element";
+import type { HomeAssistant } from "../../../types";
+import type { HuiErrorCard } from "../cards/hui-error-card";
 import { processConfigEntities } from "../common/process-config-entities";
+import { createBadgeElement } from "../create-element/create-badge-element";
+import { createCardElement } from "../create-element/create-card-element";
+import { createViewElement } from "../create-element/create-view-element";
+import type { Lovelace, LovelaceBadge, LovelaceCard } from "../types";
 
-let editCodeLoaded = false;
+const DEFAULT_VIEW_LAYOUT = "masonry";
+const PANEL_VIEW_LAYOUT = "panel";
 
-// Find column with < 5 entities, else column with lowest count
-const getColumnIndex = (columnEntityCount: number[], size: number) => {
-  let minIndex = 0;
-  for (let i = 0; i < columnEntityCount.length; i++) {
-    if (columnEntityCount[i] < 5) {
-      minIndex = i;
-      break;
-    }
-    if (columnEntityCount[i] < columnEntityCount[minIndex]) {
-      minIndex = i;
-    }
-  }
+@customElement("hui-view")
+export class HUIView extends UpdatingElement {
+  @property({ attribute: false }) public hass?: HomeAssistant;
 
-  columnEntityCount[minIndex] += size;
+  @property({ attribute: false }) public lovelace?: Lovelace;
 
-  return minIndex;
-};
+  @property({ type: Boolean }) public narrow!: boolean;
 
-export class HUIView extends LitElement {
-  @property() public hass?: HomeAssistant;
-  @property() public lovelace?: Lovelace;
-  @property({ type: Number }) public columns?: number;
   @property({ type: Number }) public index?: number;
-  @property() private _cards: Array<LovelaceCard | HuiErrorCard> = [];
-  @property() private _badges: LovelaceBadge[] = [];
+
+  @internalProperty() private _cards: Array<LovelaceCard | HuiErrorCard> = [];
+
+  @internalProperty() private _badges: LovelaceBadge[] = [];
+
+  private _layoutElement?: LovelaceViewElement;
 
   // Public to make demo happy
   public createCardElement(cardConfig: LovelaceCardConfig) {
@@ -61,7 +47,7 @@ export class HUIView extends LitElement {
     element.hass = this.hass;
     element.addEventListener(
       "ll-rebuild",
-      (ev) => {
+      (ev: Event) => {
         // In edit mode let it go to hui-root and rebuild whole view.
         if (!this.lovelace!.editMode) {
           ev.stopPropagation();
@@ -86,138 +72,81 @@ export class HUIView extends LitElement {
     return element;
   }
 
-  protected render(): TemplateResult | void {
-    return html`
-      ${this.renderStyles()}
-      <div id="badges"></div>
-      <div id="columns"></div>
-      ${this.lovelace!.editMode
-        ? html`
-            <ha-fab
-              icon="hass:plus"
-              title="${this.hass!.localize(
-                "ui.panel.lovelace.editor.edit_card.add"
-              )}"
-              @click="${this._addCard}"
-              class="${classMap({
-                rtl: computeRTL(this.hass!),
-              })}"
-            ></ha-fab>
-          `
-        : ""}
-    `;
-  }
-
-  protected renderStyles(): TemplateResult {
-    return html`
-      <style>
-        :host {
-          display: block;
-          box-sizing: border-box;
-          padding: 4px 4px 0;
-          transform: translateZ(0);
-          position: relative;
-          background: var(--lovelace-background);
-        }
-
-        #badges {
-          margin: 8px 16px;
-          font-size: 85%;
-          text-align: center;
-        }
-
-        #columns {
-          display: flex;
-          flex-direction: row;
-          justify-content: center;
-        }
-
-        .column {
-          flex: 1 0 0;
-          max-width: 500px;
-          min-width: 0;
-          /* on iOS devices the column can become wider when toggling a switch */
-          overflow-x: hidden;
-        }
-
-        .column > * {
-          display: block;
-          margin: 4px 4px 8px;
-        }
-
-        ha-fab {
-          position: sticky;
-          float: right;
-          bottom: 16px;
-          right: 16px;
-          z-index: 1;
-        }
-
-        ha-fab.rtl {
-          float: left;
-          right: auto;
-          left: 16px;
-        }
-
-        @media (max-width: 500px) {
-          :host {
-            padding-left: 0;
-            padding-right: 0;
-          }
-
-          .column > * {
-            margin-left: 0;
-            margin-right: 0;
-          }
-        }
-
-        @media (max-width: 599px) {
-          .column {
-            max-width: 600px;
-          }
-        }
-      </style>
-    `;
-  }
-
   protected updated(changedProperties: PropertyValues): void {
     super.updated(changedProperties);
 
     const hass = this.hass!;
     const lovelace = this.lovelace!;
 
-    if (lovelace.editMode && !editCodeLoaded) {
-      editCodeLoaded = true;
-      import(/* webpackChunkName: "hui-view-editable" */ "./hui-view-editable");
-    }
-
     const hassChanged = changedProperties.has("hass");
+    const oldLovelace = changedProperties.get("lovelace") as Lovelace;
+
     let editModeChanged = false;
     let configChanged = false;
 
     if (changedProperties.has("index")) {
       configChanged = true;
     } else if (changedProperties.has("lovelace")) {
-      const oldLovelace = changedProperties.get("lovelace") as Lovelace;
       editModeChanged =
-        !oldLovelace || lovelace.editMode !== oldLovelace.editMode;
+        oldLovelace && lovelace.editMode !== oldLovelace.editMode;
       configChanged = !oldLovelace || lovelace.config !== oldLovelace.config;
     }
 
+    let viewConfig: LovelaceViewConfig | undefined;
+
     if (configChanged) {
-      this._createBadges(lovelace.config.views[this.index!]);
-    } else if (hassChanged) {
+      viewConfig = lovelace.config.views[this.index!];
+      viewConfig = {
+        ...viewConfig,
+        type: viewConfig.panel
+          ? PANEL_VIEW_LAYOUT
+          : viewConfig.type || DEFAULT_VIEW_LAYOUT,
+      };
+    }
+
+    if (configChanged && !this._layoutElement) {
+      this._layoutElement = createViewElement(viewConfig!);
+    }
+
+    if (configChanged) {
+      this._createBadges(viewConfig!);
+      this._createCards(viewConfig!);
+
+      this._layoutElement!.hass = this.hass;
+      this._layoutElement!.narrow = this.narrow;
+      this._layoutElement!.lovelace = lovelace;
+      this._layoutElement!.index = this.index;
+    }
+
+    if (hassChanged) {
       this._badges.forEach((badge) => {
         badge.hass = hass;
       });
+
+      this._cards.forEach((element) => {
+        element.hass = hass;
+      });
+
+      this._layoutElement!.hass = this.hass;
     }
 
-    if (configChanged || editModeChanged || changedProperties.has("columns")) {
-      this._createCards(lovelace.config.views[this.index!]);
-    } else if (hassChanged) {
-      this._cards.forEach((element) => {
-        element.hass = this.hass;
-      });
+    if (changedProperties.has("narrow")) {
+      this._layoutElement!.narrow = this.narrow;
+    }
+
+    if (editModeChanged) {
+      this._layoutElement!.lovelace = lovelace;
+    }
+
+    if (
+      configChanged ||
+      hassChanged ||
+      editModeChanged ||
+      changedProperties.has("_cards") ||
+      changedProperties.has("_badges")
+    ) {
+      this._layoutElement!.cards = this._cards;
+      this._layoutElement!.badges = this._badges;
     }
 
     const oldHass = changedProperties.get("hass") as this["hass"] | undefined;
@@ -236,98 +165,37 @@ export class HUIView extends LitElement {
         lovelace.config.views[this.index!].theme
       );
     }
-  }
 
-  private _addCard(): void {
-    showEditCardDialog(this, {
-      lovelaceConfig: this.lovelace!.config,
-      saveConfig: this.lovelace!.saveConfig,
-      path: [this.index!],
-    });
+    if (this._layoutElement && !this.lastChild) {
+      this.appendChild(this._layoutElement);
+    }
   }
 
   private _createBadges(config: LovelaceViewConfig): void {
-    const root = this.shadowRoot!.getElementById("badges")!;
-
-    while (root.lastChild) {
-      root.removeChild(root.lastChild);
-    }
-
     if (!config || !config.badges || !Array.isArray(config.badges)) {
-      root.style.display = "none";
       this._badges = [];
       return;
     }
 
-    const elements: HUIView["_badges"] = [];
     const badges = processConfigEntities(config.badges as any);
-    for (const badge of badges) {
+    this._badges = badges.map((badge) => {
       const element = createBadgeElement(badge);
       element.hass = this.hass;
-      elements.push(element);
-      root.appendChild(element);
-    }
-    this._badges = elements;
-    root.style.display = elements.length > 0 ? "block" : "none";
+      return element;
+    });
   }
 
   private _createCards(config: LovelaceViewConfig): void {
-    const root = this.shadowRoot!.getElementById("columns")!;
-
-    while (root.lastChild) {
-      root.removeChild(root.lastChild);
-    }
-
     if (!config || !config.cards || !Array.isArray(config.cards)) {
       this._cards = [];
       return;
     }
 
-    const elements: LovelaceCard[] = [];
-    const elementsToAppend: HTMLElement[] = [];
-    config.cards.forEach((cardConfig, cardIndex) => {
+    this._cards = config.cards.map((cardConfig) => {
       const element = this.createCardElement(cardConfig);
-      elements.push(element);
-
-      if (!this.lovelace!.editMode) {
-        elementsToAppend.push(element);
-        return;
-      }
-
-      const wrapper = document.createElement("hui-card-options");
-      wrapper.hass = this.hass;
-      wrapper.lovelace = this.lovelace;
-      wrapper.path = [this.index!, cardIndex];
-      wrapper.appendChild(element);
-      elementsToAppend.push(wrapper);
+      element.hass = this.hass;
+      return element;
     });
-
-    let columns: HTMLElement[][] = [];
-    const columnEntityCount: number[] = [];
-    for (let i = 0; i < this.columns!; i++) {
-      columns.push([]);
-      columnEntityCount.push(0);
-    }
-
-    elements.forEach((el, index) => {
-      const cardSize = computeCardSize(el);
-      // Element to append might be the wrapped card when we're editing.
-      columns[getColumnIndex(columnEntityCount, cardSize)].push(
-        elementsToAppend[index]
-      );
-    });
-
-    // Remove empty columns
-    columns = columns.filter((val) => val.length > 0);
-
-    columns.forEach((column) => {
-      const columnEl = document.createElement("div");
-      columnEl.classList.add("column");
-      column.forEach((el) => columnEl.appendChild(el));
-      root.appendChild(columnEl);
-    });
-
-    this._cards = elements;
   }
 
   private _rebuildCard(
@@ -335,7 +203,10 @@ export class HUIView extends LitElement {
     config: LovelaceCardConfig
   ): void {
     const newCardEl = this.createCardElement(config);
-    cardElToReplace.parentElement!.replaceChild(newCardEl, cardElToReplace);
+    newCardEl.hass = this.hass;
+    if (cardElToReplace.parentElement) {
+      cardElToReplace.parentElement!.replaceChild(newCardEl, cardElToReplace);
+    }
     this._cards = this._cards!.map((curCardEl) =>
       curCardEl === cardElToReplace ? newCardEl : curCardEl
     );
@@ -346,8 +217,14 @@ export class HUIView extends LitElement {
     config: LovelaceBadgeConfig
   ): void {
     const newBadgeEl = this.createBadgeElement(config);
-    badgeElToReplace.parentElement!.replaceChild(newBadgeEl, badgeElToReplace);
-    this._badges = this._cards!.map((curBadgeEl) =>
+    newBadgeEl.hass = this.hass;
+    if (badgeElToReplace.parentElement) {
+      badgeElToReplace.parentElement!.replaceChild(
+        newBadgeEl,
+        badgeElToReplace
+      );
+    }
+    this._badges = this._badges!.map((curBadgeEl) =>
       curBadgeEl === badgeElToReplace ? newBadgeEl : curBadgeEl
     );
   }
@@ -358,5 +235,3 @@ declare global {
     "hui-view": HUIView;
   }
 }
-
-customElements.define("hui-view", HUIView);

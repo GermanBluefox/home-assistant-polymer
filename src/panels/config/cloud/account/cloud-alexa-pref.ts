@@ -1,29 +1,29 @@
+import "@material/mwc-button";
 import {
+  css,
+  CSSResult,
   html,
   LitElement,
-  TemplateResult,
-  CSSResult,
-  css,
   property,
+  internalProperty,
+  TemplateResult,
 } from "lit-element";
-import "@material/mwc-button";
-
+import { fireEvent } from "../../../../common/dom/fire_event";
 import "../../../../components/ha-card";
 import "../../../../components/ha-switch";
-
-// tslint:disable-next-line: no-duplicate-imports
-import { HaSwitch } from "../../../../components/ha-switch";
-import { fireEvent } from "../../../../common/dom/fire_event";
-import { HomeAssistant } from "../../../../types";
-import { CloudStatusLoggedIn, updateCloudPref } from "../../../../data/cloud";
+import type { HaSwitch } from "../../../../components/ha-switch";
 import { syncCloudAlexaEntities } from "../../../../data/alexa";
+import { CloudStatusLoggedIn, updateCloudPref } from "../../../../data/cloud";
+import type { HomeAssistant } from "../../../../types";
 
 export class CloudAlexaPref extends LitElement {
-  @property() public hass?: HomeAssistant;
-  @property() public cloudStatus?: CloudStatusLoggedIn;
-  @property() private _syncing = false;
+  @property({ attribute: false }) public hass?: HomeAssistant;
 
-  protected render(): TemplateResult | void {
+  @property() public cloudStatus?: CloudStatusLoggedIn;
+
+  @internalProperty() private _syncing = false;
+
+  protected render(): TemplateResult {
     if (!this.cloudStatus) {
       return html``;
     }
@@ -49,6 +49,7 @@ export class CloudAlexaPref extends LitElement {
               <a
                 href="https://skills-store.amazon.com/deeplink/dp/B0772J1QKB?deviceType=app"
                 target="_blank"
+                rel="noreferrer"
               >
                 ${this.hass!.localize(
                   "ui.panel.config.cloud.account.alexa.enable_ha_skill"
@@ -59,6 +60,7 @@ export class CloudAlexaPref extends LitElement {
               <a
                 href="https://www.nabucasa.com/config/amazon_alexa/"
                 target="_blank"
+                rel="noreferrer"
               >
                 ${this.hass!.localize(
                   "ui.panel.config.cloud.account.alexa.config_documentation"
@@ -165,6 +167,10 @@ export class CloudAlexaPref extends LitElement {
         position: absolute;
         right: 24px;
         top: 32px;
+      }
+      :host([dir="rtl"]) .switch {
+        right: auto;
+        left: 24px;
       }
       .card-actions {
         display: flex;

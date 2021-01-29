@@ -1,34 +1,35 @@
 import {
+  customElement,
   html,
   LitElement,
-  TemplateResult,
-  customElement,
   property,
+  internalProperty,
+  TemplateResult,
 } from "lit-element";
-
-import { struct } from "../../common/structs/struct";
-import { EntitiesEditorEvent, EditorTarget } from "../types";
-import { HomeAssistant } from "../../../../types";
-import { LovelaceCardEditor } from "../../types";
 import { fireEvent } from "../../../../common/dom/fire_event";
-import { MediaControlCardConfig } from "../../cards/hui-media-control-card";
-
 import "../../../../components/entity/ha-entity-picker";
+import { HomeAssistant } from "../../../../types";
+import { MediaControlCardConfig } from "../../cards/types";
+import { LovelaceCardEditor } from "../../types";
+import { EditorTarget, EntitiesEditorEvent } from "../types";
+import { assert, object, string, optional } from "superstruct";
 
-const cardConfigStruct = struct({
-  type: "string",
-  entity: "string?",
+const cardConfigStruct = object({
+  type: string(),
+  entity: optional(string()),
 });
+
+const includeDomains = ["media_player"];
 
 @customElement("hui-media-control-card-editor")
 export class HuiMediaControlCardEditor extends LitElement
   implements LovelaceCardEditor {
-  @property() public hass?: HomeAssistant;
+  @property({ attribute: false }) public hass?: HomeAssistant;
 
-  @property() private _config?: MediaControlCardConfig;
+  @internalProperty() private _config?: MediaControlCardConfig;
 
   public setConfig(config: MediaControlCardConfig): void {
-    config = cardConfigStruct(config);
+    assert(config, cardConfigStruct);
     this._config = config;
   }
 
@@ -36,8 +37,8 @@ export class HuiMediaControlCardEditor extends LitElement
     return this._config!.entity || "";
   }
 
-  protected render(): TemplateResult | void {
-    if (!this.hass) {
+  protected render(): TemplateResult {
+    if (!this.hass || !this._config) {
       return html``;
     }
 
@@ -49,10 +50,10 @@ export class HuiMediaControlCardEditor extends LitElement
           )} (${this.hass.localize(
             "ui.panel.lovelace.editor.card.config.required"
           )})"
-          .hass="${this.hass}"
+          .hass=${this.hass}
           .value="${this._entity}"
           .configValue=${"entity"}
-          include-domains='["media_player"]'
+          .includeDomains=${includeDomains}
           @change="${this._valueChanged}"
           allow-custom-entity
         ></ha-entity-picker>
@@ -70,6 +71,7 @@ export class HuiMediaControlCardEditor extends LitElement
     }
     if (target.configValue) {
       if (target.value === "") {
+        this._config = { ...this._config };
         delete this._config[target.configValue!];
       } else {
         this._config = {

@@ -1,37 +1,48 @@
 import "@polymer/paper-input/paper-input";
-import "../../../../../components/ha-service-picker";
-import "../../../../../components/entity/ha-entity-picker";
-import "../../../../../components/ha-yaml-editor";
-
 import {
+  customElement,
   LitElement,
   property,
-  customElement,
   PropertyValues,
   query,
 } from "lit-element";
-import { ActionElement, handleChangeEvent } from "../ha-automation-action-row";
-import { HomeAssistant } from "../../../../../types";
 import { html } from "lit-html";
 import memoizeOne from "memoize-one";
+import { any, assert, object, optional, string } from "superstruct";
+import { fireEvent } from "../../../../../common/dom/fire_event";
 import { computeDomain } from "../../../../../common/entity/compute_domain";
 import { computeObjectId } from "../../../../../common/entity/compute_object_id";
-import { PolymerChangedEvent } from "../../../../../polymer-types";
-import { fireEvent } from "../../../../../common/dom/fire_event";
+import "../../../../../components/entity/ha-entity-picker";
+import "../../../../../components/ha-service-picker";
+import "../../../../../components/ha-yaml-editor";
+import type { HaYamlEditor } from "../../../../../components/ha-yaml-editor";
 import { ServiceAction } from "../../../../../data/script";
-// tslint:disable-next-line
-import { HaYamlEditor } from "../../../../../components/ha-yaml-editor";
+import type { PolymerChangedEvent } from "../../../../../polymer-types";
+import type { HomeAssistant } from "../../../../../types";
+import { EntityId } from "../../../../lovelace/common/structs/is-entity-id";
+import { ActionElement, handleChangeEvent } from "../ha-automation-action-row";
+
+const actionStruct = object({
+  service: optional(string()),
+  entity_id: optional(EntityId),
+  data: optional(any()),
+});
 
 @customElement("ha-automation-action-service")
 export class HaServiceAction extends LitElement implements ActionElement {
-  @property() public hass!: HomeAssistant;
-  @property() public action!: ServiceAction;
-  @query("ha-yaml-editor") private _yamlEditor?: HaYamlEditor;
+  @property({ attribute: false }) public hass!: HomeAssistant;
+
+  @property({ attribute: false }) public action!: ServiceAction;
+
+  @query("ha-yaml-editor", true) private _yamlEditor?: HaYamlEditor;
+
   private _actionData?: ServiceAction["data"];
 
   public static get defaultConfig() {
     return { service: "", data: {} };
   }
+
+  private _domain = memoizeOne((service: string) => [computeDomain(service)]);
 
   private _getServiceData = memoizeOne((service: string) => {
     if (!service) {
@@ -56,6 +67,11 @@ export class HaServiceAction extends LitElement implements ActionElement {
   protected updated(changedProperties: PropertyValues) {
     if (!changedProperties.has("action")) {
       return;
+    }
+    try {
+      assert(this.action, actionStruct);
+    } catch (error) {
+      fireEvent(this, "ui-mode-not-available", error);
     }
     if (this._actionData && this._actionData !== this.action.data) {
       if (this._yamlEditor) {
@@ -84,7 +100,7 @@ export class HaServiceAction extends LitElement implements ActionElement {
               .value=${entity_id}
               .label=${entity.description}
               @value-changed=${this._entityPicked}
-              .includeDomains=${[computeDomain(service)]}
+              .includeDomains=${this._domain(service)}
               allow-custom-entity
             ></ha-entity-picker>
           `
@@ -94,13 +110,17 @@ export class HaServiceAction extends LitElement implements ActionElement {
           "ui.panel.config.automation.editor.actions.type.service.service_data"
         )}
         .name=${"data"}
-        .value=${data}
+        .defaultValue=${data}
         @value-changed=${this._dataChanged}
       ></ha-yaml-editor>
     `;
   }
 
   private _dataChanged(ev: CustomEvent): void {
+    ev.stopPropagation();
+    if (!ev.detail.isValid) {
+      return;
+    }
     this._actionData = ev.detail.value;
     handleChangeEvent(this, ev);
   }

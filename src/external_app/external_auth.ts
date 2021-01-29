@@ -11,6 +11,10 @@ interface BasePayload {
   callback: string;
 }
 
+interface GetExternalAuthPayload extends BasePayload {
+  force?: boolean;
+}
+
 interface RefreshTokenResponse {
   access_token: string;
   expires_in: number;
@@ -26,7 +30,7 @@ declare global {
     webkit?: {
       messageHandlers: {
         getExternalAuth: {
-          postMessage(payload: BasePayload);
+          postMessage(payload: GetExternalAuthPayload);
         };
         revokeExternalAuth: {
           postMessage(payload: BasePayload);
@@ -45,7 +49,7 @@ if (!window.externalApp && !window.webkit) {
   );
 }
 
-class ExternalAuth extends Auth {
+export class ExternalAuth extends Auth {
   public external?: ExternalMessaging;
 
   constructor(hassUrl: string) {
@@ -60,48 +64,58 @@ class ExternalAuth extends Auth {
     });
   }
 
-  public async refreshAccessToken() {
-    const callbackPayload = { callback: CALLBACK_SET_TOKEN };
+  private _tokenCallbackPromise?: Promise<RefreshTokenResponse>;
 
-    const callbackPromise = new Promise<RefreshTokenResponse>(
+  public async refreshAccessToken(force?: boolean) {
+    if (this._tokenCallbackPromise && !force) {
+      await this._tokenCallbackPromise;
+      return;
+    }
+    const payload: GetExternalAuthPayload = {
+      callback: CALLBACK_SET_TOKEN,
+    };
+    if (force) {
+      payload.force = true;
+    }
+
+    this._tokenCallbackPromise = new Promise<RefreshTokenResponse>(
       (resolve, reject) => {
         window[CALLBACK_SET_TOKEN] = (success, data) =>
           success ? resolve(data) : reject(data);
       }
     );
 
-    await 0;
+    // we sleep 1 microtask to get the promise to actually set it on the window object.
+    await Promise.resolve();
 
     if (window.externalApp) {
-      window.externalApp.getExternalAuth(JSON.stringify(callbackPayload));
+      window.externalApp.getExternalAuth(JSON.stringify(payload));
     } else {
-      window.webkit!.messageHandlers.getExternalAuth.postMessage(
-        callbackPayload
-      );
+      window.webkit!.messageHandlers.getExternalAuth.postMessage(payload);
     }
 
-    const tokens = await callbackPromise;
+    const tokens = await this._tokenCallbackPromise;
 
     this.data.access_token = tokens.access_token;
     this.data.expires = tokens.expires_in * 1000 + Date.now();
+    this._tokenCallbackPromise = undefined;
   }
 
   public async revoke() {
-    const callbackPayload = { callback: CALLBACK_REVOKE_TOKEN };
+    const payload: BasePayload = { callback: CALLBACK_REVOKE_TOKEN };
 
     const callbackPromise = new Promise((resolve, reject) => {
       window[CALLBACK_REVOKE_TOKEN] = (success, data) =>
         success ? resolve(data) : reject(data);
     });
 
-    await 0;
+    // we sleep 1 microtask to get the promise to actually set it on the window object.
+    await Promise.resolve();
 
     if (window.externalApp) {
-      window.externalApp.revokeExternalAuth(JSON.stringify(callbackPayload));
+      window.externalApp.revokeExternalAuth(JSON.stringify(payload));
     } else {
-      window.webkit!.messageHandlers.revokeExternalAuth.postMessage(
-        callbackPayload
-      );
+      window.webkit!.messageHandlers.revokeExternalAuth.postMessage(payload);
     }
 
     await callbackPromise;

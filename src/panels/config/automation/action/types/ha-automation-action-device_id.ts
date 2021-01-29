@@ -1,22 +1,33 @@
-import "../../../../../components/device/ha-device-picker";
-import "../../../../../components/device/ha-device-action-picker";
-import "../../../../../components/ha-form/ha-form";
-
 import {
-  fetchDeviceActionCapabilities,
-  deviceAutomationsEqual,
-  DeviceAction,
-} from "../../../../../data/device_automation";
-import { LitElement, customElement, property, html } from "lit-element";
+  customElement,
+  html,
+  LitElement,
+  property,
+  internalProperty,
+} from "lit-element";
+import memoizeOne from "memoize-one";
 import { fireEvent } from "../../../../../common/dom/fire_event";
+import "../../../../../components/device/ha-device-action-picker";
+import "../../../../../components/device/ha-device-picker";
+import "../../../../../components/ha-form/ha-form";
+import {
+  DeviceAction,
+  deviceAutomationsEqual,
+  fetchDeviceActionCapabilities,
+  DeviceCapabilities,
+} from "../../../../../data/device_automation";
 import { HomeAssistant } from "../../../../../types";
 
 @customElement("ha-automation-action-device_id")
 export class HaDeviceAction extends LitElement {
-  @property() public hass!: HomeAssistant;
-  @property() public action!: DeviceAction;
-  @property() private _deviceId?: string;
-  @property() private _capabilities?;
+  @property({ attribute: false }) public hass!: HomeAssistant;
+
+  @property({ type: Object }) public action!: DeviceAction;
+
+  @internalProperty() private _deviceId?: string;
+
+  @internalProperty() private _capabilities?: DeviceCapabilities;
+
   private _origAction?: DeviceAction;
 
   public static get defaultConfig() {
@@ -27,33 +38,43 @@ export class HaDeviceAction extends LitElement {
     };
   }
 
+  private _extraFieldsData = memoizeOne(
+    (action: DeviceAction, capabilities: DeviceCapabilities) => {
+      const extraFieldsData: { [key: string]: any } = {};
+      capabilities.extra_fields.forEach((item) => {
+        if (action[item.name] !== undefined) {
+          extraFieldsData![item.name] = action[item.name];
+        }
+      });
+      return extraFieldsData;
+    }
+  );
+
   protected render() {
     const deviceId = this._deviceId || this.action.device_id;
-    const extraFieldsData =
-      this._capabilities && this._capabilities.extra_fields
-        ? this._capabilities.extra_fields.map((item) => {
-            return { [item.name]: this.action[item.name] };
-          })
-        : undefined;
 
     return html`
       <ha-device-picker
         .value=${deviceId}
         @value-changed=${this._devicePicked}
         .hass=${this.hass}
-        label="Device"
+        label=${this.hass.localize(
+          "ui.panel.config.automation.editor.actions.type.device_id.label"
+        )}
       ></ha-device-picker>
       <ha-device-action-picker
         .value=${this.action}
         .deviceId=${deviceId}
         @value-changed=${this._deviceActionPicked}
         .hass=${this.hass}
-        label="Action"
+        label=${this.hass.localize(
+          "ui.panel.config.automation.editor.actions.type.device_id.action"
+        )}
       ></ha-device-action-picker>
-      ${extraFieldsData
+      ${this._capabilities?.extra_fields
         ? html`
             <ha-form
-              .data=${Object.assign({}, ...extraFieldsData)}
+              .data=${this._extraFieldsData(this.action, this._capabilities)}
               .schema=${this._capabilities.extra_fields}
               .computeLabel=${this._extraFieldsComputeLabelCallback(
                 this.hass.localize
@@ -77,16 +98,15 @@ export class HaDeviceAction extends LitElement {
   protected updated(changedPros) {
     const prevAction = changedPros.get("action");
     if (prevAction && !deviceAutomationsEqual(prevAction, this.action)) {
+      this._deviceId = undefined;
       this._getCapabilities();
     }
   }
 
   private async _getCapabilities() {
-    const action = this.action;
-
-    this._capabilities = action.domain
-      ? await fetchDeviceActionCapabilities(this.hass, action)
-      : null;
+    this._capabilities = this.action.domain
+      ? await fetchDeviceActionCapabilities(this.hass, this.action)
+      : undefined;
   }
 
   private _devicePicked(ev) {
@@ -117,7 +137,7 @@ export class HaDeviceAction extends LitElement {
     // Returns a callback for ha-form to calculate labels per schema object
     return (schema) =>
       localize(
-        `ui.panel.config.automation.editor.actions.type.device.extra_fields.${schema.name}`
+        `ui.panel.config.automation.editor.actions.type.device_id.extra_fields.${schema.name}`
       ) || schema.name;
   }
 }

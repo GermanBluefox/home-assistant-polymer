@@ -1,63 +1,83 @@
+import "@material/mwc-fab";
+import { mdiPlus } from "@mdi/js";
+import "@polymer/paper-item/paper-icon-item";
+import "@polymer/paper-item/paper-item-body";
 import {
-  LitElement,
-  TemplateResult,
-  html,
   css,
   CSSResult,
+  html,
+  internalProperty,
+  LitElement,
   property,
+  TemplateResult,
 } from "lit-element";
-import "@polymer/paper-item/paper-item";
-import "@polymer/paper-item/paper-item-body";
-
-import { HomeAssistant } from "../../../types";
-import {
-  Person,
-  fetchPersons,
-  updatePerson,
-  deletePerson,
-  createPerson,
-} from "../../../data/person";
-import "../../../components/ha-card";
-import "../../../components/ha-fab";
-import "../../../layouts/hass-subpage";
-import "../../../layouts/hass-loading-screen";
 import { compare } from "../../../common/string/compare";
-import "../ha-config-section";
+import "../../../components/ha-card";
+import "../../../components/ha-svg-icon";
+import "../../../components/user/ha-person-badge";
 import {
-  showPersonDetailDialog,
+  createPerson,
+  deletePerson,
+  fetchPersons,
+  Person,
+  updatePerson,
+} from "../../../data/person";
+import { fetchUsers, User } from "../../../data/user";
+import {
+  showAlertDialog,
+  showConfirmationDialog,
+} from "../../../dialogs/generic/show-dialog-box";
+import "../../../layouts/hass-loading-screen";
+import "../../../layouts/hass-tabs-subpage";
+import { HomeAssistant, Route } from "../../../types";
+import { documentationUrl } from "../../../util/documentation-url";
+import "../ha-config-section";
+import { configSections } from "../ha-panel-config";
+import {
   loadPersonDetailDialog,
+  showPersonDetailDialog,
 } from "./show-dialog-person-detail";
-import { User, fetchUsers } from "../../../data/user";
 
 class HaConfigPerson extends LitElement {
-  @property() public hass?: HomeAssistant;
+  @property({ attribute: false }) public hass?: HomeAssistant;
+
   @property() public isWide?: boolean;
-  @property() private _storageItems?: Person[];
-  @property() private _configItems?: Person[];
+
+  @property() public narrow?: boolean;
+
+  @property() public route!: Route;
+
+  @internalProperty() private _storageItems?: Person[];
+
+  @internalProperty() private _configItems?: Person[];
+
   private _usersLoad?: Promise<User[]>;
 
-  protected render(): TemplateResult | void {
+  protected render(): TemplateResult {
     if (
       !this.hass ||
       this._storageItems === undefined ||
       this._configItems === undefined
     ) {
-      return html`
-        <hass-loading-screen></hass-loading-screen>
-      `;
+      return html` <hass-loading-screen></hass-loading-screen> `;
     }
     const hass = this.hass;
     return html`
-      <hass-subpage
-        .header=${hass.localize("ui.panel.config.person.caption")}
-        .showBackButton=${!this.isWide}
+      <hass-tabs-subpage
+        .hass=${this.hass}
+        .narrow=${this.narrow}
+        .route=${this.route}
+        back-path="/config"
+        .tabs=${configSections.persons}
       >
         <ha-config-section .isWide=${this.isWide}>
           <span slot="header"
             >${hass.localize("ui.panel.config.person.caption")}</span
           >
           <span slot="introduction">
-            ${hass.localize("ui.panel.config.person.introduction")}
+            <p>
+              ${hass.localize("ui.panel.config.person.introduction")}
+            </p>
             ${this._configItems.length > 0
               ? html`
                   <p>
@@ -67,15 +87,28 @@ class HaConfigPerson extends LitElement {
                   </p>
                 `
               : ""}
+
+            <a
+              href=${documentationUrl(this.hass, "/integrations/person/")}
+              target="_blank"
+              rel="noreferrer"
+            >
+              ${this.hass.localize("ui.panel.config.person.learn_more")}
+            </a>
           </span>
+
           <ha-card class="storage">
             ${this._storageItems.map((entry) => {
               return html`
-                <paper-item @click=${this._openEditEntry} .entry=${entry}>
+                <paper-icon-item @click=${this._openEditEntry} .entry=${entry}>
+                  <ha-person-badge
+                    slot="item-icon"
+                    .person=${entry}
+                  ></ha-person-badge>
                   <paper-item-body>
                     ${entry.name}
                   </paper-item-body>
-                </paper-item>
+                </paper-icon-item>
               `;
             })}
             ${this._storageItems.length === 0
@@ -98,25 +131,29 @@ class HaConfigPerson extends LitElement {
                 <ha-card header="Configuration.yaml persons">
                   ${this._configItems.map((entry) => {
                     return html`
-                      <paper-item>
+                      <paper-icon-item>
+                        <ha-person-badge
+                          slot="item-icon"
+                          .person=${entry}
+                        ></ha-person-badge>
                         <paper-item-body>
                           ${entry.name}
                         </paper-item-body>
-                      </paper-item>
+                      </paper-icon-item>
                     `;
                   })}
                 </ha-card>
               `
             : ""}
         </ha-config-section>
-      </hass-subpage>
-
-      <ha-fab
-        ?is-wide=${this.isWide}
-        icon="hass:plus"
-        title="${hass.localize("ui.panel.config.person.add_person")}"
-        @click=${this._createPerson}
-      ></ha-fab>
+        <mwc-fab
+          slot="fab"
+          title="${hass.localize("ui.panel.config.person.add_person")}"
+          @click=${this._createPerson}
+        >
+          <ha-svg-icon slot="icon" .path=${mdiPlus}></ha-svg-icon>
+        </mwc-fab>
+      </hass-tabs-subpage>
     `;
   }
 
@@ -136,6 +173,31 @@ class HaConfigPerson extends LitElement {
     this._configItems = personData.config.sort((ent1, ent2) =>
       compare(ent1.name, ent2.name)
     );
+    this._openDialogIfPersonSpecifiedInRoute();
+  }
+
+  private _openDialogIfPersonSpecifiedInRoute() {
+    if (!this.route.path.includes("/edit/")) {
+      return;
+    }
+
+    const routeSegments = this.route.path.split("/edit/");
+    const personId = routeSegments.length > 1 ? routeSegments[1] : null;
+    if (!personId) {
+      return;
+    }
+
+    const personToEdit = this._storageItems!.find((p) => p.id === personId);
+    if (personToEdit) {
+      this._openDialog(personToEdit);
+    } else {
+      showAlertDialog(this, {
+        title: this.hass?.localize(
+          "ui.panel.config.person.person_not_found_title"
+        ),
+        text: this.hass?.localize("ui.panel.config.person.person_not_found"),
+      });
+    }
   }
 
   private _createPerson() {
@@ -182,11 +244,12 @@ class HaConfigPerson extends LitElement {
       },
       removeEntry: async () => {
         if (
-          !confirm(`${this.hass!.localize(
-            "ui.panel.config.person.confirm_delete"
-          )}
-
-${this.hass!.localize("ui.panel.config.person.confirm_delete2")}`)
+          !(await showConfirmationDialog(this, {
+            title: this.hass!.localize("ui.panel.config.person.confirm_delete"),
+            text: this.hass!.localize("ui.panel.config.person.confirm_delete2"),
+            dismissText: this.hass!.localize("ui.common.no"),
+            confirmText: this.hass!.localize("ui.common.yes"),
+          }))
         ) {
           return false;
         }
@@ -200,6 +263,9 @@ ${this.hass!.localize("ui.panel.config.person.confirm_delete2")}`)
         } catch (err) {
           return false;
         }
+      },
+      refreshUsers: () => {
+        this._usersLoad = fetchUsers(this.hass!);
       },
     });
   }
@@ -218,23 +284,12 @@ ${this.hass!.localize("ui.panel.config.person.confirm_delete2")}`)
         text-align: center;
         padding: 8px;
       }
-      paper-item {
+      paper-icon-item {
         padding-top: 4px;
         padding-bottom: 4px;
       }
-      ha-card.storage paper-item {
+      ha-card.storage paper-icon-item {
         cursor: pointer;
-      }
-      ha-fab {
-        position: fixed;
-        bottom: 16px;
-        right: 16px;
-        z-index: 1;
-      }
-
-      ha-fab[is-wide] {
-        bottom: 24px;
-        right: 24px;
       }
     `;
   }

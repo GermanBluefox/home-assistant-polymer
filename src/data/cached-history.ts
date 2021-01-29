@@ -1,16 +1,15 @@
+import { HassEntity } from "home-assistant-js-websocket";
+import { LocalizeFunc } from "../common/translations/localize";
+import { HomeAssistant } from "../types";
 import {
   computeHistory,
   fetchRecent,
   HistoryResult,
-  TimelineEntity,
   LineChartUnit,
+  TimelineEntity,
 } from "./history";
-import { HomeAssistant } from "../types";
-import { HassEntity } from "home-assistant-js-websocket";
-import { LocalizeFunc } from "../common/translations/localize";
 
-interface CacheConfig {
-  refresh: number;
+export interface CacheConfig {
   cacheKey: string;
   hoursToShow: number;
 }
@@ -99,7 +98,7 @@ export const getRecentWithCache = (
   let toFetchStartTime = startTime;
   let appendingToCache = false;
 
-  let cache = stateHistoryCache[cacheKey];
+  let cache = stateHistoryCache[cacheKey + `_${cacheConfig.hoursToShow}`];
   if (
     cache &&
     toFetchStartTime >= cache.startTime &&

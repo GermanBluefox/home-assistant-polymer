@@ -1,18 +1,17 @@
-import {
-  LitElement,
-  TemplateResult,
-  html,
-  customElement,
-  property,
-  CSSResult,
-} from "lit-element";
 import "@material/mwc-button";
-
+import {
+  CSSResult,
+  customElement,
+  html,
+  LitElement,
+  property,
+  TemplateResult,
+} from "lit-element";
+import { fireEvent } from "../../common/dom/fire_event";
 import { DataEntryFlowStepAbort } from "../../data/data_entry_flow";
 import { HomeAssistant } from "../../types";
-import { fireEvent } from "../../common/dom/fire_event";
-import { configFlowContentStyles } from "./styles";
 import { FlowConfig } from "./show-dialog-data-entry-flow";
+import { configFlowContentStyles } from "./styles";
 
 @customElement("step-flow-abort")
 class StepFlowAbort extends LitElement {
@@ -24,7 +23,7 @@ class StepFlowAbort extends LitElement {
   @property()
   private step!: DataEntryFlowStepAbort;
 
-  protected render(): TemplateResult | void {
+  protected render(): TemplateResult {
     return html`
       <h2>
         ${this.hass.localize(

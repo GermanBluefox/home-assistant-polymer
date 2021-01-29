@@ -1,14 +1,12 @@
 import "@polymer/paper-item/paper-item";
 import "@polymer/paper-listbox/paper-listbox";
 import { html } from "@polymer/polymer/lib/utils/html-tag";
+/* eslint-plugin-disable lit */
 import { PolymerElement } from "@polymer/polymer/polymer-element";
-
 import "../../components/ha-paper-dropdown-menu";
-
 import { EventsMixin } from "../../mixins/events-mixin";
 import LocalizeMixin from "../../mixins/localize-mixin";
-
-import "./ha-settings-row";
+import "../../components/ha-settings-row";
 
 /*
  * @appliesMixin LocalizeMixin
@@ -36,6 +34,7 @@ class HaPickLanguageRow extends LocalizeMixin(EventsMixin(PolymerElement)) {
           <a
             href="https://developers.home-assistant.io/docs/en/internationalization_translation.html"
             target="_blank"
+            rel="noreferrer"
             >[[localize('ui.panel.profile.language.link_promo')]]</a
           >
         </span>

@@ -1,7 +1,8 @@
-import "@polymer/paper-icon-button/paper-icon-button";
+import "./ha-icon-button";
 import { html } from "@polymer/polymer/lib/utils/html-tag";
+/* eslint-plugin-disable lit */
 import { PolymerElement } from "@polymer/polymer/polymer-element";
-
+import { UNAVAILABLE } from "../data/entity";
 import CoverEntity from "../util/cover-model";
 
 class HaCoverControls extends PolymerElement {
@@ -17,26 +18,27 @@ class HaCoverControls extends PolymerElement {
       </style>
 
       <div class="state">
-        <paper-icon-button
+        <ha-icon-button
           aria-label="Open cover"
-          icon="hass:arrow-up"
+          icon="[[computeOpenIcon(stateObj)]]"
           on-click="onOpenTap"
           invisible$="[[!entityObj.supportsOpen]]"
           disabled="[[computeOpenDisabled(stateObj, entityObj)]]"
-        ></paper-icon-button>
-        <paper-icon-button
+        ></ha-icon-button>
+        <ha-icon-button
           aria-label="Stop the cover from moving"
           icon="hass:stop"
           on-click="onStopTap"
           invisible$="[[!entityObj.supportsStop]]"
-        ></paper-icon-button>
-        <paper-icon-button
+          disabled="[[computeStopDisabled(stateObj)]]"
+        ></ha-icon-button>
+        <ha-icon-button
           aria-label="Close cover"
-          icon="hass:arrow-down"
+          icon="[[computeCloseIcon(stateObj)]]"
           on-click="onCloseTap"
           invisible$="[[!entityObj.supportsClose]]"
           disabled="[[computeClosedDisabled(stateObj, entityObj)]]"
-        ></paper-icon-button>
+        ></ha-icon-button>
       </div>
     `;
   }
@@ -60,13 +62,48 @@ class HaCoverControls extends PolymerElement {
     return new CoverEntity(hass, stateObj);
   }
 
+  computeOpenIcon(stateObj) {
+    switch (stateObj.attributes.device_class) {
+      case "awning":
+      case "door":
+      case "gate":
+        return "hass:arrow-expand-horizontal";
+      default:
+        return "hass:arrow-up";
+    }
+  }
+
+  computeCloseIcon(stateObj) {
+    switch (stateObj.attributes.device_class) {
+      case "awning":
+      case "door":
+      case "gate":
+        return "hass:arrow-collapse-horizontal";
+      default:
+        return "hass:arrow-down";
+    }
+  }
+
+  computeStopDisabled(stateObj) {
+    if (stateObj.state === UNAVAILABLE) {
+      return true;
+    }
+    return false;
+  }
+
   computeOpenDisabled(stateObj, entityObj) {
-    var assumedState = stateObj.attributes.assumed_state === true;
+    if (stateObj.state === UNAVAILABLE) {
+      return true;
+    }
+    const assumedState = stateObj.attributes.assumed_state === true;
     return (entityObj.isFullyOpen || entityObj.isOpening) && !assumedState;
   }
 
   computeClosedDisabled(stateObj, entityObj) {
-    var assumedState = stateObj.attributes.assumed_state === true;
+    if (stateObj.state === UNAVAILABLE) {
+      return true;
+    }
+    const assumedState = stateObj.attributes.assumed_state === true;
     return (entityObj.isFullyClosed || entityObj.isClosing) && !assumedState;
   }
 

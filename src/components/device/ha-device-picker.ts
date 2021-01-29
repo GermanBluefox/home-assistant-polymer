@@ -1,40 +1,40 @@
+import "../ha-icon-button";
 import "@polymer/paper-input/paper-input";
 import "@polymer/paper-item/paper-item";
 import "@polymer/paper-item/paper-item-body";
-import "@vaadin/vaadin-combo-box/theme/material/vaadin-combo-box-light";
 import "@polymer/paper-listbox/paper-listbox";
-import memoizeOne from "memoize-one";
+import "@vaadin/vaadin-combo-box/theme/material/vaadin-combo-box-light";
+import { UnsubscribeFunc } from "home-assistant-js-websocket";
 import {
-  LitElement,
-  TemplateResult,
-  html,
   css,
   CSSResult,
   customElement,
+  html,
+  LitElement,
   property,
+  TemplateResult,
 } from "lit-element";
-import { UnsubscribeFunc } from "home-assistant-js-websocket";
-import { SubscribeMixin } from "../../mixins/subscribe-mixin";
-
-import { HomeAssistant } from "../../types";
+import memoizeOne from "memoize-one";
 import { fireEvent } from "../../common/dom/fire_event";
-import {
-  DeviceRegistryEntry,
-  subscribeDeviceRegistry,
-  computeDeviceName,
-} from "../../data/device_registry";
+import { computeDomain } from "../../common/entity/compute_domain";
 import { compare } from "../../common/string/compare";
-import { PolymerChangedEvent } from "../../polymer-types";
 import {
   AreaRegistryEntry,
   subscribeAreaRegistry,
 } from "../../data/area_registry";
-import { DeviceEntityLookup } from "../../panels/config/devices/ha-devices-data-table";
+import {
+  computeDeviceName,
+  DeviceEntityLookup,
+  DeviceRegistryEntry,
+  subscribeDeviceRegistry,
+} from "../../data/device_registry";
 import {
   EntityRegistryEntry,
   subscribeEntityRegistry,
 } from "../../data/entity_registry";
-import { computeDomain } from "../../common/entity/compute_domain";
+import { SubscribeMixin } from "../../mixins/subscribe-mixin";
+import { PolymerChangedEvent } from "../../polymer-types";
+import { HomeAssistant } from "../../types";
 
 interface Device {
   name: string;
@@ -52,7 +52,7 @@ const rowRenderer = (root: HTMLElement, _owner, model: { item: Device }) => {
       }
     </style>
     <paper-item>
-      <paper-item-body two-line="">    
+      <paper-item-body two-line="">
         <div class='name'>[[item.name]]</div>
         <div secondary>[[item.area]]</div>
       </paper-item-body>
@@ -66,12 +66,18 @@ const rowRenderer = (root: HTMLElement, _owner, model: { item: Device }) => {
 
 @customElement("ha-device-picker")
 export class HaDevicePicker extends SubscribeMixin(LitElement) {
-  @property() public hass!: HomeAssistant;
+  @property({ attribute: false }) public hass!: HomeAssistant;
+
   @property() public label?: string;
+
   @property() public value?: string;
+
   @property() public devices?: DeviceRegistryEntry[];
+
   @property() public areas?: AreaRegistryEntry[];
+
   @property() public entities?: EntityRegistryEntry[];
+
   /**
    * Show only devices with entities from specific domains.
    * @type {Array}
@@ -79,6 +85,7 @@ export class HaDevicePicker extends SubscribeMixin(LitElement) {
    */
   @property({ type: Array, attribute: "include-domains" })
   public includeDomains?: string[];
+
   /**
    * Show no devices with entities of these domains.
    * @type {Array}
@@ -86,6 +93,7 @@ export class HaDevicePicker extends SubscribeMixin(LitElement) {
    */
   @property({ type: Array, attribute: "exclude-domains" })
   public excludeDomains?: string[];
+
   /**
    * Show only deviced with entities of these device classes.
    * @type {Array}
@@ -93,6 +101,7 @@ export class HaDevicePicker extends SubscribeMixin(LitElement) {
    */
   @property({ type: Array, attribute: "include-device-classes" })
   public includeDeviceClasses?: string[];
+
   @property({ type: Boolean })
   private _opened?: boolean;
 
@@ -179,7 +188,9 @@ export class HaDevicePicker extends SubscribeMixin(LitElement) {
             this.hass,
             deviceEntityLookup[device.id]
           ),
-          area: device.area_id ? areaLookup[device.area_id].name : "No area",
+          area: device.area_id
+            ? areaLookup[device.area_id].name
+            : this.hass.localize("ui.components.device-picker.no_area"),
         };
       });
       if (outputDevices.length === 1) {
@@ -203,9 +214,9 @@ export class HaDevicePicker extends SubscribeMixin(LitElement) {
     ];
   }
 
-  protected render(): TemplateResult | void {
+  protected render(): TemplateResult {
     if (!this.devices || !this.areas || !this.entities) {
-      return;
+      return html``;
     }
     const devices = this._getDevices(
       this.devices,
@@ -238,7 +249,7 @@ export class HaDevicePicker extends SubscribeMixin(LitElement) {
         >
           ${this.value
             ? html`
-                <paper-icon-button
+                <ha-icon-button
                   aria-label=${this.hass.localize(
                     "ui.components.device-picker.clear"
                   )}
@@ -249,12 +260,12 @@ export class HaDevicePicker extends SubscribeMixin(LitElement) {
                   no-ripple
                 >
                   Clear
-                </paper-icon-button>
+                </ha-icon-button>
               `
             : ""}
           ${devices.length > 0
             ? html`
-                <paper-icon-button
+                <ha-icon-button
                   aria-label=${this.hass.localize(
                     "ui.components.device-picker.show_devices"
                   )}
@@ -263,7 +274,7 @@ export class HaDevicePicker extends SubscribeMixin(LitElement) {
                   .icon=${this._opened ? "hass:menu-up" : "hass:menu-down"}
                 >
                   Toggle
-                </paper-icon-button>
+                </ha-icon-button>
               `
             : ""}
         </paper-input>
@@ -302,9 +313,8 @@ export class HaDevicePicker extends SubscribeMixin(LitElement) {
 
   static get styles(): CSSResult {
     return css`
-      paper-input > paper-icon-button {
-        width: 24px;
-        height: 24px;
+      paper-input > ha-icon-button {
+        --mdc-icon-button-size: 24px;
         padding: 2px;
         color: var(--secondary-text-color);
       }

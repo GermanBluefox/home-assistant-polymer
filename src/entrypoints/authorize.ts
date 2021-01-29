@@ -1,11 +1,11 @@
+// Compat needs to be first import
+import "../resources/compatibility";
+import "../resources/safari-14-attachshadow-patch";
 import "@polymer/polymer/lib/elements/dom-if";
 import "@polymer/polymer/lib/elements/dom-repeat";
-
-import "../components/ha-iconset-svg";
+import "../auth/ha-authorize";
 import "../resources/ha-style";
 import "../resources/roboto";
-
-import "../auth/ha-authorize";
 
 /* polyfill for paper-dropdown */
 setTimeout(

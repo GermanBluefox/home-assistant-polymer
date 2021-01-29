@@ -1,26 +1,24 @@
 import {
-  LitElement,
-  TemplateResult,
-  html,
-  property,
   customElement,
+  html,
+  LitElement,
+  property,
+  TemplateResult,
 } from "lit-element";
-
-import "./ha-settings-row";
-import "../../components/ha-switch";
-
-import { HomeAssistant } from "../../types";
 import { fireEvent } from "../../common/dom/fire_event";
-// tslint:disable-next-line: no-duplicate-imports
-import { HaSwitch } from "../../components/ha-switch";
+import "../../components/ha-switch";
+import type { HaSwitch } from "../../components/ha-switch";
 import { forwardHaptic } from "../../data/haptics";
+import type { HomeAssistant } from "../../types";
+import "../../components/ha-settings-row";
 
 @customElement("ha-set-vibrate-row")
 class HaSetVibrateRow extends LitElement {
-  @property() public hass!: HomeAssistant;
+  @property({ attribute: false }) public hass!: HomeAssistant;
+
   @property() public narrow!: boolean;
 
-  protected render(): TemplateResult | void {
+  protected render(): TemplateResult {
     return html`
       <ha-settings-row .narrow=${this.narrow}>
         <span slot="heading">

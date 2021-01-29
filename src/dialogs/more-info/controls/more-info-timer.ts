@@ -1,25 +1,24 @@
-import {
-  LitElement,
-  html,
-  TemplateResult,
-  CSSResult,
-  css,
-  property,
-  PropertyValues,
-  customElement,
-} from "lit-element";
 import "@material/mwc-button";
-
-import { HomeAssistant } from "../../../types";
+import {
+  css,
+  CSSResult,
+  customElement,
+  html,
+  LitElement,
+  property,
+  TemplateResult,
+} from "lit-element";
+import "../../../components/ha-attributes";
 import { TimerEntity } from "../../../data/timer";
+import { HomeAssistant } from "../../../types";
 
 @customElement("more-info-timer")
 class MoreInfoTimer extends LitElement {
-  @property() public hass!: HomeAssistant;
+  @property({ attribute: false }) public hass!: HomeAssistant;
 
   @property() public stateObj?: TimerEntity;
 
-  protected render(): TemplateResult | void {
+  protected render(): TemplateResult {
     if (!this.hass || !this.stateObj) {
       return html``;
     }
@@ -27,15 +26,12 @@ class MoreInfoTimer extends LitElement {
     return html`
       <ha-attributes
         .stateObj=${this.stateObj}
-        .extraFilters=${"remaining"}
+        extra-filters="remaining"
       ></ha-attributes>
       <div class="actions">
         ${this.stateObj.state === "idle" || this.stateObj.state === "paused"
           ? html`
-              <mwc-button
-                .action="${"start"}"
-                @click="${this._handleActionClick}"
-              >
+              <mwc-button .action=${"start"} @click=${this._handleActionClick}>
                 ${this.hass!.localize("ui.card.timer.actions.start")}
               </mwc-button>
             `
@@ -43,7 +39,7 @@ class MoreInfoTimer extends LitElement {
         ${this.stateObj.state === "active"
           ? html`
               <mwc-button
-                .action="${"pause"}"
+                .action=${"pause"}
                 @click="${this._handleActionClick}"
               >
                 ${this.hass!.localize("ui.card.timer.actions.pause")}
@@ -53,13 +49,13 @@ class MoreInfoTimer extends LitElement {
         ${this.stateObj.state === "active" || this.stateObj.state === "paused"
           ? html`
               <mwc-button
-                .action="${"cancel"}"
+                .action=${"cancel"}
                 @click="${this._handleActionClick}"
               >
                 ${this.hass!.localize("ui.card.timer.actions.cancel")}
               </mwc-button>
               <mwc-button
-                .action="${"finish"}"
+                .action=${"finish"}
                 @click="${this._handleActionClick}"
               >
                 ${this.hass!.localize("ui.card.timer.actions.finish")}
@@ -68,13 +64,6 @@ class MoreInfoTimer extends LitElement {
           : ""}
       </div>
     `;
-  }
-
-  protected updated(changedProps: PropertyValues) {
-    super.updated(changedProps);
-    if (!changedProps.has("stateObj") || !this.stateObj) {
-      return;
-    }
   }
 
   private _handleActionClick(e: MouseEvent): void {

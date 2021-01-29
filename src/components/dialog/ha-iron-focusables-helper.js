@@ -11,9 +11,8 @@ found at http://polymer.github.io/PATENTS.txt
 /*
   Fixes issue with not using shadow dom properly in iron-overlay-behavior/icon-focusables-helper.js
 */
-import { dom } from "@polymer/polymer/lib/legacy/polymer.dom.js";
-
-import { IronFocusablesHelper } from "@polymer/iron-overlay-behavior/iron-focusables-helper.js";
+import { IronFocusablesHelper } from "@polymer/iron-overlay-behavior/iron-focusables-helper";
+import { dom } from "@polymer/polymer/lib/legacy/polymer.dom";
 
 export const HaIronFocusablesHelper = {
   /**
@@ -23,11 +22,11 @@ export const HaIronFocusablesHelper = {
    * @param {!Node} node
    * @return {!Array<!HTMLElement>}
    */
-  getTabbableNodes: function(node) {
-    var result = [];
+  getTabbableNodes: function (node) {
+    const result = [];
     // If there is at least one element with tabindex > 0, we need to sort
     // the final array by tabindex.
-    var needsSortByTabIndex = this._collectTabbableNodes(node, result);
+    const needsSortByTabIndex = this._collectTabbableNodes(node, result);
     if (needsSortByTabIndex) {
       return IronFocusablesHelper._sortByTabIndex(result);
     }
@@ -43,7 +42,7 @@ export const HaIronFocusablesHelper = {
    * @return {boolean}
    * @private
    */
-  _collectTabbableNodes: function(node, result) {
+  _collectTabbableNodes: function (node, result) {
     // If not an element or not visible, no need to explore children.
     if (
       node.nodeType !== Node.ELEMENT_NODE ||
@@ -51,9 +50,9 @@ export const HaIronFocusablesHelper = {
     ) {
       return false;
     }
-    var element = /** @type {!HTMLElement} */ (node);
-    var tabIndex = IronFocusablesHelper._normalizedTabIndex(element);
-    var needsSort = tabIndex > 0;
+    const element = /** @type {!HTMLElement} */ (node);
+    const tabIndex = IronFocusablesHelper._normalizedTabIndex(element);
+    let needsSort = tabIndex > 0;
     if (tabIndex >= 0) {
       result.push(element);
     }
@@ -71,7 +70,7 @@ export const HaIronFocusablesHelper = {
     //   <input id="B" slot="b" tabindex="1">
     //  </div>
     // TODO(valdrin) support ShadowDOM v1 when upgrading to Polymer v2.0.
-    var children;
+    let children;
     if (element.localName === "content" || element.localName === "slot") {
       children = dom(element).getDistributedNodes();
     } else {
@@ -81,7 +80,7 @@ export const HaIronFocusablesHelper = {
       children = dom(element.shadowRoot || element.root || element).children;
       // /////////////////////////
     }
-    for (var i = 0; i < children.length; i++) {
+    for (let i = 0; i < children.length; i++) {
       // Ensure method is always invoked to collect tabbable children.
       needsSort = this._collectTabbableNodes(children[i], result) || needsSort;
     }

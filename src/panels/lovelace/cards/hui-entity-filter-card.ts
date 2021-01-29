@@ -1,23 +1,38 @@
-import { createCardElement } from "../common/create-card-element";
-import { processConfigEntities } from "../common/process-config-entities";
-import { LovelaceCard } from "../types";
 import { LovelaceCardConfig } from "../../../data/lovelace";
-import { EntityFilterEntityConfig } from "../entity-rows/types";
 import { HomeAssistant } from "../../../types";
-import { EntityFilterCardConfig } from "./types";
 import { evaluateFilter } from "../common/evaluate-filter";
+import { processConfigEntities } from "../common/process-config-entities";
+import { createCardElement } from "../create-element/create-card-element";
+import { EntityFilterEntityConfig } from "../entity-rows/types";
+import { LovelaceCard } from "../types";
+import { EntityFilterCardConfig } from "./types";
+import {
+  property,
+  internalProperty,
+  PropertyValues,
+  UpdatingElement,
+} from "lit-element";
+import { computeCardSize } from "../common/compute-card-size";
 
-class EntityFilterCard extends HTMLElement implements LovelaceCard {
-  public isPanel?: boolean;
+class EntityFilterCard extends UpdatingElement implements LovelaceCard {
+  @property({ attribute: false }) public hass?: HomeAssistant;
+
+  @property() public isPanel = false;
+
+  @property() public editMode = false;
+
+  @internalProperty() private _config?: EntityFilterCardConfig;
+
   private _element?: LovelaceCard;
-  private _config?: EntityFilterCardConfig;
+
   private _configEntities?: EntityFilterEntityConfig[];
+
   private _baseCardConfig?: LovelaceCardConfig;
-  private _hass?: HomeAssistant;
+
   private _oldEntities?: EntityFilterEntityConfig[];
 
-  public getCardSize(): number {
-    return this._element ? this._element.getCardSize() : 1;
+  public getCardSize(): number | Promise<number> {
+    return this._element ? computeCardSize(this._element) : 1;
   }
 
   public setConfig(config: EntityFilterCardConfig): void {
@@ -37,8 +52,8 @@ class EntityFilterCard extends HTMLElement implements LovelaceCard {
       throw new Error("Incorrect filter config.");
     }
 
+    this._configEntities = processConfigEntities(config.entities);
     this._config = config;
-    this._configEntities = undefined;
     this._baseCardConfig = {
       type: "entities",
       entities: [],
@@ -47,28 +62,42 @@ class EntityFilterCard extends HTMLElement implements LovelaceCard {
 
     if (this.lastChild) {
       this.removeChild(this.lastChild);
-      this._element = undefined;
     }
+
+    this._element = this._createCardElement(this._baseCardConfig);
   }
 
-  set hass(hass: HomeAssistant) {
-    if (!hass || !this._config) {
-      return;
+  protected shouldUpdate(changedProps: PropertyValues): boolean {
+    if (this._element) {
+      this._element.hass = this.hass;
+      this._element.editMode = this.editMode;
+      this._element.isPanel = this.isPanel;
     }
 
-    if (!this.haveEntitiesChanged(hass)) {
-      this._hass = hass;
-      return;
+    if (changedProps.has("_config")) {
+      return true;
     }
+    if (changedProps.has("hass")) {
+      return this._haveEntitiesChanged(
+        changedProps.get("hass") as HomeAssistant | null
+      );
+    }
+    return false;
+  }
 
-    this._hass = hass;
-
-    if (!this._configEntities) {
-      this._configEntities = processConfigEntities(this._config.entities);
+  protected update(changedProps: PropertyValues) {
+    super.update(changedProps);
+    if (
+      !this.hass ||
+      !this._config ||
+      !this._configEntities ||
+      !this._element
+    ) {
+      return;
     }
 
     const entitiesList = this._configEntities.filter((entityConf) => {
-      const stateObj = hass.states[entityConf.entity];
+      const stateObj = this.hass!.states[entityConf.entity];
 
       if (!stateObj) {
         return false;
@@ -96,13 +125,13 @@ class EntityFilterCard extends HTMLElement implements LovelaceCard {
       return;
     }
 
-    const element = this._cardElement();
-
-    if (!element) {
-      return;
-    }
-
-    if (element.tagName !== "HUI-ERROR-CARD") {
+    if (!this.lastChild) {
+      this._element.setConfig({
+        ...this._baseCardConfig!,
+        entities: entitiesList,
+      });
+      this._oldEntities = entitiesList;
+    } else if (this._element.tagName !== "HUI-ERROR-CARD") {
       const isSame =
         this._oldEntities &&
         entitiesList.length === this._oldEntities.length &&
@@ -110,23 +139,23 @@ class EntityFilterCard extends HTMLElement implements LovelaceCard {
 
       if (!isSame) {
         this._oldEntities = entitiesList;
-        element.setConfig({ ...this._baseCardConfig!, entities: entitiesList });
+        this._element.setConfig({
+          ...this._baseCardConfig!,
+          entities: entitiesList,
+        });
       }
-
-      element.isPanel = this.isPanel;
-      element.hass = hass;
     }
 
     // Attach element if it has never been attached.
     if (!this.lastChild) {
-      this.appendChild(element);
+      this.appendChild(this._element);
     }
 
     this.style.display = "block";
   }
 
-  private haveEntitiesChanged(hass: HomeAssistant): boolean {
-    if (!this._hass) {
+  private _haveEntitiesChanged(oldHass: HomeAssistant | null): boolean {
+    if (!this.hass || !oldHass) {
       return true;
     }
 
@@ -134,11 +163,12 @@ class EntityFilterCard extends HTMLElement implements LovelaceCard {
       return true;
     }
 
+    if (this.hass.localize !== oldHass.localize) {
+      return true;
+    }
+
     for (const config of this._configEntities) {
-      if (
-        this._hass.states[config.entity] !== hass.states[config.entity] ||
-        this._hass.localize !== hass.localize
-      ) {
+      if (this.hass.states[config.entity] !== oldHass.states[config.entity]) {
         return true;
       }
     }
@@ -146,13 +176,33 @@ class EntityFilterCard extends HTMLElement implements LovelaceCard {
     return false;
   }
 
-  private _cardElement(): LovelaceCard | undefined {
-    if (!this._element && this._config) {
-      const element = createCardElement(this._baseCardConfig!);
-      this._element = element;
+  private _createCardElement(cardConfig: LovelaceCardConfig) {
+    const element = createCardElement(cardConfig) as LovelaceCard;
+    if (this.hass) {
+      element.hass = this.hass;
     }
+    element.isPanel = this.isPanel;
+    element.editMode = this.editMode;
+    element.addEventListener(
+      "ll-rebuild",
+      (ev) => {
+        ev.stopPropagation();
+        this._rebuildCard(element, cardConfig);
+      },
+      { once: true }
+    );
+    return element;
+  }
 
-    return this._element;
+  private _rebuildCard(
+    cardElToReplace: LovelaceCard,
+    config: LovelaceCardConfig
+  ): void {
+    const newCardEl = this._createCardElement(config);
+    if (cardElToReplace.parentElement) {
+      cardElToReplace.parentElement!.replaceChild(newCardEl, cardElToReplace);
+    }
+    this._element = newCardEl;
   }
 }
 customElements.define("hui-entity-filter-card", EntityFilterCard);

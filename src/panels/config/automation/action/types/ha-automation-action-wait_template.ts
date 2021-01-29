@@ -1,25 +1,27 @@
 import "@polymer/paper-input/paper-input";
-
-import { LitElement, property, customElement } from "lit-element";
-import { ActionElement, handleChangeEvent } from "../ha-automation-action-row";
-import { HomeAssistant } from "../../../../../types";
+import "@polymer/paper-input/paper-textarea";
+import { customElement, LitElement, property } from "lit-element";
 import { html } from "lit-html";
+import { fireEvent } from "../../../../../common/dom/fire_event";
 import { WaitAction } from "../../../../../data/script";
+import { HomeAssistant } from "../../../../../types";
+import { ActionElement, handleChangeEvent } from "../ha-automation-action-row";
 
 @customElement("ha-automation-action-wait_template")
 export class HaWaitAction extends LitElement implements ActionElement {
-  @property() public hass!: HomeAssistant;
+  @property({ attribute: false }) public hass!: HomeAssistant;
+
   @property() public action!: WaitAction;
 
   public static get defaultConfig() {
-    return { wait_template: "", timeout: "" };
+    return { wait_template: "" };
   }
 
   protected render() {
-    const { wait_template, timeout } = this.action;
+    const { wait_template, timeout, continue_on_timeout } = this.action;
 
     return html`
-      <ha-textarea
+      <paper-textarea
         .label=${this.hass.localize(
           "ui.panel.config.automation.editor.actions.type.wait_template.wait_template"
         )}
@@ -27,7 +29,7 @@ export class HaWaitAction extends LitElement implements ActionElement {
         .value=${wait_template}
         @value-changed=${this._valueChanged}
         dir="ltr"
-      ></ha-textarea>
+      ></paper-textarea>
       <paper-input
         .label=${this.hass.localize(
           "ui.panel.config.automation.editor.actions.type.wait_template.timeout"
@@ -36,7 +38,24 @@ export class HaWaitAction extends LitElement implements ActionElement {
         .value=${timeout}
         @value-changed=${this._valueChanged}
       ></paper-input>
+      <br />
+      <ha-formfield
+        .label=${this.hass.localize(
+          "ui.panel.config.automation.editor.actions.type.wait_template.continue_timeout"
+        )}
+      >
+        <ha-switch
+          .checked=${continue_on_timeout}
+          @change=${this._continueChanged}
+        ></ha-switch>
+      </ha-formfield>
     `;
+  }
+
+  private _continueChanged(ev) {
+    fireEvent(this, "value-changed", {
+      value: { ...this.action, continue_on_timeout: ev.target.checked },
+    });
   }
 
   private _valueChanged(ev: CustomEvent): void {

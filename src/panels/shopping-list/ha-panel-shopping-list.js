@@ -1,22 +1,25 @@
-import "@polymer/app-layout/app-header-layout/app-header-layout";
+import "../../layouts/ha-app-layout";
 import "@polymer/app-layout/app-header/app-header";
 import "@polymer/app-layout/app-toolbar/app-toolbar";
 import "@polymer/paper-checkbox/paper-checkbox";
-import "@polymer/paper-icon-button/paper-icon-button";
+import "../../components/ha-icon-button";
 import "@polymer/paper-input/paper-input";
 import "@polymer/paper-item/paper-icon-item";
-import "@polymer/paper-item/paper-item-body";
 import "@polymer/paper-item/paper-item";
+import "@polymer/paper-item/paper-item-body";
 import "@polymer/paper-listbox/paper-listbox";
-import "@polymer/paper-menu-button/paper-menu-button";
+import "@material/mwc-list/mwc-list-item";
+import "../../components/ha-button-menu";
 import { html } from "@polymer/polymer/lib/utils/html-tag";
+/* eslint-plugin-disable lit */
 import { PolymerElement } from "@polymer/polymer/polymer-element";
-
-import "../../components/ha-menu-button";
-import "../../components/ha-card";
-import LocalizeMixin from "../../mixins/localize-mixin";
 import { isComponentLoaded } from "../../common/config/is_component_loaded";
+import "../../components/ha-card";
+import "../../components/ha-menu-button";
 import { showVoiceCommandDialog } from "../../dialogs/voice-command-dialog/show-ha-voice-command-dialog";
+import LocalizeMixin from "../../mixins/localize-mixin";
+import "../../styles/polymer-ha-style";
+import { mdiDotsVertical } from "@mdi/js";
 
 /*
  * @appliesMixin LocalizeMixin
@@ -65,7 +68,7 @@ class HaPanelShoppingList extends LocalizeMixin(PolymerElement) {
         }
       </style>
 
-      <app-header-layout has-scrolling-region>
+      <ha-app-layout>
         <app-header slot="header" fixed>
           <app-toolbar>
             <ha-menu-button
@@ -74,39 +77,34 @@ class HaPanelShoppingList extends LocalizeMixin(PolymerElement) {
             ></ha-menu-button>
             <div main-title>[[localize('panel.shopping_list')]]</div>
 
-            <paper-icon-button
+            <ha-icon-button
               hidden$="[[!conversation]]"
               aria-label="Start conversation"
               icon="hass:microphone"
               on-click="_showVoiceCommandDialog"
-            ></paper-icon-button>
-
-            <paper-menu-button
-              horizontal-align="right"
-              horizontal-offset="-5"
-              vertical-offset="-5"
-            >
-              <paper-icon-button
+            ></ha-icon-button>
+            <ha-button-menu corner="BOTTOM_START" on-action="_clearCompleted">
+              <ha-icon-button
                 icon="hass:dots-vertical"
-                slot="dropdown-trigger"
-              ></paper-icon-button>
-              <paper-listbox slot="dropdown-content">
-                <paper-item on-click="_clearCompleted"
-                  >[[localize('ui.panel.shopping-list.clear_completed')]]</paper-item
-                >
-              </paper-listbox>
-            </paper-menu-button>
+                label="Menu"
+                slot="trigger"
+              >
+              </ha-icon-button>
+              <mwc-list-item>
+                [[localize('ui.panel.shopping-list.clear_completed')]]
+              </mwc-list-item>
+            </ha-button-menu>
           </app-toolbar>
         </app-header>
 
         <div class="content">
           <ha-card>
             <paper-icon-item on-focus="_focusRowInput">
-              <paper-icon-button
+              <ha-icon-button
                 slot="item-icon"
                 icon="hass:plus"
                 on-click="_addItem"
-              ></paper-icon-button>
+              ></ha-icon-button>
               <paper-item-body>
                 <paper-input
                   id="addBox"
@@ -140,7 +138,7 @@ class HaPanelShoppingList extends LocalizeMixin(PolymerElement) {
             [[localize('ui.panel.shopping-list.microphone_tip')]]
           </div>
         </div>
-      </app-header-layout>
+      </ha-app-layout>
     `;
   }
 
@@ -166,7 +164,7 @@ class HaPanelShoppingList extends LocalizeMixin(PolymerElement) {
     this.hass.connection
       .subscribeEvents(this._fetchData, "shopping_list_updated")
       .then(
-        function(unsub) {
+        function (unsub) {
           this._unsubEvents = unsub;
         }.bind(this)
       );
@@ -180,7 +178,7 @@ class HaPanelShoppingList extends LocalizeMixin(PolymerElement) {
 
   _fetchData() {
     this.hass.callApi("get", "shopping_list").then(
-      function(items) {
+      function (items) {
         items.reverse();
         this.items = items;
       }.bind(this)

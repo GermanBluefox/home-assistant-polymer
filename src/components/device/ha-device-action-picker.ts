@@ -4,13 +4,22 @@ import {
   fetchDeviceActions,
   localizeDeviceAutomationAction,
 } from "../../data/device_automation";
-import "../../components/ha-paper-dropdown-menu";
+import "../ha-paper-dropdown-menu";
 import { HaDeviceAutomationPicker } from "./ha-device-automation-picker";
 
 @customElement("ha-device-action-picker")
 class HaDeviceActionPicker extends HaDeviceAutomationPicker<DeviceAction> {
-  protected NO_AUTOMATION_TEXT = "No actions";
-  protected UNKNOWN_AUTOMATION_TEXT = "Unknown action";
+  protected get NO_AUTOMATION_TEXT() {
+    return this.hass.localize(
+      "ui.panel.config.devices.automation.actions.no_actions"
+    );
+  }
+
+  protected get UNKNOWN_AUTOMATION_TEXT() {
+    return this.hass.localize(
+      "ui.panel.config.devices.automation.actions.unknown_action"
+    );
+  }
 
   constructor() {
     super(

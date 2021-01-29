@@ -1,27 +1,31 @@
-import { html, TemplateResult } from "lit-element";
-
+import { css, CSSResult } from "lit-element";
 import { computeCardSize } from "../common/compute-card-size";
 import { HuiStackCard } from "./hui-stack-card";
 
 class HuiHorizontalStackCard extends HuiStackCard {
-  public getCardSize(): number {
-    let totalSize = 0;
-
-    if (this._cards) {
-      for (const element of this._cards) {
-        const elementSize = computeCardSize(element);
-        totalSize = elementSize > totalSize ? elementSize : totalSize;
-      }
+  public async getCardSize(): Promise<number> {
+    if (!this._cards) {
+      return 0;
     }
 
-    return totalSize;
+    const promises: Array<Promise<number> | number> = [];
+
+    for (const element of this._cards) {
+      promises.push(computeCardSize(element));
+    }
+
+    const results = await Promise.all(promises);
+
+    return Math.max(...results);
   }
 
-  protected renderStyle(): TemplateResult {
-    return html`
-      <style>
+  static get styles(): CSSResult[] {
+    return [
+      super.sharedStyles,
+      css`
         #root {
           display: flex;
+          height: 100%;
         }
         #root > * {
           flex: 1 1 0;
@@ -34,8 +38,8 @@ class HuiHorizontalStackCard extends HuiStackCard {
         #root > *:last-child {
           margin-right: 0;
         }
-      </style>
-    `;
+      `,
+    ];
   }
 }
 

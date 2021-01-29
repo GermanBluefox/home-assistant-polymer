@@ -1,34 +1,33 @@
 import {
+  css,
+  CSSResult,
+  customElement,
   html,
   LitElement,
-  TemplateResult,
-  customElement,
   property,
-  CSSResult,
-  css,
+  TemplateResult,
 } from "lit-element";
-
+import { ifDefined } from "lit-html/directives/if-defined";
 import "../../../components/entity/ha-state-label-badge";
-import "../components/hui-warning-element";
-
-import { LovelaceBadge } from "../types";
-import { HomeAssistant } from "../../../types";
-import { StateLabelBadgeConfig } from "./types";
-import { actionHandler } from "../common/directives/action-handler-directive";
-import { hasAction } from "../common/has-action";
 import { ActionHandlerEvent } from "../../../data/lovelace";
+import { HomeAssistant } from "../../../types";
+import { actionHandler } from "../common/directives/action-handler-directive";
 import { handleAction } from "../common/handle-action";
+import { hasAction } from "../common/has-action";
+import { LovelaceBadge } from "../types";
+import { StateLabelBadgeConfig } from "./types";
 
 @customElement("hui-state-label-badge")
 export class HuiStateLabelBadge extends LitElement implements LovelaceBadge {
-  @property() public hass?: HomeAssistant;
+  @property({ attribute: false }) public hass?: HomeAssistant;
+
   @property() protected _config?: StateLabelBadgeConfig;
 
   public setConfig(config: StateLabelBadgeConfig): void {
     this._config = config;
   }
 
-  protected render(): TemplateResult | void {
+  protected render(): TemplateResult {
     if (!this._config || !this.hass) {
       return html``;
     }
@@ -47,7 +46,11 @@ export class HuiStateLabelBadge extends LitElement implements LovelaceBadge {
           hasHold: hasAction(this._config!.hold_action),
           hasDoubleClick: hasAction(this._config!.double_tap_action),
         })}
-        tabindex="0"
+        tabindex=${ifDefined(
+          hasAction(this._config.tap_action) || this._config.entity
+            ? "0"
+            : undefined
+        )}
       ></ha-state-label-badge>
     `;
   }
@@ -65,8 +68,8 @@ export class HuiStateLabelBadge extends LitElement implements LovelaceBadge {
       }
       ha-state-label-badge {
         display: inline-block;
-        padding: 4px;
-        margin: -4px 0 -4px 0;
+        padding: 4px 2px 4px 2px;
+        margin: -4px -2px -4px -2px;
       }
     `;
   }

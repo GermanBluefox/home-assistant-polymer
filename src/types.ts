@@ -1,22 +1,27 @@
 import {
-  HassEntities,
-  HassConfig,
   Auth,
   Connection,
-  MessageBase,
-  HassEntityBase,
+  HassConfig,
+  HassEntities,
   HassEntityAttributeBase,
+  HassEntityBase,
   HassServices,
+  MessageBase,
 } from "home-assistant-js-websocket";
 import { LocalizeFunc } from "./common/translations/localize";
+import { CoreFrontendUserData } from "./data/frontend";
+import { getHassTranslations } from "./data/translation";
 import { ExternalMessaging } from "./external_app/external_messaging";
 
 declare global {
+  /* eslint-disable no-var, no-redeclare */
   var __DEV__: boolean;
   var __DEMO__: boolean;
   var __BUILD__: "latest" | "es5";
   var __VERSION__: string;
   var __STATIC_PATH__: string;
+  var __BACKWARDS_COMPAT__: boolean;
+  /* eslint-enable no-var, no-redeclare */
 
   interface Window {
     // Custom panel entry point url
@@ -38,9 +43,24 @@ declare global {
     };
     change: undefined;
   }
+
+  // For loading workers in webpack
+  interface ImportMeta {
+    url: string;
+  }
 }
 
-export type Constructor<T = {}> = new (...args: any[]) => T;
+export type Constructor<T = any> = new (...args: any[]) => T;
+
+export interface ClassElement {
+  kind: "field" | "method";
+  key: PropertyKey;
+  placement: "static" | "prototype" | "own";
+  initializer?: (...args) => unknown;
+  extras?: ClassElement[];
+  finisher?: <T>(cls: Constructor<T>) => undefined | Constructor<T>;
+  descriptor?: PropertyDescriptor;
+}
 
 export interface WebhookError {
   code: number;
@@ -72,14 +92,24 @@ export interface Theme {
   "primary-color": string;
   "text-primary-color": string;
   "accent-color": string;
+  [key: string]: string;
 }
 
 export interface Themes {
   default_theme: string;
+  default_dark_theme: string | null;
   themes: { [key: string]: Theme };
+  darkMode: boolean;
 }
 
-export interface PanelInfo<T = {} | null> {
+export interface ThemeSettings {
+  theme: string;
+  dark?: boolean;
+  primaryColor?: string;
+  accentColor?: string;
+}
+
+export interface PanelInfo<T = Record<string, any> | null> {
   component_name: string;
   config: T;
   icon: string | null;
@@ -91,10 +121,50 @@ export interface Panels {
   [name: string]: PanelInfo;
 }
 
+export interface Calendar {
+  entity_id: string;
+  name?: string;
+  backgroundColor?: string;
+}
+
+export interface SelectedCalendar {
+  selected: boolean;
+  calendar: Calendar;
+}
+
+export interface CalendarEvent {
+  summary: string;
+  title: string;
+  start: string;
+  end?: string;
+  backgroundColor?: string;
+  borderColor?: string;
+  calendar: string;
+  [key: string]: any;
+}
+
+export interface CalendarViewChanged {
+  end: Date;
+  start: Date;
+  view: string;
+}
+
+export type FullCalendarView =
+  | "dayGridMonth"
+  | "dayGridWeek"
+  | "dayGridDay"
+  | "listWeek";
+
+export interface ToggleButton {
+  label: string;
+  iconPath: string;
+  value: string;
+}
+
 export interface Translation {
   nativeName: string;
   isRTL: boolean;
-  fingerprints: { [fragment: string]: string };
+  hash: string;
 }
 
 export interface TranslationMetadata {
@@ -102,6 +172,16 @@ export interface TranslationMetadata {
   translations: {
     [lang: string]: Translation;
   };
+}
+
+export interface IconMetaFile {
+  version: string;
+  parts: IconMeta[];
+}
+
+export interface IconMeta {
+  start: string;
+  file: string;
 }
 
 export interface Notification {
@@ -118,12 +198,18 @@ export interface Resources {
 
 export interface Context {
   id: string;
-  parrent_id?: string;
+  parent_id?: string;
   user_id?: string;
 }
 
 export interface ServiceCallResponse {
   context: Context;
+}
+
+export interface ServiceCallRequest {
+  domain: string;
+  service: string;
+  serviceData?: { [key: string]: any };
 }
 
 export interface HomeAssistant {
@@ -134,7 +220,7 @@ export interface HomeAssistant {
   services: HassServices;
   config: HassConfig;
   themes: Themes;
-  selectedTheme?: string | null;
+  selectedTheme?: ThemeSettings | null;
   panels: Panels;
   panelUrl: string;
 
@@ -150,16 +236,19 @@ export interface HomeAssistant {
   resources: Resources;
   localize: LocalizeFunc;
   translationMetadata: TranslationMetadata;
-
+  suspendWhenHidden: boolean;
+  enableShortcuts: boolean;
   vibrate: boolean;
   dockedSidebar: "docked" | "always_hidden" | "auto";
+  defaultPanel: string;
   moreInfoEntityId: string | null;
   user?: CurrentUser;
+  userData?: CoreFrontendUserData | null;
   hassUrl(path?): string;
   callService(
-    domain: string,
-    service: string,
-    serviceData?: { [key: string]: any }
+    domain: ServiceCallRequest["domain"],
+    service: ServiceCallRequest["service"],
+    serviceData?: ServiceCallRequest["serviceData"]
   ): Promise<ServiceCallResponse>;
   callApi<T>(
     method: "GET" | "POST" | "PUT" | "DELETE",
@@ -169,6 +258,11 @@ export interface HomeAssistant {
   fetchWithAuth(path: string, init?: { [key: string]: any }): Promise<Response>;
   sendWS(msg: MessageBase): void;
   callWS<T>(msg: MessageBase): Promise<T>;
+  loadBackendTranslation(
+    category: Parameters<typeof getHassTranslations>[2],
+    integration?: Parameters<typeof getHassTranslations>[3],
+    configFlow?: Parameters<typeof getHassTranslations>[4]
+  ): Promise<LocalizeFunc>;
 }
 
 export type LightEntity = HassEntityBase & {
@@ -178,6 +272,10 @@ export type LightEntity = HassEntityBase & {
     friendly_name: string;
     brightness: number;
     hs_color: number[];
+    color_temp: number;
+    white_value: number;
+    effect?: string;
+    effect_list: string[] | null;
   };
 };
 
@@ -198,6 +296,30 @@ export type CameraEntity = HassEntityBase & {
     brand: string;
     motion_detection: boolean;
   };
+};
+
+export type MediaEntity = HassEntityBase & {
+  attributes: HassEntityAttributeBase & {
+    media_duration: number;
+    media_position: number;
+    media_title: string;
+    icon?: string;
+    entity_picture_local?: string;
+    is_volume_muted?: boolean;
+    volume_level?: number;
+    source?: string;
+    source_list?: string[];
+    sound_mode?: string;
+    sound_mode_list?: string[];
+  };
+  state:
+    | "playing"
+    | "paused"
+    | "idle"
+    | "off"
+    | "on"
+    | "unavailable"
+    | "unknown";
 };
 
 export type InputSelectEntity = HassEntityBase & {
@@ -222,3 +344,24 @@ export interface LocalizeMixin {
   hass?: HomeAssistant;
   localize: LocalizeFunc;
 }
+
+interface ForecastAttribute {
+  temperature: number;
+  datetime: string;
+  templow?: number;
+  precipitation?: number;
+  precipitation_probability?: number;
+  humidity?: number;
+  condition?: string;
+  daytime?: boolean;
+}
+
+export type WeatherEntity = HassEntityBase & {
+  attributes: HassEntityAttributeBase & {
+    temperature: number;
+    humidity?: number;
+    forecast?: ForecastAttribute[];
+    wind_speed: string;
+    wind_bearing: string;
+  };
+};

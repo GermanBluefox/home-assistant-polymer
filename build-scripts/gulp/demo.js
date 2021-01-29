@@ -1,13 +1,16 @@
 // Run demo develop mode
 const gulp = require("gulp");
 
+const env = require("../env");
+
 require("./clean.js");
 require("./translations.js");
-require("./gen-icons.js");
+require("./gen-icons-json.js");
 require("./gather-static.js");
 require("./webpack.js");
 require("./service-worker.js");
 require("./entry-html.js");
+require("./rollup.js");
 
 gulp.task(
   "develop-demo",
@@ -16,15 +19,10 @@ gulp.task(
       process.env.NODE_ENV = "development";
     },
     "clean-demo",
-    gulp.parallel(
-      "gen-icons-app",
-      "gen-icons-mdi",
-      "gen-icons-demo",
-      "gen-index-demo-dev",
-      "build-translations"
-    ),
+    "translations-enable-merge-backend",
+    gulp.parallel("gen-icons-json", "gen-index-demo-dev", "build-translations"),
     "copy-static-demo",
-    "webpack-dev-server-demo"
+    env.useRollup() ? "rollup-dev-server-demo" : "webpack-dev-server-demo"
   )
 );
 
@@ -35,14 +33,11 @@ gulp.task(
       process.env.NODE_ENV = "production";
     },
     "clean-demo",
-    gulp.parallel(
-      "gen-icons-app",
-      "gen-icons-mdi",
-      "gen-icons-demo",
-      "build-translations"
-    ),
+    // Cast needs to be backwards compatible and older HA has no translations
+    "translations-enable-merge-backend",
+    gulp.parallel("gen-icons-json", "build-translations"),
     "copy-static-demo",
-    "webpack-prod-demo",
+    env.useRollup() ? "rollup-prod-demo" : "webpack-prod-demo",
     "gen-index-demo-prod"
   )
 );

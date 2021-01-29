@@ -2,15 +2,18 @@ import "@material/mwc-button";
 import "@polymer/paper-checkbox/paper-checkbox";
 import "@polymer/paper-input/paper-input";
 import { html } from "@polymer/polymer/lib/utils/html-tag";
+/* eslint-plugin-disable lit */
 import { PolymerElement } from "@polymer/polymer/polymer-element";
-
 import { safeDump, safeLoad } from "js-yaml";
-
 import "../../../components/entity/ha-entity-picker";
+import "../../../components/ha-svg-icon";
 import "../../../components/ha-code-editor";
-import "../../../resources/ha-style";
+import { showAlertDialog } from "../../../dialogs/generic/show-dialog-box";
 import { EventsMixin } from "../../../mixins/events-mixin";
 import LocalizeMixin from "../../../mixins/localize-mixin";
+import "../../../styles/polymer-ha-style";
+import { mdiInformationOutline } from "@mdi/js";
+import { computeRTL } from "../../../common/util/compute_rtl";
 
 const ERROR_SENTINEL = {};
 /*
@@ -27,7 +30,6 @@ class HaPanelDevState extends EventsMixin(LocalizeMixin(PolymerElement)) {
           -moz-user-select: initial;
           display: block;
           padding: 16px;
-          direction: ltr;
         }
 
         .inputs {
@@ -42,8 +44,13 @@ class HaPanelDevState extends EventsMixin(LocalizeMixin(PolymerElement)) {
           text-align: left;
         }
 
+        :host([rtl]) .entities th {
+          text-align: right;
+        }
+
         .entities tr {
           vertical-align: top;
+          direction: ltr;
         }
 
         .entities tr:nth-child(odd) {
@@ -55,10 +62,13 @@ class HaPanelDevState extends EventsMixin(LocalizeMixin(PolymerElement)) {
         }
         .entities td {
           padding: 4px;
+          min-width: 200px;
+          word-break: break-word;
         }
-        .entities paper-icon-button {
-          height: 24px;
-          padding: 0;
+        .entities ha-svg-icon {
+          --mdc-icon-size: 20px;
+          padding: 4px;
+          cursor: pointer;
         }
         .entities td:nth-child(3) {
           white-space: pre-wrap;
@@ -150,13 +160,12 @@ class HaPanelDevState extends EventsMixin(LocalizeMixin(PolymerElement)) {
         <template is="dom-repeat" items="[[_entities]]" as="entity">
           <tr>
             <td>
-              <paper-icon-button
+              <ha-svg-icon
                 on-click="entityMoreInfo"
-                icon="hass:information-outline"
                 alt="[[localize('ui.panel.developer-tools.tabs.states.more_info')]]"
                 title="[[localize('ui.panel.developer-tools.tabs.states.more_info')]]"
-              >
-              </paper-icon-button>
+                path="[[informationOutlineIcon()]]"
+              ></ha-svg-icon>
               <a href="#" on-click="entitySelected">[[entity.entity_id]]</a>
             </td>
             <td>[[entity.state]]</td>
@@ -228,11 +237,16 @@ class HaPanelDevState extends EventsMixin(LocalizeMixin(PolymerElement)) {
         computed:
           "computeEntities(hass, _entityFilter, _stateFilter, _attributeFilter)",
       },
+
+      rtl: {
+        reflectToAttribute: true,
+        computed: "_computeRTL(hass)",
+      },
     };
   }
 
   entitySelected(ev) {
-    var state = ev.model.entity;
+    const state = ev.model.entity;
     this._entityId = state.entity_id;
     this._state = state.state;
     this._stateAttributes = safeDump(state.attributes);
@@ -245,7 +259,10 @@ class HaPanelDevState extends EventsMixin(LocalizeMixin(PolymerElement)) {
       this._stateAttributes = "";
       return;
     }
-    var state = this.hass.states[this._entityId];
+    const state = this.hass.states[this._entityId];
+    if (!state) {
+      return;
+    }
     this._state = state.state;
     this._stateAttributes = safeDump(state.attributes);
   }
@@ -257,11 +274,11 @@ class HaPanelDevState extends EventsMixin(LocalizeMixin(PolymerElement)) {
 
   handleSetState() {
     if (!this._entityId) {
-      alert(
-        this.hass.localize(
+      showAlertDialog(this, {
+        text: this.hass.localize(
           "ui.panel.developer-tools.tabs.states.alert_entity_field"
-        )
-      );
+        ),
+      });
       return;
     }
     this.hass.callApi("POST", "states/" + this._entityId, {
@@ -270,12 +287,16 @@ class HaPanelDevState extends EventsMixin(LocalizeMixin(PolymerElement)) {
     });
   }
 
+  informationOutlineIcon() {
+    return mdiInformationOutline;
+  }
+
   computeEntities(hass, _entityFilter, _stateFilter, _attributeFilter) {
     return Object.keys(hass.states)
-      .map(function(key) {
+      .map(function (key) {
         return hass.states[key];
       })
-      .filter(function(value) {
+      .filter(function (value) {
         if (!value.entity_id.includes(_entityFilter.toLowerCase())) {
           return false;
         }
@@ -285,12 +306,12 @@ class HaPanelDevState extends EventsMixin(LocalizeMixin(PolymerElement)) {
         }
 
         if (_attributeFilter !== "") {
-          var attributeFilter = _attributeFilter.toLowerCase();
-          var colonIndex = attributeFilter.indexOf(":");
-          var multiMode = colonIndex !== -1;
+          const attributeFilter = _attributeFilter.toLowerCase();
+          const colonIndex = attributeFilter.indexOf(":");
+          const multiMode = colonIndex !== -1;
 
-          var keyFilter = attributeFilter;
-          var valueFilter = attributeFilter;
+          let keyFilter = attributeFilter;
+          let valueFilter = attributeFilter;
 
           if (multiMode) {
             // we need to filter keys and values separately
@@ -298,10 +319,10 @@ class HaPanelDevState extends EventsMixin(LocalizeMixin(PolymerElement)) {
             valueFilter = attributeFilter.substring(colonIndex + 1).trim();
           }
 
-          var attributeKeys = Object.keys(value.attributes);
+          const attributeKeys = Object.keys(value.attributes);
 
-          for (var i = 0; i < attributeKeys.length; i++) {
-            var key = attributeKeys[i];
+          for (let i = 0; i < attributeKeys.length; i++) {
+            const key = attributeKeys[i];
 
             if (key.includes(keyFilter) && !multiMode) {
               return true; // in single mode we're already satisfied with this match
@@ -310,13 +331,11 @@ class HaPanelDevState extends EventsMixin(LocalizeMixin(PolymerElement)) {
               continue;
             }
 
-            var attributeValue = value.attributes[key];
+            const attributeValue = value.attributes[key];
 
             if (
               attributeValue !== null &&
-              JSON.stringify(attributeValue)
-                .toLowerCase()
-                .includes(valueFilter)
+              JSON.stringify(attributeValue).toLowerCase().includes(valueFilter)
             ) {
               return true;
             }
@@ -328,7 +347,7 @@ class HaPanelDevState extends EventsMixin(LocalizeMixin(PolymerElement)) {
 
         return true;
       })
-      .sort(function(entityA, entityB) {
+      .sort(function (entityA, entityB) {
         if (entityA.entity_id < entityB.entity_id) {
           return -1;
         }
@@ -348,22 +367,28 @@ class HaPanelDevState extends EventsMixin(LocalizeMixin(PolymerElement)) {
   }
 
   attributeString(entity) {
-    var output = "";
-    var i;
-    var keys;
-    var key;
-    var value;
+    let output = "";
+    let i;
+    let keys;
+    let key;
+    let value;
 
     for (i = 0, keys = Object.keys(entity.attributes); i < keys.length; i++) {
       key = keys[i];
-      value = entity.attributes[key];
-      if (!Array.isArray(value) && value instanceof Object) {
-        value = JSON.stringify(value, null, "  ");
-      }
-      output += key + ": " + value + "\n";
+      value = this.formatAttributeValue(entity.attributes[key]);
+      output += `${key}: ${value}\n`;
     }
-
     return output;
+  }
+
+  formatAttributeValue(value) {
+    if (
+      (Array.isArray(value) && value.some((val) => val instanceof Object)) ||
+      (!Array.isArray(value) && value instanceof Object)
+    ) {
+      return `\n${safeDump(value)}`;
+    }
+    return Array.isArray(value) ? value.join(", ") : value;
   }
 
   _computeParsedStateAttributes(stateAttributes) {
@@ -380,6 +405,10 @@ class HaPanelDevState extends EventsMixin(LocalizeMixin(PolymerElement)) {
 
   _yamlChanged(ev) {
     this._stateAttributes = ev.detail.value;
+  }
+
+  _computeRTL(hass) {
+    return computeRTL(hass);
   }
 }
 

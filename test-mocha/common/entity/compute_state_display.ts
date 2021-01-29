@@ -1,5 +1,6 @@
 import { assert } from "chai";
 import { computeStateDisplay } from "../../../src/common/entity/compute_state_display";
+import { UNKNOWN } from "../../../src/data/entity";
 
 describe("computeStateDisplay", () => {
   // Mock Localize function for testing
@@ -14,7 +15,7 @@ describe("computeStateDisplay", () => {
     };
     assert.strictEqual(
       computeStateDisplay(localize, stateObj, "en"),
-      "state.binary_sensor.default.off"
+      "component.binary_sensor.state._.off"
     );
   });
 
@@ -28,7 +29,7 @@ describe("computeStateDisplay", () => {
     };
     assert.strictEqual(
       computeStateDisplay(localize, stateObj, "en"),
-      "state.binary_sensor.moisture.off"
+      "component.binary_sensor.state.moisture.off"
     );
   });
 
@@ -48,7 +49,7 @@ describe("computeStateDisplay", () => {
     };
     assert.strictEqual(
       computeStateDisplay(altLocalize, stateObj, "en"),
-      "state.binary_sensor.default.off"
+      "component.binary_sensor.state.invalid_device_class.off"
     );
   });
 
@@ -72,7 +73,7 @@ describe("computeStateDisplay", () => {
     };
     const stateObj: any = {
       entity_id: "sensor.test",
-      state: "unknown",
+      state: UNKNOWN,
       attributes: {
         unit_of_measurement: "m",
       },
@@ -105,7 +106,7 @@ describe("computeStateDisplay", () => {
 
   it("Localizes sensor value with component translation", () => {
     const altLocalize = (message, ...args) => {
-      if (message !== "component.sensor.state.custom_state") {
+      if (message !== "component.sensor.state._.custom_state") {
         return "";
       }
       return localize(message, ...args);
@@ -117,7 +118,7 @@ describe("computeStateDisplay", () => {
     };
     assert.strictEqual(
       computeStateDisplay(altLocalize, stateObj, "en"),
-      "component.sensor.state.custom_state"
+      "component.sensor.state._.custom_state"
     );
   });
 
@@ -181,46 +182,6 @@ describe("computeStateDisplay", () => {
     assert.strictEqual(
       computeStateDisplay(localize, stateObj, "en"),
       "11:12 AM"
-    );
-  });
-
-  it("Localizes zwave ready", () => {
-    const stateObj: any = {
-      entity_id: "zwave.test",
-      state: "ready",
-      attributes: {
-        query_stage: "Complete",
-      },
-    };
-    assert.strictEqual(
-      computeStateDisplay(localize, stateObj, "en"),
-      "state.zwave.default.ready"
-    );
-  });
-
-  it("Localizes zwave initializing", () => {
-    const stateObj: any = {
-      entity_id: "zwave.test",
-      state: "initializing",
-      attributes: {
-        query_stage: "Probe",
-      },
-    };
-    assert.strictEqual(
-      computeStateDisplay(localize, stateObj, "en"),
-      "state.zwave.query_stage.initializing: query_stage,Probe"
-    );
-  });
-
-  it("Localizes cover open", () => {
-    const stateObj: any = {
-      entity_id: "cover.test",
-      state: "open",
-      attributes: {},
-    };
-    assert.strictEqual(
-      computeStateDisplay(localize, stateObj, "en"),
-      "state.cover.open"
     );
   });
 

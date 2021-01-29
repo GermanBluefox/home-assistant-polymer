@@ -1,26 +1,26 @@
 import {
+  customElement,
   html,
   LitElement,
-  TemplateResult,
-  customElement,
   property,
+  internalProperty,
   PropertyValues,
+  TemplateResult,
 } from "lit-element";
-
-import "../components/hui-generic-entity-row";
-import "../../../components/entity/ha-entity-toggle";
-import "../components/hui-warning";
-
 import { computeStateDisplay } from "../../../common/entity/compute_state_display";
+import "../../../components/entity/ha-entity-toggle";
+import { UNAVAILABLE_STATES } from "../../../data/entity";
 import { HomeAssistant } from "../../../types";
-import { EntityRow, EntityConfig } from "./types";
 import { hasConfigOrEntityChanged } from "../common/has-changed";
+import "../components/hui-generic-entity-row";
+import { createEntityNotFoundWarning } from "../components/hui-warning";
+import { EntityConfig, LovelaceRow } from "./types";
 
 @customElement("hui-toggle-entity-row")
-class HuiToggleEntityRow extends LitElement implements EntityRow {
-  @property() public hass?: HomeAssistant;
+class HuiToggleEntityRow extends LitElement implements LovelaceRow {
+  @property({ attribute: false }) public hass?: HomeAssistant;
 
-  @property() private _config?: EntityConfig;
+  @internalProperty() private _config?: EntityConfig;
 
   public setConfig(config: EntityConfig): void {
     if (!config) {
@@ -33,7 +33,7 @@ class HuiToggleEntityRow extends LitElement implements EntityRow {
     return hasConfigOrEntityChanged(this, changedProps);
   }
 
-  protected render(): TemplateResult | void {
+  protected render(): TemplateResult {
     if (!this._config || !this.hass) {
       return html``;
     }
@@ -42,27 +42,25 @@ class HuiToggleEntityRow extends LitElement implements EntityRow {
 
     if (!stateObj) {
       return html`
-        <hui-warning
-          >${this.hass.localize(
-            "ui.panel.lovelace.warning.entity_not_found",
-            "entity",
-            this._config.entity
-          )}</hui-warning
-        >
+        <hui-warning>
+          ${createEntityNotFoundWarning(this.hass, this._config.entity)}
+        </hui-warning>
       `;
     }
 
     return html`
-      <hui-generic-entity-row .hass="${this.hass}" .config="${this._config}">
-        ${stateObj.state === "on" || stateObj.state === "off"
+      <hui-generic-entity-row .hass=${this.hass} .config=${this._config}>
+        ${stateObj.state === "on" ||
+        stateObj.state === "off" ||
+        UNAVAILABLE_STATES.includes(stateObj.state)
           ? html`
               <ha-entity-toggle
-                .hass="${this.hass}"
-                .stateObj="${stateObj}"
+                .hass=${this.hass}
+                .stateObj=${stateObj}
               ></ha-entity-toggle>
             `
           : html`
-              <div>
+              <div class="text-content">
                 ${computeStateDisplay(
                   this.hass!.localize,
                   stateObj,

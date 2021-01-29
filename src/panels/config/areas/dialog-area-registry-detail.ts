@@ -1,27 +1,32 @@
-import {
-  LitElement,
-  html,
-  css,
-  CSSResult,
-  TemplateResult,
-  property,
-} from "lit-element";
+import "@material/mwc-button";
 import "@polymer/paper-dialog-scrollable/paper-dialog-scrollable";
 import "@polymer/paper-input/paper-input";
-
+import {
+  css,
+  CSSResult,
+  html,
+  LitElement,
+  property,
+  internalProperty,
+  TemplateResult,
+} from "lit-element";
 import "../../../components/dialog/ha-paper-dialog";
-import { AreaRegistryDetailDialogParams } from "./show-dialog-area-registry-detail";
+import { AreaRegistryEntryMutableParams } from "../../../data/area_registry";
 import { PolymerChangedEvent } from "../../../polymer-types";
 import { haStyleDialog } from "../../../resources/styles";
 import { HomeAssistant } from "../../../types";
-import { AreaRegistryEntryMutableParams } from "../../../data/area_registry";
+import { AreaRegistryDetailDialogParams } from "./show-dialog-area-registry-detail";
 
 class DialogAreaDetail extends LitElement {
-  @property() public hass!: HomeAssistant;
-  @property() private _name!: string;
-  @property() private _error?: string;
-  @property() private _params?: AreaRegistryDetailDialogParams;
-  @property() private _submitting?: boolean;
+  @property({ attribute: false }) public hass!: HomeAssistant;
+
+  @internalProperty() private _name!: string;
+
+  @internalProperty() private _error?: string;
+
+  @internalProperty() private _params?: AreaRegistryDetailDialogParams;
+
+  @internalProperty() private _submitting?: boolean;
 
   public async showDialog(
     params: AreaRegistryDetailDialogParams
@@ -32,7 +37,7 @@ class DialogAreaDetail extends LitElement {
     await this.updateComplete;
   }
 
-  protected render(): TemplateResult | void {
+  protected render(): TemplateResult {
     if (!this._params) {
       return html``;
     }
@@ -47,28 +52,29 @@ class DialogAreaDetail extends LitElement {
         <h2>
           ${entry
             ? entry.name
-            : this.hass.localize(
-                "ui.panel.config.area_registry.editor.default_name"
-              )}
+            : this.hass.localize("ui.panel.config.areas.editor.default_name")}
         </h2>
         <paper-dialog-scrollable>
-          ${this._error
-            ? html`
-                <div class="error">${this._error}</div>
-              `
-            : ""}
+          ${this._error ? html` <div class="error">${this._error}</div> ` : ""}
           <div class="form">
             ${entry
               ? html`
-                  <div>Area ID: ${entry.area_id}</div>
+                  <div>
+                    ${this.hass.localize(
+                      "ui.panel.config.areas.editor.area_id"
+                    )}:
+                    ${entry.area_id}
+                  </div>
                 `
               : ""}
 
             <paper-input
               .value=${this._name}
               @value-changed=${this._nameChanged}
-              label="Name"
-              error-message="Name is required"
+              .label=${this.hass.localize("ui.panel.config.areas.editor.name")}
+              .errorMessage=${this.hass.localize(
+                "ui.panel.config.areas.editor.name_required"
+              )}
               .invalid=${nameInvalid}
             ></paper-input>
           </div>
@@ -81,9 +87,7 @@ class DialogAreaDetail extends LitElement {
                   @click="${this._deleteEntry}"
                   .disabled=${this._submitting}
                 >
-                  ${this.hass.localize(
-                    "ui.panel.config.area_registry.editor.delete"
-                  )}
+                  ${this.hass.localize("ui.panel.config.areas.editor.delete")}
                 </mwc-button>
               `
             : html``}
@@ -92,12 +96,8 @@ class DialogAreaDetail extends LitElement {
             .disabled=${nameInvalid || this._submitting}
           >
             ${entry
-              ? this.hass.localize(
-                  "ui.panel.config.area_registry.editor.update"
-                )
-              : this.hass.localize(
-                  "ui.panel.config.area_registry.editor.create"
-                )}
+              ? this.hass.localize("ui.panel.config.areas.editor.update")
+              : this.hass.localize("ui.panel.config.areas.editor.create")}
           </mwc-button>
         </div>
       </ha-paper-dialog>
@@ -116,13 +116,15 @@ class DialogAreaDetail extends LitElement {
         name: this._name.trim(),
       };
       if (this._params!.entry) {
-        await this._params!.updateEntry(values);
+        await this._params!.updateEntry!(values);
       } else {
-        await this._params!.createEntry(values);
+        await this._params!.createEntry!(values);
       }
       this._params = undefined;
     } catch (err) {
-      this._error = err.message || "Unknown error";
+      this._error =
+        err.message ||
+        this.hass.localize("ui.panel.config.areas.editor.unknown_error");
     } finally {
       this._submitting = false;
     }
@@ -131,7 +133,7 @@ class DialogAreaDetail extends LitElement {
   private async _deleteEntry() {
     this._submitting = true;
     try {
-      if (await this._params!.removeEntry()) {
+      if (await this._params!.removeEntry!()) {
         this._params = undefined;
       }
     } finally {
@@ -149,9 +151,6 @@ class DialogAreaDetail extends LitElement {
     return [
       haStyleDialog,
       css`
-        ha-paper-dialog {
-          min-width: 400px;
-        }
         .form {
           padding-bottom: 24px;
         }
@@ -159,7 +158,7 @@ class DialogAreaDetail extends LitElement {
           margin-right: auto;
         }
         .error {
-          color: var(--google-red-500);
+          color: var(--error-color);
         }
       `,
     ];

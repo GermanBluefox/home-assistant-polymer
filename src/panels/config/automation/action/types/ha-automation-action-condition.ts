@@ -1,21 +1,21 @@
-import "../../condition/ha-automation-condition-editor";
-
-import { LitElement, property, customElement, html } from "lit-element";
-import { ActionElement } from "../ha-automation-action-row";
-import { HomeAssistant } from "../../../../../types";
+import { customElement, html, LitElement, property } from "lit-element";
 import { fireEvent } from "../../../../../common/dom/fire_event";
 import { Condition } from "../../../../../data/automation";
+import { HomeAssistant } from "../../../../../types";
+import "../../condition/ha-automation-condition-editor";
+import { ActionElement } from "../ha-automation-action-row";
 
 @customElement("ha-automation-action-condition")
 export class HaConditionAction extends LitElement implements ActionElement {
-  @property() public hass!: HomeAssistant;
+  @property({ attribute: false }) public hass!: HomeAssistant;
+
   @property() public action!: Condition;
 
   public static get defaultConfig() {
     return { condition: "state" };
   }
 
-  public render() {
+  protected render() {
     return html`
       <ha-automation-condition-editor
         .condition=${this.action}

@@ -1,45 +1,59 @@
-import {
-  LitElement,
-  TemplateResult,
-  html,
-  customElement,
-  PropertyValues,
-  property,
-  CSSResult,
-  css,
-} from "lit-element";
 import "@material/mwc-button/mwc-button";
+import {
+  css,
+  CSSResult,
+  customElement,
+  html,
+  LitElement,
+  property,
+  internalProperty,
+  PropertyValues,
+  TemplateResult,
+} from "lit-element";
+import { fireEvent } from "../common/dom/fire_event";
+import { compare } from "../common/string/compare";
+import { LocalizeFunc } from "../common/translations/localize";
+import { ConfigEntry, getConfigEntries } from "../data/config_entries";
+import {
+  getConfigFlowInProgressCollection,
+  localizeConfigFlowTitle,
+  subscribeConfigFlowInProgress,
+} from "../data/config_flow";
+import { DataEntryFlowProgress } from "../data/data_entry_flow";
+import { domainToName } from "../data/integration";
 import {
   loadConfigFlowDialog,
   showConfigFlowDialog,
 } from "../dialogs/config-flow/show-dialog-config-flow";
 import { HomeAssistant } from "../types";
-import { getConfigEntries, ConfigEntry } from "../data/config_entries";
-import { compare } from "../common/string/compare";
+import "./action-badge";
 import "./integration-badge";
-import { LocalizeFunc } from "../common/translations/localize";
-import { fireEvent } from "../common/dom/fire_event";
-import { onboardIntegrationStep } from "../data/onboarding";
-import { genClientId } from "home-assistant-js-websocket";
-import { DataEntryFlowProgress } from "../data/data_entry_flow";
-import {
-  localizeConfigFlowTitle,
-  subscribeConfigFlowInProgress,
-  getConfigFlowInProgressCollection,
-} from "../data/config_flow";
+
+const HIDDEN_DOMAINS = new Set(["met", "rpi_power"]);
 
 @customElement("onboarding-integrations")
 class OnboardingIntegrations extends LitElement {
-  @property() public hass!: HomeAssistant;
+  @property({ attribute: false }) public hass!: HomeAssistant;
+
   @property() public onboardingLocalize!: LocalizeFunc;
-  @property() private _entries?: ConfigEntry[];
-  @property() private _discovered?: DataEntryFlowProgress[];
+
+  @internalProperty() private _entries?: ConfigEntry[];
+
+  @internalProperty() private _discovered?: DataEntryFlowProgress[];
+
   private _unsubEvents?: () => void;
 
   public connectedCallback() {
     super.connectedCallback();
+    this.hass.loadBackendTranslation("title", undefined, true);
     this._unsubEvents = subscribeConfigFlowInProgress(this.hass, (flows) => {
       this._discovered = flows;
+      for (const flow of flows) {
+        // To render title placeholders
+        if (flow.context.title_placeholders) {
+          this.hass.loadBackendTranslation("config", flow.handler);
+        }
+      }
     });
   }
 
@@ -51,22 +65,21 @@ class OnboardingIntegrations extends LitElement {
     }
   }
 
-  protected render(): TemplateResult | void {
+  protected render(): TemplateResult {
     if (!this._entries || !this._discovered) {
       return html``;
     }
     // Render discovered and existing entries together sorted by localized title.
     const entries: Array<[string, TemplateResult]> = this._entries.map(
       (entry) => {
-        const title = this.hass.localize(
-          `component.${entry.domain}.config.title`
-        );
+        const title = domainToName(this.hass.localize, entry.domain);
         return [
           title,
           html`
             <integration-badge
+              .domain=${entry.domain}
               .title=${title}
-              icon="hass:check"
+              badgeIcon="hass:check"
             ></integration-badge>
           `,
         ];
@@ -81,8 +94,8 @@ class OnboardingIntegrations extends LitElement {
             <button .flowId=${flow.flow_id} @click=${this._continueFlow}>
               <integration-badge
                 clickable
+                .domain=${flow.handler}
                 .title=${title}
-                icon="hass:plus"
               ></integration-badge>
             </button>
           `,
@@ -100,13 +113,13 @@ class OnboardingIntegrations extends LitElement {
       <div class="badges">
         ${content}
         <button @click=${this._createFlow}>
-          <integration-badge
+          <action-badge
             clickable
             title=${this.onboardingLocalize(
               "ui.panel.page-onboarding.integration.more_integrations"
             )}
             icon="hass:dots-horizontal"
-          ></integration-badge>
+          ></action-badge>
         </button>
       </div>
       <div class="footer">
@@ -150,19 +163,17 @@ class OnboardingIntegrations extends LitElement {
 
   private async _loadConfigEntries() {
     const entries = await getConfigEntries(this.hass!);
-    // We filter out the config entry for the local weather.
+    // We filter out the config entry for the local weather and rpi_power.
     // It is one that we create automatically and it will confuse the user
     // if it starts showing up during onboarding.
-    this._entries = entries.filter((entry) => entry.domain !== "met");
+    this._entries = entries.filter(
+      (entry) => !HIDDEN_DOMAINS.has(entry.domain)
+    );
   }
 
   private async _finish() {
-    const result = await onboardIntegrationStep(this.hass, {
-      client_id: genClientId(),
-    });
     fireEvent(this, "onboarding-step", {
       type: "integration",
-      result,
     });
   }
 
@@ -170,14 +181,17 @@ class OnboardingIntegrations extends LitElement {
     return css`
       .badges {
         margin-top: 24px;
+        display: flex;
+        flex-direction: row;
+        flex-wrap: wrap;
+        justify-content: flex-start;
+        align-items: flex-start;
       }
       .badges > * {
-        width: 24%;
-        min-width: 90px;
+        width: 96px;
         margin-bottom: 24px;
       }
       button {
-        display: inline-block;
         cursor: pointer;
         padding: 0;
         border: 0;

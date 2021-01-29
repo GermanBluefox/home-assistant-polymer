@@ -1,17 +1,18 @@
-import "@polymer/iron-flex-layout/iron-flex-layout-classes";
 import "@material/mwc-button";
+import "@polymer/iron-flex-layout/iron-flex-layout-classes";
 import "@polymer/paper-input/paper-input";
 import { html } from "@polymer/polymer/lib/utils/html-tag";
+/* eslint-plugin-disable lit */
 import { PolymerElement } from "@polymer/polymer/polymer-element";
-
 import { safeLoad } from "js-yaml";
-
 import "../../../components/ha-code-editor";
-import "../../../resources/ha-style";
-import "./events-list";
-import "./event-subscribe-card";
+import { showAlertDialog } from "../../../dialogs/generic/show-dialog-box";
 import { EventsMixin } from "../../../mixins/events-mixin";
 import LocalizeMixin from "../../../mixins/localize-mixin";
+import { documentationUrl } from "../../../util/documentation-url";
+import "../../../styles/polymer-ha-style";
+import "./event-subscribe-card";
+import "./events-list";
 
 const ERROR_SENTINEL = {};
 /*
@@ -29,7 +30,6 @@ class HaPanelDevEvent extends EventsMixin(LocalizeMixin(PolymerElement)) {
           -moz-user-select: initial;
           @apply --paper-font-body1;
           padding: 16px;
-          direction: ltr;
           display: block;
         }
 
@@ -51,6 +51,10 @@ class HaPanelDevEvent extends EventsMixin(LocalizeMixin(PolymerElement)) {
           max-width: 800px;
           margin: 16px auto;
         }
+
+        a {
+          color: var(--primary-color);
+        }
       </style>
 
       <div class$="[[computeFormClasses(narrow)]]">
@@ -58,11 +62,13 @@ class HaPanelDevEvent extends EventsMixin(LocalizeMixin(PolymerElement)) {
           <p>
             [[localize( 'ui.panel.developer-tools.tabs.events.description' )]]
             <a
-              href="https://www.home-assistant.io/docs/configuration/events/"
+              href="[[_computeDocumentationUrl(hass)]]"
               target="_blank"
-              >[[localize( 'ui.panel.developer-tools.tabs.events.documentation'
-              )]]</a
+              rel="noreferrer"
             >
+              [[localize( 'ui.panel.developer-tools.tabs.events.documentation'
+              )]]
+            </a>
           </p>
           <div class="ha-form">
             <paper-input
@@ -144,6 +150,10 @@ class HaPanelDevEvent extends EventsMixin(LocalizeMixin(PolymerElement)) {
     }
   }
 
+  _computeDocumentationUrl(hass) {
+    return documentationUrl(hass, "/docs/configuration/events/");
+  }
+
   _computeValidJSON(parsedJSON) {
     return parsedJSON !== ERROR_SENTINEL;
   }
@@ -154,15 +164,15 @@ class HaPanelDevEvent extends EventsMixin(LocalizeMixin(PolymerElement)) {
 
   fireEvent() {
     if (!this.eventType) {
-      alert(
-        this.hass.localize(
+      showAlertDialog(this, {
+        text: this.hass.localize(
           "ui.panel.developer-tools.tabs.events.alert_event_type"
-        )
-      );
+        ),
+      });
       return;
     }
     this.hass.callApi("POST", "events/" + this.eventType, this.parsedJSON).then(
-      function() {
+      function () {
         this.fire("hass-notification", {
           message: this.hass.localize(
             "ui.panel.developer-tools.tabs.events.notification_event_fired",

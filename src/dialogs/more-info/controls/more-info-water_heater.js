@@ -4,17 +4,14 @@ import "@polymer/paper-listbox/paper-listbox";
 import { timeOut } from "@polymer/polymer/lib/utils/async";
 import { Debouncer } from "@polymer/polymer/lib/utils/debounce";
 import { html } from "@polymer/polymer/lib/utils/html-tag";
+/* eslint-plugin-disable lit */
 import { PolymerElement } from "@polymer/polymer/polymer-element";
-
-import "../../../components/ha-water_heater-control";
-import "../../../components/ha-paper-slider";
+import { featureClassNames } from "../../../common/entity/feature_class_names";
+import { supportsFeature } from "../../../common/entity/supports-feature";
 import "../../../components/ha-paper-dropdown-menu";
 import "../../../components/ha-switch";
-
-import { supportsFeature } from "../../../common/entity/supports-feature";
+import "../../../components/ha-water_heater-control";
 import { EventsMixin } from "../../../mixins/events-mixin";
-
-import { featureClassNames } from "../../../common/entity/feature_class_names";
 import LocalizeMixin from "../../../mixins/localize-mixin";
 
 /*
@@ -30,26 +27,12 @@ class MoreInfoWaterHeater extends LocalizeMixin(EventsMixin(PolymerElement)) {
           color: var(--primary-text-color);
         }
 
-        .container-away_mode,
-        .container-temperature,
-        .container-operation_list,
-
-        .has-away_mode .container-away_mode,
-        .has-target_temperature .container-temperature,
-        .has-operation_mode .container-operation_list,
-
-        .container-operation_list iron-icon,
-
         ha-paper-dropdown-menu {
           width: 100%;
         }
 
         paper-item {
           cursor: pointer;
-        }
-
-        ha-paper-slider {
-          width: 100%;
         }
 
         ha-water_heater-control.range-control-left,
@@ -205,7 +188,7 @@ class MoreInfoWaterHeater extends LocalizeMixin(EventsMixin(PolymerElement)) {
       4: "has-away_mode",
     };
 
-    var classes = [featureClassNames(stateObj, _featureClassNames)];
+    const classes = [featureClassNames(stateObj, _featureClassNames)];
 
     classes.push("more-info-water_heater");
 
@@ -248,7 +231,7 @@ class MoreInfoWaterHeater extends LocalizeMixin(EventsMixin(PolymerElement)) {
   }
 
   _localizeOperationMode(localize, mode) {
-    return localize(`state.water_heater.${mode}`) || mode;
+    return localize(`component.water_heater.state._.${mode}`) || mode;
   }
 }
 

@@ -1,22 +1,24 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
   <head>
     <title>Home Assistant</title>
     <link rel="preload" href="<%= latestPageJS %>" as="script" crossorigin="use-credentials" />
-    <link
-      rel="preload"
-      href="/static/fonts/roboto/Roboto-Light.woff2"
-      as="font"
-      crossorigin
-    />
-    <link
-      rel="preload"
-      href="/static/fonts/roboto/Roboto-Regular.woff2"
-      as="font"
-      crossorigin
-    />
     <%= renderTemplate('_header') %>
     <style>
+      html {
+        color: var(--primary-text-color, #212121);
+      }
+      @media (prefers-color-scheme: dark) {
+        html {
+          background-color: #111111;
+          color: #e1e1e1;
+        }
+        ha-onboarding {
+          --primary-text-color: #e1e1e1;
+          --secondary-text-color: #9b9b9b;
+          --disabled-text-color: #6f6f6f;
+        }
+      }
       .content {
         padding: 20px 16px;
         max-width: 400px;
@@ -48,23 +50,26 @@
     </div>
 
     <%= renderTemplate('_js_base') %>
+    <%= renderTemplate('_preload_roboto') %>
 
-    <script type="module" crossorigin="use-credentials">
-      import "<%= latestPageJS %>";
-      import "<%= latestHassIconsJS %>";
+    <script crossorigin="use-credentials">
+      import("<%= latestPageJS %>");
+      window.latestJS = true;
       window.stepsPromise = fetch("/api/onboarding", {
         credentials: "same-origin",
       });
     </script>
 
-    <script nomodule>
+    <script>
       (function() {
-        // Safari 10.1 supports type=module but ignores nomodule, so we add this check.
-        if (!isS101) {
-          _ls("/static/polyfills/custom-elements-es5-adapter.js");
-          _ls("<%= es5Compatibility %>");
-          _ls("<%= es5PageJS %>");
-          _ls("<%= es5HassIconsJS %>");
+        if (!window.latestJS) {
+          <% if (useRollup) { %>
+            _ls("/static/js/s.min.js").onload = function() {
+              System.import("<%= es5PageJS %>");
+            }
+          <% } else { %>
+            _ls("<%= es5PageJS %>");
+          <% } %>
         }
       })();
     </script>

@@ -1,22 +1,22 @@
 import "@polymer/paper-input/paper-input";
-import "../../../../../components/ha-service-picker";
+import { customElement, html, LitElement, property } from "lit-element";
 import "../../../../../components/entity/ha-entity-picker";
-
-import { LitElement, property, customElement, html } from "lit-element";
-import { ActionElement, handleChangeEvent } from "../ha-automation-action-row";
-import { HomeAssistant } from "../../../../../types";
+import "../../../../../components/ha-service-picker";
 import { DelayAction } from "../../../../../data/script";
+import { HomeAssistant } from "../../../../../types";
+import { ActionElement, handleChangeEvent } from "../ha-automation-action-row";
 
 @customElement("ha-automation-action-delay")
 export class HaDelayAction extends LitElement implements ActionElement {
-  @property() public hass!: HomeAssistant;
+  @property({ attribute: false }) public hass!: HomeAssistant;
+
   @property() public action!: DelayAction;
 
   public static get defaultConfig() {
     return { delay: "" };
   }
 
-  public render() {
+  protected render() {
     const { delay } = this.action;
 
     return html`

@@ -1,30 +1,28 @@
-import {
-  LitElement,
-  html,
-  css,
-  CSSResult,
-  TemplateResult,
-  property,
-  customElement,
-  query,
-} from "lit-element";
+import "@material/mwc-button";
 import "@polymer/paper-dialog-scrollable/paper-dialog-scrollable";
 import "@polymer/paper-input/paper-input";
-import "@polymer/paper-spinner/paper-spinner";
-import "@material/mwc-button";
-
+import type { PaperInputElement } from "@polymer/paper-input/paper-input";
+import "../../../../components/ha-circular-progress";
+import {
+  css,
+  CSSResult,
+  customElement,
+  html,
+  LitElement,
+  property,
+  internalProperty,
+  query,
+  TemplateResult,
+} from "lit-element";
 import "../../../../components/dialog/ha-paper-dialog";
-import "./ha-thingtalk-placeholders";
-import { ThingtalkDialogParams } from "../show-dialog-thingtalk";
-import { PolymerChangedEvent } from "../../../../polymer-types";
-import { haStyleDialog, haStyle } from "../../../../resources/styles";
-import { HomeAssistant } from "../../../../types";
-// tslint:disable-next-line
-import { PaperInputElement } from "@polymer/paper-input/paper-input";
-import { AutomationConfig } from "../../../../data/automation";
-// tslint:disable-next-line
-import { PlaceholderValues } from "./ha-thingtalk-placeholders";
+import type { AutomationConfig } from "../../../../data/automation";
 import { convertThingTalk } from "../../../../data/cloud";
+import type { PolymerChangedEvent } from "../../../../polymer-types";
+import { haStyle, haStyleDialog } from "../../../../resources/styles";
+import type { HomeAssistant } from "../../../../types";
+import type { ThingtalkDialogParams } from "../show-dialog-thingtalk";
+import "./ha-thingtalk-placeholders";
+import type { PlaceholderValues } from "./ha-thingtalk-placeholders";
 
 export interface Placeholder {
   name: string;
@@ -40,16 +38,22 @@ export interface PlaceholderContainer {
 
 @customElement("ha-dialog-thinktalk")
 class DialogThingtalk extends LitElement {
-  @property() public hass!: HomeAssistant;
-  @property() private _error?: string;
-  @property() private _params?: ThingtalkDialogParams;
-  @property() private _submitting: boolean = false;
-  @property() private _opened = false;
-  @property() private _placeholders?: PlaceholderContainer;
+  @property({ attribute: false }) public hass!: HomeAssistant;
 
-  @query("#input") private _input?: PaperInputElement;
+  @internalProperty() private _error?: string;
+
+  @internalProperty() private _params?: ThingtalkDialogParams;
+
+  @internalProperty() private _submitting = false;
+
+  @internalProperty() private _opened = false;
+
+  @internalProperty() private _placeholders?: PlaceholderContainer;
+
+  @query("#input", true) private _input?: PaperInputElement;
 
   private _value!: string;
+
   private _config!: Partial<AutomationConfig>;
 
   public showDialog(params: ThingtalkDialogParams): void {
@@ -58,7 +62,7 @@ class DialogThingtalk extends LitElement {
     this._opened = true;
   }
 
-  protected render(): TemplateResult | void {
+  protected render(): TemplateResult {
     if (!this._params) {
       return html``;
     }
@@ -83,11 +87,7 @@ class DialogThingtalk extends LitElement {
       >
         <h2>Create a new automation</h2>
         <paper-dialog-scrollable>
-          ${this._error
-            ? html`
-                <div class="error">${this._error}</div>
-              `
-            : ""}
+          ${this._error ? html` <div class="error">${this._error}</div> ` : ""}
           Type below what this automation should do, and we will try to convert
           it into a Home Assistant automation. (only English is supported for
           now)<br /><br />
@@ -123,6 +123,7 @@ class DialogThingtalk extends LitElement {
           <a
             href="https://almond.stanford.edu/"
             target="_blank"
+            rel="noreferrer"
             class="attribution"
             >Powered by Almond</a
           >
@@ -132,10 +133,13 @@ class DialogThingtalk extends LitElement {
             Skip
           </mwc-button>
           <mwc-button @click="${this._generate}" .disabled=${this._submitting}>
-            <paper-spinner
-              ?active="${this._submitting}"
-              alt="Creating your automation..."
-            ></paper-spinner>
+            ${this._submitting
+              ? html`<ha-circular-progress
+                  active
+                  size="small"
+                  title="Creating your automation..."
+                ></ha-circular-progress>`
+              : ""}
             Create automation
           </mwc-button>
         </div>
@@ -245,19 +249,8 @@ class DialogThingtalk extends LitElement {
         mwc-button.left {
           margin-right: auto;
         }
-        mwc-button paper-spinner {
-          width: 14px;
-          height: 14px;
-          margin-right: 20px;
-        }
-        paper-spinner {
-          display: none;
-        }
-        paper-spinner[active] {
-          display: block;
-        }
         .error {
-          color: var(--google-red-500);
+          color: var(--error-color);
         }
         .attribution {
           color: var(--secondary-text-color);
